@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Online Exam System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-graduation-cap text-blue-600 text-2xl mr-3"></i>
+                    <span class="text-xl font-bold text-gray-800">Online Exam System</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'teacher_pending_evaluations' %}" 
+                       class="text-gray-700 hover:text-blue-600 font-medium">
+                        <i class="fas fa-clipboard-check mr-1"></i> Evaluations
+                    </a>
+                    <a href="{% url 'logout' %}" 
+                       class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 font-medium">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}
+        <!-- Content will be injected here -->
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-12">
+        <div class="container mx-auto px-4 py-6">
+            <p class="text-center text-gray-600">
+                &copy; {% now "Y" %} Online Exam System. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

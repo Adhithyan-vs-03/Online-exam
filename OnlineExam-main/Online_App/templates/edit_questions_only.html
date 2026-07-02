@@ -1,0 +1,603 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Edit Paper Questions</h1>
+            <p class="text-gray-600 mt-2">
+                <strong>Paper:</strong> {{ paper.exam_name }} | 
+                <strong>Class:</strong> {{ paper.class_name }} | 
+                <strong>Total Marks:</strong> {{ paper.total_marks }}
+            </p>
+            <p class="text-blue-600 text-sm mt-1">
+                <i class="fas fa-info-circle mr-1"></i>
+                Only questions can be edited here. Other paper settings remain unchanged.
+            </p>
+        </div>
+        <div>
+            <a href="{% url 'teacher_generated_papers' %}" 
+               class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 mr-2">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Papers
+            </a>
+            <a href="{% url 'edit_generated_paper' paper.id %}" 
+               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-edit mr-2"></i>Full Edit Mode
+            </a>
+        </div>
+    </div>
+
+    <!-- Existing Paper Info (Read-only) -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4 text-gray-700">
+            <i class="fas fa-info-circle mr-2"></i>Paper Information (Read Only)
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="p-3 bg-gray-50 rounded">
+                <label class="block text-sm font-medium text-gray-500 mb-1">School Name</label>
+                <div class="font-medium">{{ paper.school_name }}</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+                <label class="block text-sm font-medium text-gray-500 mb-1">Exam Name</label>
+                <div class="font-medium">{{ paper.exam_name }}</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+                <label class="block text-sm font-medium text-gray-500 mb-1">Class</label>
+                <div class="font-medium">{{ paper.class_name }}</div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="p-3 bg-gray-50 rounded">
+                <label class="block text-sm font-medium text-gray-500 mb-1">Total Marks</label>
+                <div class="font-medium">{{ paper.total_marks }}</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded">
+                <label class="block text-sm font-medium text-gray-500 mb-1">Time Duration</label>
+                <div class="font-medium">{{ paper.time_duration }}</div>
+            </div>
+        </div>
+        
+        <div class="p-3 bg-gray-50 rounded">
+            <label class="block text-sm font-medium text-gray-500 mb-1">Instructions</label>
+            <div class="whitespace-pre-line">{{ paper.instructions }}</div>
+        </div>
+    </div>
+
+    <!-- Question Editing Section -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4 text-blue-600">
+            <i class="fas fa-edit mr-2"></i>Edit Questions
+            <span id="selectedCount" class="ml-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">0</span>
+            <span id="totalMarksSelected" class="ml-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">0 marks</span>
+        </h2>
+
+        <!-- Hidden fields to store paper settings -->
+        <input type="hidden" id="paperId" value="{{ paper.id }}">
+        <div id="paperSettings" data-settings="{{ paper_settings|safe }}"></div>
+
+        <!-- Filter Questions Section (Same as before) -->
+        <div class="filter-section mb-6">
+            <h3 class="text-lg font-bold mb-3 text-gray-700">Filter & Add Questions</h3>
+            
+            <!-- Copy the filter section from your question_creation.html -->
+            <!-- Include all the same filtering controls -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Subject</label>
+                    <select id="filterSubject" class="w-full p-2 border border-gray-300 rounded">
+                        <option value="">All Subjects</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}" data-class-id="{{ subject.class_name.id }}">
+                            {{ subject.name }} ({{ subject.class_name.class_name }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Question Type</label>
+                    <select id="filterType" class="w-full p-2 border border-gray-300 rounded">
+                        <option value="">All Types</option>
+                        <option value="objective">MCQ</option>
+                        <option value="descriptive">Descriptive</option>
+                        <option value="numerical">Numerical</option>
+                        <!-- Add other types -->
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Difficulty</label>
+                    <select id="filterDifficulty" class="w-full p-2 border border-gray-300 rounded">
+                        <option value="">All Levels</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Marks</label>
+                    <select id="filterMarks" class="w-full p-2 border border-gray-300 rounded">
+                        <option value="">All Marks</option>
+                        <option value="1">1 mark</option>
+                        <option value="2">2 marks</option>
+                        <option value="3">3 marks</option>
+                        <option value="4">4 marks</option>
+                        <option value="5">5 marks</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Chapter</label>
+                    <select id="filterChapter" class="w-full p-2 border border-gray-300 rounded">
+                        <option value="">All Chapters</option>
+                        {% for chapter in chapters %}
+                            <option value="{{ chapter.id }}">{{ chapter.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex justify-between">
+                <button onclick="loadFilteredQuestions()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    <i class="fas fa-filter mr-2"></i>Apply Filters
+                </button>
+                <button onclick="clearQuestionFilters()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                    <i class="fas fa-redo mr-2"></i>Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- Questions List -->
+        <div class="mb-6">
+            <h3 class="text-lg font-bold mb-3 text-gray-700">Available Questions</h3>
+            <div id="questionsList" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto p-4 border border-gray-200 rounded-lg">
+                <div class="col-span-2 text-center py-8 text-gray-500">
+                    <i class="fas fa-search text-3xl mb-4"></i>
+                    <p>Apply filters to see questions</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selected Questions Section -->
+        <div class="selected-questions-section mb-6">
+            <h3 class="text-lg font-bold mb-3 text-green-700">
+                <i class="fas fa-list-check mr-2"></i>Selected Questions for Paper
+                <span id="selectedCountDisplay" class="ml-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">0 questions</span>
+            </h3>
+            
+            <div id="selectedQuestionsContainer" class="max-h-[300px] overflow-y-auto p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <!-- Selected questions will appear here -->
+            </div>
+            
+            <div class="flex gap-2 mt-4">
+                <button onclick="saveQuestionChanges()" class="px-6 py-3 bg-green-600 text-white rounded hover:bg-green-700">
+                    <i class="fas fa-save mr-2"></i>Save Question Changes
+                </button>
+                <button onclick="previewEditedPaper()" class="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    <i class="fas fa-eye mr-2"></i>Preview Changes
+                </button>
+                <button onclick="resetToOriginal()" class="px-6 py-3 bg-gray-600 text-white rounded hover:bg-gray-700">
+                    <i class="fas fa-undo mr-2"></i>Reset to Original
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+    <div class="container mx-auto p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl mx-auto my-8">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold">Preview Edited Paper</h3>
+                <button onclick="closePreview()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <div class="p-4 max-h-[80vh] overflow-y-auto">
+                <div id="paperPreviewContent"></div>
+            </div>
+            <div class="p-4 border-t text-right">
+                <button onclick="saveQuestionChanges()" class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 mr-2">
+                    <i class="fas fa-save mr-2"></i>Save Changes
+                </button>
+                <button onclick="closePreview()" class="px-6 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+// Global variables
+let allQuestions = [];
+let selectedQuestions = new Map();
+let originalQuestions = [];
+const paperId = document.getElementById('paperId').value;
+const paperSettings = JSON.parse(document.getElementById('paperSettings').dataset.settings);
+
+// Load existing questions from paper
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Select2
+    $('#filterSubject, #filterType, #filterDifficulty, #filterMarks, #filterChapter').select2({
+        width: '100%'
+    });
+    
+    // Load existing questions
+    loadExistingQuestions();
+    
+    // Load all questions for filtering
+    loadAllQuestions();
+});
+
+// Load existing questions from paper
+function loadExistingQuestions() {
+    try {
+        const existingQuestions = {{ existing_questions_json|safe }};
+        originalQuestions = [...existingQuestions];
+        
+        // Add to selected questions
+        existingQuestions.forEach(question => {
+            if (question.id) {
+                selectedQuestions.set(question.id, question);
+                addToSelectedContainer(question);
+            }
+        });
+        
+        updateSelectionCount();
+        
+    } catch (error) {
+        console.error('Error loading existing questions:', error);
+    }
+}
+
+// Load all questions for filtering
+function loadAllQuestions() {
+    fetch('/api/get-all-questions/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                allQuestions = data.questions;
+                loadFilteredQuestions();
+            }
+        })
+        .catch(error => console.error('Error loading questions:', error));
+}
+
+// Filter questions
+function loadFilteredQuestions() {
+    const subject = $('#filterSubject').val();
+    const type = $('#filterType').val();
+    const difficulty = $('#filterDifficulty').val();
+    const marks = $('#filterMarks').val();
+    const chapter = $('#filterChapter').val();
+    
+    let filtered = [...allQuestions];
+    
+    if (subject) filtered = filtered.filter(q => q.subject_id == subject);
+    if (type) filtered = filtered.filter(q => q.type === type);
+    if (difficulty) filtered = filtered.filter(q => q.difficulty === difficulty);
+    if (marks) filtered = filtered.filter(q => q.marks == marks);
+    if (chapter) filtered = filtered.filter(q => q.chapter_id == chapter);
+    
+    displayQuestions(filtered);
+}
+
+// Display questions in list
+function displayQuestions(questions) {
+    const container = document.getElementById('questionsList');
+    
+    if (!questions || questions.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-2 text-center py-8 text-gray-500">
+                <i class="fas fa-search text-3xl mb-4"></i>
+                <p>No questions found with current filters</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    questions.forEach(question => {
+        const isSelected = selectedQuestions.has(question.id);
+        
+        html += `
+            <div class="question-card border rounded p-3 ${isSelected ? 'bg-blue-50 border-blue-300' : 'bg-white'}" 
+                 data-id="${question.id}">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <span class="font-medium text-gray-700">${question.subject_name || 'Unknown'}</span>
+                        <span class="ml-2 text-sm text-gray-500">(${question.type})</span>
+                        <span class="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded">${question.marks}m</span>
+                    </div>
+                    <button onclick="toggleQuestionSelection(${question.id})" 
+                            class="px-2 py-1 text-sm ${isSelected ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'} rounded">
+                        ${isSelected ? '<i class="fas fa-minus mr-1"></i>Remove' : '<i class="fas fa-plus mr-1"></i>Add'}
+                    </button>
+                </div>
+                <div class="text-sm text-gray-600 mb-2">
+                    ${question.question ? question.question.substring(0, 100) : 'No text'}...
+                </div>
+                <div class="text-xs text-gray-500">
+                    <i class="fas fa-book mr-1"></i>${question.chapter || 'General'}
+                    <span class="mx-2">•</span>
+                    <i class="fas fa-chart-line mr-1"></i>${question.difficulty || 'Medium'}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Toggle question selection
+function toggleQuestionSelection(questionId) {
+    const question = allQuestions.find(q => q.id === questionId);
+    if (!question) return;
+    
+    if (selectedQuestions.has(questionId)) {
+        selectedQuestions.delete(questionId);
+        removeFromSelectedContainer(questionId);
+    } else {
+        selectedQuestions.set(questionId, question);
+        addToSelectedContainer(question);
+    }
+    
+    updateSelectionCount();
+    loadFilteredQuestions(); // Refresh display
+}
+
+// Add to selected container
+function addToSelectedContainer(question) {
+    const container = document.getElementById('selectedQuestionsContainer');
+    
+    if (container.querySelector('.empty-message')) {
+        container.innerHTML = '';
+    }
+    
+    const item = document.createElement('div');
+    item.className = 'selected-question-item bg-white border rounded p-3 mb-2';
+    item.id = `selected-${question.id}`;
+    item.innerHTML = `
+        <div class="flex justify-between items-center">
+            <div>
+                <span class="font-medium">${question.subject_name || 'Unknown'}</span>
+                <span class="ml-2 text-sm text-gray-500">${question.type}</span>
+                <span class="ml-2 text-sm bg-green-100 text-green-800 px-2 py-1 rounded">${question.marks}m</span>
+            </div>
+            <button onclick="toggleQuestionSelection(${question.id})" 
+                    class="text-red-600 hover:text-red-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="text-sm text-gray-600 mt-1">
+            ${question.question ? question.question.substring(0, 80) : 'No text'}...
+        </div>
+    `;
+    
+    container.appendChild(item);
+}
+
+// Remove from selected container
+function removeFromSelectedContainer(questionId) {
+    const item = document.getElementById(`selected-${questionId}`);
+    if (item) item.remove();
+    
+    const container = document.getElementById('selectedQuestionsContainer');
+    if (container.children.length === 0) {
+        container.innerHTML = `
+            <div class="empty-message text-center py-8 text-gray-400">
+                <i class="fas fa-list-check text-3xl mb-4"></i>
+                <p>No questions selected yet</p>
+                <p class="text-sm">Add questions from the list above</p>
+            </div>
+        `;
+    }
+}
+
+// Update selection count
+function updateSelectionCount() {
+    const count = selectedQuestions.size;
+    const totalMarks = Array.from(selectedQuestions.values())
+        .reduce((sum, q) => sum + (parseInt(q.marks) || 1), 0);
+    
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('selectedCountDisplay').textContent = `${count} questions (${totalMarks} marks)`;
+    document.getElementById('totalMarksSelected').textContent = `${totalMarks} marks`;
+}
+
+// Clear filters
+function clearQuestionFilters() {
+    $('#filterSubject').val('').trigger('change');
+    $('#filterType').val('').trigger('change');
+    $('#filterDifficulty').val('').trigger('change');
+    $('#filterMarks').val('').trigger('change');
+    $('#filterChapter').val('').trigger('change');
+    loadFilteredQuestions();
+}
+
+// Save question changes
+function saveQuestionChanges() {
+    if (!confirm('Save changes to questions? Other paper settings will remain unchanged.')) {
+        return;
+    }
+    
+    const selectedQuestionsArray = Array.from(selectedQuestions.values());
+    
+    // Prepare data
+    const data = {
+        paper_id: paperId,
+        selected_questions: selectedQuestionsArray,
+        action: 'update_questions_only'
+    };
+    
+    // Show loading
+    const saveBtn = event.target;
+    const originalText = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+    saveBtn.disabled = true;
+    
+    // Send request
+    fetch('/api/update-paper-questions/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            alert('✅ Questions updated successfully!');
+            window.location.href = "{% url 'teacher_generated_papers' %}";
+        } else {
+            alert('❌ Error: ' + (result.error || 'Failed to save changes'));
+        }
+    })
+    .catch(error => {
+        alert('❌ Error: ' + error.message);
+    })
+    .finally(() => {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    });
+}
+
+// Preview edited paper
+function previewEditedPaper() {
+    const selectedQuestionsArray = Array.from(selectedQuestions.values());
+    
+    // Create preview data
+    const previewData = {
+        ...paperSettings,
+        selected_questions: selectedQuestionsArray,
+        total_marks: selectedQuestionsArray.reduce((sum, q) => sum + (parseInt(q.marks) || 1), 0),
+        total_questions: selectedQuestionsArray.length
+    };
+    
+    // Generate preview HTML
+    const previewHTML = generatePaperPreviewHTML(previewData);
+    document.getElementById('paperPreviewContent').innerHTML = previewHTML;
+    document.getElementById('previewModal').classList.remove('hidden');
+}
+
+// Generate paper preview HTML
+function generatePaperPreviewHTML(data) {
+    let html = `
+        <div class="question-paper">
+            <div class="paper-header">
+                <h2 class="text-center text-2xl font-bold">${data.school_name}</h2>
+                <p class="text-center">${data.school_address}</p>
+                <p class="text-center">${data.school_contact}</p>
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <h3 class="text-xl font-bold">${data.exam_name}</h3>
+                    <p>Class: ${data.class_name} | Total Marks: ${data.total_marks} | Time: ${data.time_duration}</p>
+                </div>
+            </div>
+            
+            <div class="instructions my-4 p-3 bg-gray-50">
+                <h4 class="font-bold">Instructions:</h4>
+                <p class="whitespace-pre-line">${data.instructions}</p>
+            </div>
+            
+            <div class="questions-section">
+    `;
+    
+    // Add questions
+    data.selected_questions.forEach((question, index) => {
+        html += `
+            <div class="question-box my-4">
+                <div class="font-bold">Q${index + 1}. (${question.marks} marks)</div>
+                <div class="ml-4">${question.question || 'No question text'}</div>
+                ${question.type === 'objective' && question.option1 ? `
+                    <div class="options ml-8 mt-2">
+                        <div>A. ${question.option1 || ''}</div>
+                        <div>B. ${question.option2 || ''}</div>
+                        <div>C. ${question.option3 || ''}</div>
+                        <div>D. ${question.option4 || ''}</div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    html += `
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+// Close preview
+function closePreview() {
+    document.getElementById('previewModal').classList.add('hidden');
+}
+
+// Reset to original
+function resetToOriginal() {
+    if (confirm('Reset all question changes and restore original questions?')) {
+        selectedQuestions.clear();
+        document.getElementById('selectedQuestionsContainer').innerHTML = '';
+        
+        originalQuestions.forEach(question => {
+            selectedQuestions.set(question.id, question);
+            addToSelectedContainer(question);
+        });
+        
+        updateSelectionCount();
+        loadFilteredQuestions();
+    }
+}
+
+// CSRF token helper
+function getCSRFToken() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+<style>
+.question-paper {
+    font-family: 'Times New Roman', serif;
+    line-height: 1.6;
+}
+
+.question-box {
+    page-break-inside: avoid;
+}
+
+.selected-question-item {
+    transition: all 0.2s;
+}
+
+.selected-question-item:hover {
+    background-color: #f9fafb;
+}
+
+#previewModal {
+    backdrop-filter: blur(5px);
+}
+</style>
+{% endblock %}

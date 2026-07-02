@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mathematics Question Details</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f9;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #3498db;
+    }
+
+    h2 {
+        color: #1e3d59;
+        margin-bottom: 10px;
+    }
+
+    .subject-badge {
+        background: #3498db;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        display: inline-block;
+    }
+
+    .question-info, .content-box {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+    }
+
+    .info-row {
+        display: flex;
+        margin-bottom: 10px;
+    }
+
+    .info-label {
+        font-weight: bold;
+        width: 150px;
+        color: #2c3e50;
+    }
+
+    .info-value {
+        color: #34495e;
+    }
+
+    .question-box {
+        border: 2px solid #3498db;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .answer-box {
+        border: 2px solid #27ae60;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .options-box {
+        border: 2px solid #e67e22;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .formula-box, .characters-box, .graph-box, .diagram-box {
+        border: 2px solid #9b59b6;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .question-title, .answer-title, .options-title, .formula-title, .characters-title, .graph-title, .diagram-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #2c3e50;
+    }
+
+    .question-content, .answer-content, .option-text, .formula-content, .characters-content {
+        font-size: 16px;
+        line-height: 1.6;
+        color: #2c3e50;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .option-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 15px;
+        background: #fdf2e9;
+        border-radius: 5px;
+        border-left: 4px solid #e67e22;
+    }
+
+    .option-number {
+        background: #e67e22;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: bold;
+    }
+
+    .correct-option {
+        background: #d5f4e6;
+        border-left: 4px solid #27ae60;
+    }
+
+    .back-btn {
+        display: inline-block;
+        background: #3498db;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 16px;
+        margin-top: 20px;
+        transition: background 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .back-btn:hover {
+        background: #2980b9;
+        color: white;
+        text-decoration: none;
+    }
+
+    img {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 5px;
+        display: block;
+        margin-top: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .correct-answer-display {
+        margin-top: 20px;
+        padding: 15px;
+        background: #e8f6f3;
+        border-radius: 5px;
+        border-left: 4px solid #27ae60;
+    }
+
+    .correct-answer-display strong {
+        color: #2c3e50;
+    }
+
+    @media (max-width: 768px) {
+        .container { padding: 20px; }
+        .info-row { flex-direction: column; margin-bottom: 15px; }
+        .info-label { width: 100%; margin-bottom: 5px; }
+        .question-content, .answer-content { font-size: 15px; padding: 15px; }
+        .option-item { flex-direction: column; align-items: flex-start; }
+        .option-number { margin-bottom: 10px; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>Mathematics Question Details</h2>
+        <span class="subject-badge">Mathematics</span>
+    </div>
+
+    <div class="question-info">
+        <div class="info-row">
+            <div class="info-label">Question ID:</div>
+            <div class="info-value">{{ question.id }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Chapter:</div>
+            <div class="info-value">{{ question.chapter }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Topic:</div>
+            <div class="info-value">{{ question.topic }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Question Type:</div>
+            <div class="info-value">
+                {% if question.question_type == "objective" %}
+                    Objective (MCQ)
+                {% elif question.question_type == "descriptive" %}
+                    Descriptive
+                {% elif question.question_type == "numerical" %}
+                    Numerical
+                {% elif question.question_type == "theorem" %}
+                    Theorem
+                {% elif question.question_type == "graph_based" %}
+                    Graph Based
+                {% else %}
+                    {{ question.question_type|title }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Created On:</div>
+            <div class="info-value">{{ question.created_at|date:"F d, Y H:i" }}</div>
+        </div>
+    </div>
+
+    {% if question.formula %}
+    <div class="formula-box">
+        <div class="formula-title">Formula</div>
+        <div class="formula-content">{{ question.formula|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.equation_latex %}
+    <div class="formula-box">
+        <div class="formula-title">LaTeX Equation</div>
+        <div class="formula-content">{{ question.equation_latex }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.given_values %}
+    <div class="formula-box">
+        <div class="formula-title">Given Values</div>
+        <div class="formula-content">{{ question.given_values }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.graph_image %}
+    <div class="graph-box">
+        <div class="graph-title">Graph Image</div>
+        <img src="{{ question.graph_image.url }}" alt="Graph">
+        {% if question.graph_type %}
+        <p><strong>Graph Type:</strong> {{ question.graph_type }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if question.theorem_diagram %}
+    <div class="diagram-box">
+        <div class="diagram-title">Theorem Diagram</div>
+        <img src="{{ question.theorem_diagram.url }}" alt="Theorem Diagram">
+    </div>
+    {% endif %}
+
+    <div class="question-box">
+        <div class="question-title">Question</div>
+        <div class="question-content">{{ question.question|safe }}</div>
+    </div>
+
+    {% if question.question_type == 'objective' and question.option1 %}
+    <div class="options-box">
+        <div class="options-title">Options</div>
+        
+        {% if question.option1 %}
+        <div class="option-item {% if '1' in question.correct_options or 1 in question.correct_options %}correct-option{% endif %}">
+            <div class="option-number">A</div>
+            <div class="option-text">{{ question.option1|safe }}</div>
+        </div>
+        {% endif %}
+        
+        {% if question.option2 %}
+        <div class="option-item {% if '2' in question.correct_options or 2 in question.correct_options %}correct-option{% endif %}">
+            <div class="option-number">B</div>
+            <div class="option-text">{{ question.option2|safe }}</div>
+        </div>
+        {% endif %}
+        
+        {% if question.option3 %}
+        <div class="option-item {% if '3' in question.correct_options or 3 in question.correct_options %}correct-option{% endif %}">
+            <div class="option-number">C</div>
+            <div class="option-text">{{ question.option3|safe }}</div>
+        </div>
+        {% endif %}
+        
+        {% if question.option4 %}
+        <div class="option-item {% if '4' in question.correct_options or 4 in question.correct_options %}correct-option{% endif %}">
+            <div class="option-number">D</div>
+            <div class="option-text">{{ question.option4|safe }}</div>
+        </div>
+        {% endif %}
+        
+        {% if question.option5 %}
+        <div class="option-item {% if '5' in question.correct_options or 5 in question.correct_options %}correct-option{% endif %}">
+            <div class="option-number">E</div>
+            <div class="option-text">{{ question.option5|safe }}</div>
+        </div>
+        {% endif %}
+        
+        <!-- <div class="correct-answer-display">
+            <strong>Correct Answer(s):</strong>
+            {% if question.correct_options %}
+                {% with correct_letters=question.get_correct_options_display %}
+                    {% if correct_letters %}
+                        <span style="color: #27ae60; font-weight: bold;">{{ correct_letters }}</span>
+                    {% else %}
+                        <span style="color: #e74c3c;">No correct answer selected</span>
+                    {% endif %}
+                {% endwith %}
+            {% else %}
+                <span style="color: #e74c3c;">No correct answer selected</span>
+            {% endif %}
+        </div> -->
+    </div>
+    {% endif %}
+
+    {% if question.answer %}
+    <div class="answer-box">
+        <div class="answer-title">Answer</div>
+        <div class="answer-content">{{ question.answer|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.question_type == 'numerical' and question.final_answer %}
+    <div class="answer-box">
+        <div class="answer-title">Final Answer</div>
+        <div class="answer-content">{{ question.final_answer|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.step_solution %}
+    <div class="answer-box">
+        <div class="answer-title">Step-by-Step Solution</div>
+        <div class="answer-content">{{ question.step_solution|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.question_type == 'theorem' and question.theorem_statement %}
+    <div class="answer-box">
+        <div class="answer-title">Theorem Statement</div>
+        <div class="answer-content">{{ question.theorem_statement|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.theorem_proof %}
+    <div class="answer-box">
+        <div class="answer-title">Theorem Proof</div>
+        <div class="answer-content">{{ question.theorem_proof|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.theorem_applications %}
+    <div class="answer-box">
+        <div class="answer-title">Theorem Applications</div>
+        <div class="answer-content">{{ question.theorem_applications|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.graph_analysis %}
+    <div class="answer-box">
+        <div class="answer-title">Graph Analysis</div>
+        <div class="answer-content">{{ question.graph_analysis|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.graph_keypoints %}
+    <div class="answer-box">
+        <div class="answer-title">Graph Key Points</div>
+        <div class="answer-content">{{ question.graph_keypoints|safe }}</div>
+    </div>
+    {% endif %}
+
+    {% if question.graph_calculations %}
+    <div class="answer-box">
+        <div class="answer-title">Graph Calculations</div>
+        <div class="answer-content">{{ question.graph_calculations|safe }}</div>
+    </div>
+    {% endif %}
+
+    <div class="actions">
+        <a href="{% url 'view_mathematics_questions' %}" class="back-btn">← Back to Mathematics Questions</a>
+        {% if user.is_staff %}
+        <a href="{% url 'edit_mathematics_question' question.id %}" class="back-btn" style="background: #f39c12; margin-left: 10px;">
+            <i class="fas fa-edit"></i> Edit Question
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Function to go back to previous page
+function goBack() {
+    window.history.back();
+}
+
+// Add MathJax for LaTeX rendering if needed
+if (document.querySelector('[class*="latex"]')) {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+    document.head.appendChild(script);
+}
+</script>
+</body>
+</html>

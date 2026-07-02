@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search Students</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 80%;
+      margin: 20px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h2, h3 { text-align: center; margin-bottom: 20px; }
+    form { text-align: center; margin-bottom: 30px; }
+    input[type="text"] {
+      padding: 10px;
+      width: 60%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 15px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background: #007bff;
+      color: white;
+    }
+    tr:hover {
+      background: #f1f1f1;
+    }
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Search Students</h2>
+
+  <!-- Search box -->
+  <form method="GET" action="{% url 'search_students' %}">
+    <input type="text" name="q" placeholder="Search by First or Last Name" value="{{ query }}" required>
+    <button type="submit"><i class="fa fa-search"></i> Search</button>
+  </form>
+
+  <!-- Only show this section if a search query is made -->
+  {% if query %}
+    <h3>Search Results for "{{ query }}"</h3>
+    {% if students %}
+      <table>
+        <thead>
+          <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Guardian</th>
+            <th>Course</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td>{{ student.first_name }}</td>
+            <td>{{ student.last_name }}</td>
+            <td>{{ student.email }}</td>
+            <td>{{ student.mobile_number }}</td>
+            <td>{{ student.guardian_name }}</td>
+            <td>{{ student.course_applied_for }}</td>
+            <td>
+              <form action="{% url 'delete_student' student.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="delete-btn">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p style="text-align: center; color: #666;">No students found for "{{ query }}".</p>
+    {% endif %}
+  {% endif %}
+
+  <!-- 🔒 ALWAYS SHOW THIS FULL LIST -->
+  <h3>All Student List</h3>
+  {% if student_list %}
+    <table>
+      <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Email</th>
+          <th>Mobile</th>
+          <th>Guardian</th>
+          <th>Course</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in student_list %}
+        <tr>
+          <td>{{ student.first_name }}</td>
+          <td>{{ student.last_name }}</td>
+          <td>{{ student.email }}</td>
+          <td>{{ student.mobile_number }}</td>
+          <td>{{ student.guardian_name }}</td>
+          <td>{{ student.course_applied_for }}</td>
+          <td>
+            <form action="{% url 'delete_student' student.id %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="delete-btn">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p style="text-align: center; color: #666;">No students in the database.</p>
+  {% endif %}
+
+</div>
+
+</body>
+</html>

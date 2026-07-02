@@ -1,0 +1,179 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Parent Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="text-2xl font-bold text-blue-600">Parent Dashboard</div>
+        </div>
+        <div class="flex items-center gap-4">
+            <i class="fa fa-bell text-xl cursor-pointer hover:text-blue-500"></i>
+            <i class="fa fa-shopping-cart text-xl cursor-pointer hover:text-blue-500"></i>
+            <span class="font-medium">Welcome, {{ data.username }}</span>
+            <a href="{% url 'Login' %}">
+                <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    Logout <i class="fa fa-sign-out-alt ml-1"></i>
+                </button>
+            </a>
+        </div>
+    </header>
+
+    <!-- Layout -->
+    <div class="flex min-h-screen">
+
+        
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-100 p-4 space-y-4 shadow-inner">
+            <nav class="space-y-4">
+
+                <!-- Exam Details Box -->
+                <div class="bg-gray-400 rounded-lg shadow p-4">
+                    <details class="group">
+                        <summary class="flex items-center cursor-pointer font-semibold text-gray-700">
+                            <i class="fa fa-file-alt mr-2"></i> Exam Details
+                        </summary>
+                        <div class="ml-6 mt-3 space-y-2">
+                            <div onclick="window.location.href='{% url 'Parent_result' %}'"
+                                class="bg-blue-100 text-blue-800 px-4 py-2 rounded cursor-pointer hover:bg-blue-200 transition flex items-center">
+                                <i class="fa fa-chart-bar mr-2"></i> Exam Results
+                            </div>
+                            <div onclick="window.location.href='{% url 'exam_schedule' %}'"
+                                class="bg-blue-100 text-blue-800 px-4 py-2 rounded cursor-pointer hover:bg-blue-200 transition flex items-center">
+                                <i class="fa fa-info-circle mr-2"></i> Exam Details
+                            </div>
+                        </div>
+                    </details>
+                </div>
+                
+
+               <!-- Packages Box -->
+                <div onclick="toggleSection('packageCards')" class="bg-gray-400 rounded-lg shadow p-4 cursor-pointer hover:bg-blue-50 transition">
+                    <div class="flex items-center text-gray-800 hover:text-blue-600">
+                        <i class="fa fa-box-open mr-2"></i> Packages
+                    </div>
+                </div>
+                <!-- Contact Us Box -->
+                <div class="bg-gray-400 rounded-lg shadow p-4 cursor-pointer hover:bg-blue-50 transition">
+                    <div class="flex items-center text-gray-800 hover:text-blue-600">
+                        <i class="fa fa-envelope mr-2"></i> Contact Us
+                    </div>
+                </div>
+
+                <!-- Review Box -->
+                <div class="bg-gray-400 rounded-lg shadow p-4 cursor-pointer hover:bg-blue-50 transition" onclick="window.location.href='/feedbacks/'">
+                    <div class="flex items-center text-gray-800 hover:text-blue-600">
+                        <i class="fa fa-star mr-2"></i> Review
+                    </div>
+                </div>
+
+            </nav>
+        </aside>
+
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 space-y-8">
+
+            <!-- Package Cards -->
+       <!-- Package Cards -->
+<section id="packageCards" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition">
+        <div class="h-40 bg-gray-200 rounded mb-4 flex items-center justify-center text-gray-500">
+           <img src="{% static 'gallery/jee.jpg' %}" alt="JEE Image">
+        </div>
+        <h2 class="text-xl font-semibold">JEE</h2>
+        <p class="text-sm text-gray-600 mb-2">JEE exam preparation package.</p>
+        <p class="font-semibold text-green-600">$19.99</p>
+        <a href="{% url 'buy_product' %}">
+            <button class="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Buy</button>
+        </a>
+    </div>
+    <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition">
+        <div class="h-40 bg-gray-200 rounded mb-4 flex items-center justify-center text-gray-500">
+            <img src="{% static 'gallery/NEET-LOGO.jpg' %}" alt="JEE Image">
+        </div>
+        <h2 class="text-xl font-semibold">NEET</h2>
+        <p class="text-sm text-gray-600 mb-2">NEET exam preparation package.</p>
+        <p class="font-semibold text-green-600">$19.99</p>
+        <a href="{% url 'buy_product' %}">
+            <button class="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Buy</button>
+        </a>
+    </div>
+    <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition">
+        <div class="h-40 bg-gray-200 rounded mb-4 flex items-center justify-center text-gray-500">
+             <img src="{% static 'gallery/comb.png' %}" alt="Combined Image">
+        </div>
+        <h2 class="text-xl font-semibold">COMBINED</h2>
+        <p class="text-sm text-gray-600 mb-2">Combined exam preparation package.</p>
+        <p class="font-semibold text-green-600">$19.99</p>
+        <a href="{% url 'buy_product' %}">
+            <button class="mt-3 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Buy</button>
+        </a>
+    </div>
+</section>
+
+            <!-- Contact Details -->
+            <section id="teacherContactDetails" class="bg-white p-6 rounded-lg shadow hidden">
+                <h3 class="text-lg font-bold mb-2">Contact Details</h3>
+                <p><strong>Name:</strong> John Doe</p>
+                <p><strong>Position:</strong> Mathematics Teacher</p>
+                <p><strong>Phone Number:</strong> +1234567890</p>
+            </section>
+
+            <!-- Exam Details Table -->
+            <section id="exam-details-section" class="bg-white p-6 rounded-lg shadow {% if not exams %}hidden{% endif %}">
+                <h2 class="text-xl font-semibold mb-4">Exam Details</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100 text-left">
+                                <th class="p-3 border">Exam Date</th>
+                                <th class="p-3 border">Exam Time</th>
+                                <th class="p-3 border">Subject</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if exams %}
+                                {% for exam in exams %}
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="p-3 border">{{ exam.exam_date }}</td>
+                                        <td class="p-3 border">{{ exam.exam_time }}</td>
+                                        <td class="p-3 border">{{ exam.exam_subject }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="3" class="p-3 text-center">No exam details available.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white text-center text-sm text-gray-500 py-4 border-t mt-8">
+        &copy; 2025 Your Exam Platform. All rights reserved.
+    </footer>
+    <script>
+        function toggleSection(id) {
+            const section = document.getElementById(id);
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+            }
+        }
+    </script>
+    
+</body>
+</html>

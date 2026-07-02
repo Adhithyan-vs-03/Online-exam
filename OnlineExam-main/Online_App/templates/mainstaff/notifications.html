@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notifications</title>
+
+    <style>
+        body { 
+            font-family: "Segoe UI", sans-serif; 
+            background:#f5f7fb; 
+            margin:0; padding:0;
+        }
+
+        .container {
+            margin: 40px auto;
+            width: 70%;
+            background:white;
+            padding:30px;
+            border-radius:12px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 { color:#1a73e8; }
+
+        .note {
+            padding:15px 20px;
+            border-left:5px solid #1a73e8;
+            margin-bottom:18px;
+            background:#eef4ff;
+            border-radius:6px;
+        }
+
+        .note time {
+            color:#777;
+            font-size:14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>🔔 Notifications</h2>
+
+    {% if notifications %}
+        {% for n in notifications %}
+            <div class="note">
+                <h3>{{ n.title }}</h3>
+                <p>{{ n.message }}</p>
+                <time>{{ n.created_at }}</time>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No notifications found.</p>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

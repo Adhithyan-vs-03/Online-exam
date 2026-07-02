@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">👁️ View Submission</h1>
+            <p class="text-gray-600 mt-2">{{ submission.student_name }} - {{ submission.exam_title }}</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url 'teacher_evaluate_exam' submission.id %}" 
+               class="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-300">
+                <i class="fas fa-check-circle mr-2"></i> Evaluate
+            </a>
+            <a href="{% url 'teacher_pending_evaluations' %}" 
+               class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition duration-300">
+                ← Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left: Submission Details & Answer Sheet -->
+        <div class="lg:col-span-2">
+            <!-- Submission Details Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-clipboard-list mr-2 text-blue-500"></i>
+                    📋 Submission Details
+                </h2>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 mb-1">Student Name</p>
+                        <p class="font-semibold text-lg text-gray-800">{{ submission.student_name }}</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 mb-1">Student Email</p>
+                        <p class="font-medium text-gray-700">{{ submission.student_email }}</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 mb-1">Submission Date</p>
+                        <p class="font-medium text-gray-700">{{ submission.submitted_at|date:"F j, Y, g:i a" }}</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 mb-1">Time Taken</p>
+                        <p class="font-medium text-gray-700">{{ submission.time_taken }} minutes</p>
+                    </div>
+                </div>
+                
+                {% if submission.additional_notes %}
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-sticky-note mr-2 text-yellow-500"></i>
+                        Student's Notes
+                    </h3>
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                        {{ submission.additional_notes|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Answer Sheet Section - COMPLETE INTEGRATED VERSION -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-file-alt mr-2 text-green-500"></i>
+                        📄 Answer Sheet
+                    </h2>
+                    {% if submission.answer_file %}
+                    <span class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium flex items-center">
+                        <i class="fas fa-check-circle mr-1"></i> 
+                        Ready to View
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 text-center border-2 border-gray-200">
+                    {% if submission.answer_file %}
+                        <div class="mb-6">
+                            <!-- PDF Icon with Animation -->
+                            <div class="relative inline-block">
+                                <div class="absolute inset-0 bg-red-200 rounded-full animate-ping opacity-25"></div>
+                                <i class="fas fa-file-pdf text-8xl text-red-500 mb-4 relative"></i>
+                                <span class="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg">
+                                    PDF
+                                </span>
+                            </div>
+                            
+                            <!-- File Information -->
+                            <h3 class="text-2xl font-bold text-gray-800 mb-3">Student Answer Sheet</h3>
+                            <div class="bg-white p-3 rounded-lg inline-block shadow-sm mb-3">
+                                <p class="text-gray-600 font-mono text-sm">
+                                    <i class="fas fa-file mr-1"></i> 
+                                    {{ submission.answer_file.name|slice:"45:" }}
+                                </p>
+                            </div>
+                            
+                            <!-- File Details -->
+                            <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-600 mt-4">
+                                <span class="bg-white px-3 py-1 rounded-full shadow-sm">
+                                    <i class="fas fa-file mr-1 text-blue-500"></i> 
+                                    {{ submission.answer_file.size|filesizeformat }}
+                                </span>
+                                <span class="bg-white px-3 py-1 rounded-full shadow-sm">
+                                    <i class="fas fa-clock mr-1 text-green-500"></i> 
+                                    {{ submission.submitted_at|timesince }} ago
+                                </span>
+                                <span class="bg-white px-3 py-1 rounded-full shadow-sm">
+                                    <i class="fas fa-user mr-1 text-purple-500"></i> 
+                                    {{ submission.student_name }}
+                                </span>
+                                <span class="bg-white px-3 py-1 rounded-full shadow-sm">
+                                    <i class="fas fa-file-pdf mr-1 text-red-500"></i> 
+                                    PDF Document
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                            <!-- View Button - Primary Action -->
+                            <a href="/media/{{ submission.answer_file.name }}" 
+                               target="_blank"
+                               class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 ease-in-out transform hover:scale-105 shadow-xl flex items-center justify-center group">
+                                <i class="fas fa-eye mr-3 text-2xl group-hover:animate-pulse"></i>
+                                View PDF Answer Sheet
+                                <i class="fas fa-external-link-alt ml-2 text-sm opacity-75"></i>
+                            </a>
+                            
+                            <!-- Download Button - Secondary Action -->
+                            <a href="/exam/download-answer/{{ submission.id }}/?download=1" 
+                               class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 ease-in-out transform hover:scale-105 shadow-xl flex items-center justify-center group">
+                                <i class="fas fa-download mr-3 text-2xl group-hover:animate-bounce"></i>
+                                Download PDF
+                            </a>
+                        </div>
+                        
+                        <!-- Help Text -->
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 text-sm text-blue-700 text-left">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle mr-2 mt-0.5"></i>
+                                <div>
+                                    <strong class="block mb-1">📌 About Viewing PDFs:</strong>
+                                    <p>The PDF will open in a new tab using your browser's built-in PDF viewer. This is the most reliable method and works on all browsers and devices.</p>
+                                    {% if '127.0.0.1' in request.build_absolute_uri or 'localhost' in request.build_absolute_uri %}
+                                        <p class="mt-2 text-xs bg-blue-100 p-2 rounded">
+                                            <i class="fas fa-laptop mr-1"></i> 
+                                            <strong>Development Mode:</strong> You're viewing this on localhost. PDFs always open in new tabs due to browser security restrictions. This is normal and expected behavior.
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- No File Uploaded State -->
+                        <div class="py-12">
+                            <div class="relative inline-block">
+                                <i class="fas fa-exclamation-circle text-7xl text-yellow-400 mb-4"></i>
+                                <span class="absolute -top-2 -right-2 bg-gray-500 text-white text-xs px-2 py-1 rounded-full">
+                                    Empty
+                                </span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-700 mb-2">No Answer Sheet Uploaded</h3>
+                            <p class="text-gray-500 mb-6">The student has not submitted any file for this exam.</p>
+                            <div class="bg-gray-100 p-4 rounded-lg inline-block">
+                                <i class="fas fa-info-circle mr-1 text-gray-600"></i>
+                                <span class="text-gray-600">Status: Submitted without attachment</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Status & Quick Actions -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-bolt mr-2 text-yellow-500"></i>
+                    ⚡ Quick Actions
+                </h2>
+                
+                <div class="space-y-4">
+                    <!-- Evaluate Button -->
+                    <a href="{% url 'teacher_evaluate_exam' submission.id %}" 
+                       class="block w-full text-center bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-check-circle mr-2 text-xl"></i>
+                        Start Evaluation
+                    </a>
+                    
+                    {% if submission.answer_file %}
+                        <!-- Quick View Button -->
+                        <a href="/media/{{ submission.answer_file.name }}" 
+                           target="_blank"
+                           class="block w-full text-center bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-eye mr-2 text-xl"></i>
+                            Quick View PDF
+                        </a>
+                        
+                        <!-- Quick Download Button -->
+                        <a href="/exam/download-answer/{{ submission.id }}/?download=1" 
+                           class="block w-full text-center bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-download mr-2 text-xl"></i>
+                            Quick Download
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Status Information Card -->
+                <div class="mt-8 pt-8 border-t border-gray-200">
+                    <h3 class="font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                        Status Information
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Current Status -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 mb-1">Current Status</p>
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold 
+                                {% if submission.status == 'submitted' %}
+                                    bg-yellow-100 text-yellow-800 border border-yellow-200
+                                {% elif submission.status == 'evaluated' %}
+                                    bg-green-100 text-green-800 border border-green-200
+                                {% else %}
+                                    bg-gray-100 text-gray-800 border border-gray-200
+                                {% endif %}">
+                                <i class="fas fa-circle mr-2 text-xs 
+                                    {% if submission.status == 'submitted' %}text-yellow-500
+                                    {% elif submission.status == 'evaluated' %}text-green-500
+                                    {% else %}text-gray-500{% endif %}">
+                                </i>
+                                {{ submission.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        <!-- Submission Time -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 mb-1">Submitted</p>
+                            <p class="font-semibold text-gray-800">
+                                <i class="fas fa-clock mr-1 text-gray-600"></i>
+                                {{ submission.submitted_at|timesince }} ago
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ submission.submitted_at|date:"M d, Y - h:i A" }}
+                            </p>
+                        </div>
+                        
+                        <!-- Evaluator Info -->
+                        {% if submission.evaluated_by %}
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 mb-1">Evaluated By</p>
+                            <p class="font-semibold text-gray-800">
+                                <i class="fas fa-user mr-1 text-blue-500"></i>
+                                {{ submission.evaluated_by.get_full_name|default:submission.evaluated_by.username }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Exam Info -->
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-sm text-gray-500 mb-1">Exam Title</p>
+                            <p class="font-medium text-gray-800">
+                                <i class="fas fa-graduation-cap mr-1 text-indigo-500"></i>
+                                {{ submission.exam_title }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- File Information Card -->
+                {% if submission.answer_file %}
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <h3 class="font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-file-pdf mr-2 text-red-500"></i>
+                        File Information
+                    </h3>
+                    
+                    <div class="bg-red-50 p-4 rounded-lg border border-red-100 space-y-3">
+                        <div>
+                            <p class="text-xs text-red-600 uppercase font-bold mb-1">Filename</p>
+                            <p class="text-sm font-medium text-gray-800 break-all bg-white p-2 rounded border border-red-100">
+                                <i class="fas fa-file-pdf mr-1 text-red-500"></i>
+                                {{ submission.answer_file.name|slice:"40:" }}
+                            </p>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-xs text-red-600 uppercase font-bold mb-1">Size</p>
+                                <p class="text-sm font-semibold text-gray-800">
+                                    <i class="fas fa-database mr-1 text-gray-600"></i>
+                                    {{ submission.answer_file.size|filesizeformat }}
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-xs text-red-600 uppercase font-bold mb-1">Type</p>
+                                <p class="text-sm font-semibold text-gray-800">
+                                    <i class="fas fa-file-pdf mr-1 text-red-500"></i>
+                                    PDF Document
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <p class="text-xs text-red-600 uppercase font-bold mb-1">Pages</p>
+                                <p class="text-sm font-semibold text-gray-800">
+                                    <i class="fas fa-copy mr-1 text-gray-600"></i>
+                                    N/A
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Direct Link -->
+                        <div class="mt-2">
+                            <p class="text-xs text-red-600 uppercase font-bold mb-1">Direct Link</p>
+                            <code class="text-xs bg-gray-800 text-gray-200 p-2 rounded block break-all">
+                                /media/{{ submission.answer_file.name }}
+                            </code>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Back to List Button (Mobile) -->
+                <div class="mt-8 lg:hidden">
+                    <a href="{% url 'teacher_pending_evaluations' %}" 
+                       class="block w-full text-center bg-gray-100 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-200 transition duration-300">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Evaluations List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add custom styles for animations -->
+<style>
+    @keyframes ping {
+        75%, 100% {
+            transform: scale(2);
+            opacity: 0;
+        }
+    }
+    .animate-ping {
+        animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    .group:hover .group-hover\:animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .group:hover .group-hover\:animate-bounce {
+        animation: bounce 1s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: .5;
+        }
+    }
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+    
+    /* Smooth transitions */
+    .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+    }
+    
+    /* Hover scale effect */
+    .hover\:scale-105:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Sticky sidebar */
+    .sticky {
+        position: sticky;
+        top: 1.5rem;
+        z-index: 10;
+    }
+    
+    /* Custom scrollbar for code block */
+    .break-all {
+        word-break: break-all;
+        white-space: pre-wrap;
+    }
+</style>
+{% endblock %}

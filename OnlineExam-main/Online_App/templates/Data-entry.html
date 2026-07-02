@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Entry</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/file/data-entry.css">
+</head>
+<body>
+    <div class="header-top7">
+        <img src="/static/images/nassonline.jpg" alt="Logo" class="logo7">
+        <div class="header-info7">
+            <h3 class="welcome7">Welcome, {{ data.username }}</h3>
+            <a href="{% url 'Login' %}">
+                <button class="reg7">
+                    LogOut <i class="fa fa-sign-out" style="font-size:16px;"></i>
+                </button>
+            </a>
+        </div>
+    </div>
+    <hr>
+        <div class="container7">
+            <aside>
+                <ul>
+                    <li class="dropdown7"><img src="/static/dashboard/settings.png" alt="">  Courses
+                        <ul class="dropdown-menu7">
+                            <li class="sub-dropdown7">Courses</li>
+                            <li class="sub-dropdown7">Classes</li>
+                            <li class="sub-dropdown7">Subjects</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown7"><img src="/static/dashboard/dashboard.png" alt="">  Questions
+                        <ul class="dropdown-menu7">
+                            <li class="sub-dropdown7">Staffs
+                                <ul class="sub-dropdown-menu7">
+                                    <li>Overview</li>
+                                </ul>
+                            </li>
+                            <li class="sub-dropdown7">Student
+                                <ul class="sub-dropdown-menu7">
+                                    <li>Overview</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown7"><img src="/static/dashboard/student.png" alt="">  Subject
+                        <ul class="dropdown-menu7">
+                            <li><a href="{% url 'add_biology_question' %}" style="text-decoration: none; color: white;">Biology</a></li>
+                            <li><a href="{% url 'add_chemistry_question' %}" style="text-decoration: none; color: white;">Chemistry</a></li>
+                            <li><a href="{% url 'add_physics_question' %}" style="text-decoration: none; color: white;">Physics</a></li>
+                            <li><a href="{% url 'add_mathematics_question' %}" style="text-decoration: none; color: white;">Mathematics</a></li>
+                        </ul>
+                    </li>
+                    
+                </ul>
+            </aside>
+        </div>
+
+    <footer>
+            <hr>
+    </footer>
+    <script src="/static/file/data-entry.js"></script>       
+</body>
+</html>

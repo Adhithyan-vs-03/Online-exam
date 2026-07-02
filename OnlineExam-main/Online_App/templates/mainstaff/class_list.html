@@ -1,0 +1,160 @@
+<!-- <!-- templates/mainstaff/class_list.html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Select Class</title>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; background: #f1f4f8; padding: 40px; }
+    .card { max-width:800px; margin:auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08);}
+    h1 { color:#1a73e8; margin:0 0 16px; }
+    .class-list { margin-top:12px; }
+    .class-item { padding:12px 14px; border-radius:8px; margin:8px 0; background:#f9fbff; display:flex; justify-content:space-between; align-items:center; border:1px solid #eef3ff; text-decoration:none; color:#0b2140; }
+    .class-item a { text-decoration:none; color:inherit; width:100%; display:block; }
+    .btn { padding:8px 12px; background:#1a73e8; color:#fff; border-radius:8px; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Select a Class</h1>
+    <p>Click a class to open its details.</p>
+
+    <div class="class-list">
+      {% if classes %}
+        {% for c in classes %}
+          <div class="class-item">
+            <a href="{% url 'class_details' c.id %}">Class {{ c.class_name }}</a>
+            <a class="btn" href="{% url 'class_details' c.id %}">Open</a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No classes found.</p>
+      {% endif %}
+    </div>
+
+    <p style="margin-top:16px;">
+      <a href="{% url 'mainstaff_dashboard' %}">← Back to Dashboard</a>
+    </p>
+  </div>
+</body>
+</html> -->
+
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Class Details</title>
+    <style>
+        body { font-family: Segoe UI, sans-serif; background: #f1f4f8; padding: 30px; }
+        .box { background: #fff; padding: 25px; border-radius: 12px; width: 700px; margin: auto;
+               box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        h2 { color: #0d9488; }
+        .list-box { margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 10px; border: 1px solid #ddd; }
+        a.btn { display: block; padding: 12px; margin-top: 20px; background: #0d9488; color: #fff;
+                text-align: center; border-radius: 8px; text-decoration: none; }
+        a.btn:hover { background: #0f766e; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Class: {{ class_obj.class_name }}</h2>
+
+    <div class="list-box">
+        <h3>Subjects</h3>
+        {% if subjects %}
+            {% for s in subjects %}
+                <p>• {{ s.name }}</p>
+            {% endfor %}
+        {% else %}
+            <p>No subjects added yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="list-box">
+        <h3>Chapters</h3>
+        {% if chapters %}
+            {% for c in chapters %}
+                <p>• {{ c.name }} ({{ c.subject.name }})</p>
+            {% endfor %}
+        {% else %}
+            <p>No chapters added yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="list-box">
+        <h3>Topics</h3>
+        {% if topics %}
+            {% for t in topics %}
+                <p>• {{ t.name }} ({{ t.chapter.name }})</p>
+            {% endfor %}
+        {% else %}
+            <p>No topics added yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="list-box">
+        <h3>Subtopics</h3>
+        {% if subtopics %}
+            {% for st in subtopics %}
+                <p>• {{ st.name }} ({{ st.topic.name }})</p>
+            {% endfor %}
+        {% else %}
+            <p>No subtopics added yet.</p>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'manage_subjects'  %}" class="btn">
+    Manage Subjects / Chapters / Topics
+</a>
+
+
+</div>
+
+</body>
+</html> --> 
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Select Class</title>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; background: #f1f4f8; padding: 40px; }
+    .card { max-width:800px; margin:auto; background:#fff; padding:24px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08); }
+    h1 { color:#1a73e8; margin:0 0 16px; }
+    .class-list { margin-top:12px; }
+    .class-item { padding:12px 14px; border-radius:8px; margin:8px 0; background:#f9fbff;
+                  display:flex; justify-content:space-between; align-items:center;
+                  border:1px solid #eef3ff; text-decoration:none; color:#0b2140; }
+    .class-item a { text-decoration:none; color:inherit; width:100%; display:block; }
+    .btn { padding:8px 12px; background:#1a73e8; color:#fff; border-radius:8px; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Select a Class</h1>
+    <p>Click a class to open its details.</p>
+
+    <div class="class-list">
+      {% if classes %}
+        {% for c in classes %}
+          <div class="class-item">
+            <a href="{% url 'class_details' class_id=c.id %}">Class {{ c.class_name }}</a>
+            <a class="btn" href="{% url 'class_details' class_id=c.id %}">Open</a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No classes found.</p>
+      {% endif %}
+    </div>
+
+    <p style="margin-top:16px;">
+      <a href="{% url 'mainstaff_dashboard' %}">← Back to Dashboard</a>
+    </p>
+  </div>
+</body>
+</html>
+

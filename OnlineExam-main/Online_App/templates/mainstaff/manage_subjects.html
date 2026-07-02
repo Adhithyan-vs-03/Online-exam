@@ -1,0 +1,674 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Manage Subjects | Main Staff</title>
+  <style>
+    body { margin:0; padding:0; font-family: "Segoe UI", sans-serif; background:#eef2f7; }
+    .container { width:900px; margin:30px auto; background:#fff; padding:25px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
+    h2 { text-align:center; color:#0d9488; margin-bottom:20px; }
+    h3 { color:#333; margin-top:0; }
+    label { display:block; font-weight:700; margin-top:10px; color:#333; }
+    select, input[type="text"], input[type="file"] { width:100%; padding:10px; margin-top:5px; border-radius:8px; border:1px solid #bbb; font-size:1rem; }
+    button { padding:12px; background:#0d9488; color:#fff; border:none; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:12px; width:100%; }
+    button:hover { background:#0f766e; }
+    .section-box { border:1px solid #ddd; padding:16px; border-radius:12px; margin-top:18px; background:#fafafa; }
+    .two-col { display:flex; gap:14px; }
+    .two-col > div { flex:1; }
+    .small-select { height:36px; }
+    .hint { color:#666; font-size:13px; margin-top:8px; line-height: 1.4; }
+    
+    /* Item List Styles */
+    .item-list { 
+      max-height: 200px; 
+      overflow-y: auto; 
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      margin-top: 5px;
+      border: 1px solid #e9ecef;
+    }
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 6px 0;
+      padding: 8px;
+      background: white;
+      border-radius: 4px;
+      border-left: 3px solid #0d9488;
+      font-size: 13px;
+    }
+    .item-info {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .edit-btn, .delete-btn {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+    }
+    .edit-btn {
+      background: #4CAF50;
+      color: white;
+    }
+    .edit-btn:hover {
+      background: #45a049;
+    }
+    .delete-btn {
+      background: #f44336;
+      color: white;
+    }
+    .delete-btn:hover {
+      background: #d32f2f;
+    }
+    
+    /* Edit Form Styles */
+    .edit-form {
+      background: #fff;
+      border: 2px solid #4CAF50;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      display: none;
+    }
+    .edit-form h4 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    .edit-form .form-group {
+      margin-bottom: 10px;
+    }
+    .edit-form input[type="text"],
+    .edit-form select {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 100%;
+    }
+    .edit-form .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .edit-form .save-btn {
+      background: #4CAF50;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .edit-form .cancel-btn {
+      background: #f44336;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    /* AI Importer Button Styles */
+    .ai-importer-btn { 
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      border: none;
+      color: white;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(26, 115, 232, 0.3);
+    }
+    
+    .ai-importer-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(26, 115, 232, 0.4);
+      background: linear-gradient(135deg, #1557b0, #0b3d91);
+    }
+    
+    /* Messages */
+    .messages { margin: 10px 0; }
+    .alert-success { padding: 10px; background: #d4edda; color: #155724; border-radius: 5px; border: 1px solid #c3e6cb; }
+    .alert-error { padding: 10px; background: #f8d7da; color: #721c24; border-radius: 5px; border: 1px solid #f5c6cb; }
+    .alert-info { padding: 10px; background: #cce7ff; color: #004085; border-radius: 5px; border: 1px solid #b3d7ff; }
+    
+    /* Counter badges */
+    .badge {
+      background: #0d9488;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Manage Subjects / Chapters / Topics</h2>
+
+    <!-- Display Messages -->
+    {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert-{% if message.tags %}{{ message.tags }}{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- AI IMPORTER BUTTON -->
+    <a href="{% url 'ai_content_importer' %}" style="text-decoration: none;">
+      <button type="button" class="ai-importer-btn">
+        🚀 AI-Powered Content Importer (NCERT/SCERT/NEET/JEE)
+      </button>
+    </a>
+    <div class="hint" style="text-align: center; margin-bottom: 20px;">
+      Upload PDF files and let AI automatically extract chapters, topics, and subtopics
+    </div>
+
+    <!-- ADD COURSE -->
+    <div class="section-box">
+      <h3>Add Course <span class="badge">{{ courses|length }}</span></h3>
+      <form method="post" action="">
+        {% csrf_token %}
+        <label>Course Name</label>
+        <input type="text" name="course_name" placeholder="Enter Course Name (e.g. CBSE, ICSE, NEET, JEE)" required>
+        <button type="submit">Save Course</button>
+      </form>
+      <div class="hint">Existing courses:</div>
+      <div class="item-list">
+        {% for c in courses %}
+        <div class="item-row" id="course-{{ c.id }}">
+          <div class="item-info">{{ c.name }}</div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="showEditForm('course', {{ c.id }}, '{{ c.name|escapejs }}')">Edit</button>
+            <!-- <button class="delete-btn" onclick="deleteItem('course', {{ c.id }})">Delete</button> -->
+          </div>
+        </div>
+        <div id="edit-course-{{ c.id }}" class="edit-form">
+          <h4>Edit Course</h4>
+          <form method="post" action="{% url 'edit_course' c.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Course Name</label>
+              <input type="text" name="course_name" value="{{ c.name }}" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="save-btn">Update</button>
+              <button type="button" class="cancel-btn" onclick="hideEditForm('course', {{ c.id }})">Cancel</button>
+            </div>
+          </form>
+        </div>
+        {% empty %}
+        <div style="text-align: center; color: #999; padding: 10px;">No courses added yet</div>
+        {% endfor %}
+      </div>
+    </div>
+        
+    <!-- ADD CLASS -->
+    <div class="section-box">
+      <h3>Add Class <span class="badge">{{ classes|length }}</span></h3>
+      <form method="post" action="">
+        {% csrf_token %}
+        <div class="two-col">
+          <div>
+            <label>Select Course</label>
+            <select name="course_id" required>
+              <option value="">-- Select Course --</option>
+              {% for c in courses %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Class Name</label>
+            <input type="text" name="class_name" placeholder="Enter Class Name (e.g. 10, 12, Grade 10)" required>
+          </div>
+        </div>
+        <button type="submit">Save Class</button>
+      </form>
+      <div class="hint">Existing classes:</div>
+      <div class="item-list">
+        {% for c in classes %}
+        <div class="item-row" id="class-{{ c.id }}">
+          <div class="item-info">{{ c.class_name }} ({{ c.course.name }})</div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="showEditForm('class', {{ c.id }}, '{{ c.class_name|escapejs }}', {{ c.course.id }})">Edit</button>
+            <!-- <button class="delete-btn" onclick="deleteItem('class', {{ c.id }})">Delete</button> -->
+          </div>
+        </div>
+        <div id="edit-class-{{ c.id }}" class="edit-form">
+          <h4>Edit Class</h4>
+          <form method="post" action="{% url 'edit_class' c.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Select Course</label>
+              <select name="course_id" required>
+                {% for course in courses %}
+                <option value="{{ course.id }}" {% if course.id == c.course.id %}selected{% endif %}>{{ course.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Class Name</label>
+              <input type="text" name="class_name" value="{{ c.class_name }}" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="save-btn">Update</button>
+              <button type="button" class="cancel-btn" onclick="hideEditForm('class', {{ c.id }})">Cancel</button>
+            </div>
+          </form>
+        </div>
+        {% empty %}
+        <div style="text-align: center; color: #999; padding: 10px;">No classes added yet</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ADD SUBJECT -->
+    <div class="section-box">
+      <h3>Add Subject <span class="badge">{{ subjects|length }}</span></h3>
+      <form method="post" action="{% url 'add_subject' %}">
+        {% csrf_token %}
+        <div class="two-col">
+          <div>
+            <label>Select Class</label>
+            <select name="class_id" id="class_select" required>
+              <option value="">-- Select Class --</option>
+              {% for c in classes %}
+                <option value="{{ c.id }}">{{ c.class_name }} ({{ c.course.name }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Subject Name</label>
+            <input type="text" name="subject_name" placeholder="Enter Subject Name (e.g. Mathematics)" required>
+          </div>
+        </div>
+        <button type="submit">Save Subject</button>
+      </form>
+      <div class="hint">Existing subjects:</div>
+      <div class="item-list">
+        {% for s in subjects %}
+        <div class="item-row" id="subject-{{ s.id }}">
+          <div class="item-info">{{ s.name }} ({{ s.class_name.class_name }})</div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="showEditForm('subject', {{ s.id }}, '{{ s.name|escapejs }}', {{ s.class_name.id }})">Edit</button>
+            <!-- <button class="delete-btn" onclick="deleteItem('subject', {{ s.id }})">Delete</button> -->
+          </div>
+        </div>
+        <div id="edit-subject-{{ s.id }}" class="edit-form">
+          <h4>Edit Subject</h4>
+          <form method="post" action="{% url 'edit_subject' s.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Select Class</label>
+              <select name="class_id" required>
+                {% for c in classes %}
+                <option value="{{ c.id }}" {% if c.id == s.class_name.id %}selected{% endif %}>{{ c.class_name }} ({{ c.course.name }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Subject Name</label>
+              <input type="text" name="subject_name" value="{{ s.name }}" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="save-btn">Update</button>
+              <button type="button" class="cancel-btn" onclick="hideEditForm('subject', {{ s.id }})">Cancel</button>
+            </div>
+          </form>
+        </div>
+        {% empty %}
+        <div style="text-align: center; color: #999; padding: 10px;">No subjects added yet</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ADD CHAPTER -->
+    <div class="section-box">
+      <h3>Add Chapter <span class="badge">{{ chapters|length }}</span></h3>
+      <form method="post" action="{% url 'add_chapter' %}">
+        {% csrf_token %}
+        <div class="two-col">
+          <div>
+            <label>Select Subject</label>
+            <select name="subject_id" id="subject_select" class="small-select" required>
+              <option value="">-- Select Subject --</option>
+              {% for s in subjects %}
+                <option value="{{ s.id }}">{{ s.name }} ({{ s.class_name.class_name }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Chapter Name</label>
+            <input type="text" name="chapter_name" placeholder="Enter Chapter Name" required>
+          </div>
+        </div>
+        <button type="submit">Save Chapter</button>
+      </form>
+      <div class="hint">Existing chapters:</div>
+      <div class="item-list">
+        {% for ch in chapters %}
+        <div class="item-row" id="chapter-{{ ch.id }}">
+          <div class="item-info">{{ ch.name }} ({{ ch.subject.name }} - {{ ch.subject.class_name.class_name }})</div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="showEditForm('chapter', {{ ch.id }}, '{{ ch.name|escapejs }}', {{ ch.subject.id }})">Edit</button>
+            <!-- <button class="delete-btn" onclick="deleteItem('chapter', {{ ch.id }})">Delete</button> -->
+          </div>
+        </div>
+        <div id="edit-chapter-{{ ch.id }}" class="edit-form">
+          <h4>Edit Chapter</h4>
+          <form method="post" action="{% url 'edit_chapter' ch.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Select Subject</label>
+              <select name="subject_id" required>
+                {% for s in subjects %}
+                <option value="{{ s.id }}" {% if s.id == ch.subject.id %}selected{% endif %}>{{ s.name }} ({{ s.class_name.class_name }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Chapter Name</label>
+              <input type="text" name="chapter_name" value="{{ ch.name }}" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="save-btn">Update</button>
+              <button type="button" class="cancel-btn" onclick="hideEditForm('chapter', {{ ch.id }})">Cancel</button>
+            </div>
+          </form>
+        </div>
+        {% empty %}
+        <div style="text-align: center; color: #999; padding: 10px;">No chapters added yet</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ADD TOPIC -->
+    <div class="section-box">
+      <h3>Add Topic <span class="badge">{{ topics|length }}</span></h3>
+      <form method="post" action="{% url 'add_topic' %}">
+        {% csrf_token %}
+        <div class="two-col">
+          <div>
+            <label>Select Chapter</label>
+            <select name="chapter_id" id="chapter_select" class="small-select" required>
+              <option value="">-- Select Chapter --</option>
+              {% for ch in chapters %}
+                <option value="{{ ch.id }}">{{ ch.name }} ({{ ch.subject.name }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Topic Name</label>
+            <input type="text" name="topic_name" placeholder="Enter Topic Name" required>
+          </div>
+        </div>
+        <button type="submit">Save Topic</button>
+      </form>
+      <div class="hint">Existing topics:</div>
+      <div class="item-list">
+        {% for t in topics %}
+        <div class="item-row" id="topic-{{ t.id }}">
+          <div class="item-info">{{ t.name }} ({{ t.chapter.name }} - {{ t.chapter.subject.name }})</div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="showEditForm('topic', {{ t.id }}, '{{ t.name|escapejs }}', {{ t.chapter.id }})">Edit</button>
+            <!-- <button class="delete-btn" onclick="deleteItem('topic', {{ t.id }})">Delete</button> -->
+          </div>
+        </div>
+        <div id="edit-topic-{{ t.id }}" class="edit-form">
+          <h4>Edit Topic</h4>
+          <form method="post" action="{% url 'edit_topic' t.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Select Chapter</label>
+              <select name="chapter_id" required>
+                {% for ch in chapters %}
+                <option value="{{ ch.id }}" {% if ch.id == t.chapter.id %}selected{% endif %}>{{ ch.name }} ({{ ch.subject.name }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Topic Name</label>
+              <input type="text" name="topic_name" value="{{ t.name }}" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="save-btn">Update</button>
+              <button type="button" class="cancel-btn" onclick="hideEditForm('topic', {{ t.id }})">Cancel</button>
+            </div>
+          </form>
+        </div>
+        {% empty %}
+        <div style="text-align: center; color: #999; padding: 10px;">No topics added yet</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ADD SUBTOPIC -->
+    <div class="section-box">
+      <h3>Add Subtopic <span class="badge">{{ subtopics|length }}</span></h3>
+      <form method="post" action="{% url 'add_subtopic' %}">
+        {% csrf_token %}
+        <div class="two-col">
+          <div>
+            <label>Select Topic</label>
+            <select name="topic_id" id="topic_select" class="small-select" required>
+              <option value="">-- Select Topic --</option>
+              {% for t in topics %}
+                <option value="{{ t.id }}">{{ t.name }} ({{ t.chapter.name }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Subtopic Name</label>
+            <input type="text" name="subtopic_name" placeholder="Enter Subtopic Name" required>
+          </div>
+        </div>
+        <button type="submit">Save Subtopic</button>
+      </form>
+      <div class="hint">Existing subtopics:</div>
+      <div class="item-list">
+        {% for st in subtopics %}
+        <div class="item-row" id="subtopic-{{ st.id }}">
+          <div class="item-info">{{ st.name }} ({{ st.topic.name }} - {{ st.topic.chapter.name }})</div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="showEditForm('subtopic', {{ st.id }}, '{{ st.name|escapejs }}', {{ st.topic.id }})">Edit</button>
+            <!-- <button class="delete-btn" onclick="deleteItem('subtopic', {{ st.id }})">Delete</button> -->
+          </div>
+        </div>
+        <div id="edit-subtopic-{{ st.id }}" class="edit-form">
+          <h4>Edit Subtopic</h4>
+          <form method="post" action="{% url 'edit_subtopic' st.id %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label>Select Topic</label>
+              <select name="topic_id" required>
+                {% for t in topics %}
+                <option value="{{ t.id }}" {% if t.id == st.topic.id %}selected{% endif %}>{{ t.name }} ({{ t.chapter.name }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Subtopic Name</label>
+              <input type="text" name="subtopic_name" value="{{ st.name }}" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="save-btn">Update</button>
+              <button type="button" class="cancel-btn" onclick="hideEditForm('subtopic', {{ st.id }})">Cancel</button>
+            </div>
+          </form>
+        </div>
+        {% empty %}
+        <div style="text-align: center; color: #999; padding: 10px;">No subtopics added yet</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- FINAL SUBMIT BUTTON -->
+    <div style="margin-top:30px;">
+      <form method="get" action="{% url 'class_list' %}">
+        <button type="submit" style="padding:14px; background:#1a73e8; color:#fff; border:none; border-radius:8px; font-size:1rem; width:100%; cursor:pointer;">
+          Finish & Go to Class List
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Show edit form
+    function showEditForm(type, id, name, parentId = null) {
+      // Hide all other edit forms first
+      document.querySelectorAll('.edit-form').forEach(form => {
+        form.style.display = 'none';
+      });
+      
+      // Show the specific edit form
+      const formId = `edit-${type}-${id}`;
+      const form = document.getElementById(formId);
+      if (form) {
+        form.style.display = 'block';
+        
+        // If there's a parent select, set it
+        if (parentId && type !== 'course') {
+          const select = form.querySelector('select[name$="_id"]');
+          if (select) {
+            select.value = parentId;
+          }
+        }
+      }
+    }
+    
+    // Hide edit form
+    function hideEditForm(type, id) {
+      const formId = `edit-${type}-${id}`;
+      const form = document.getElementById(formId);
+      if (form) {
+        form.style.display = 'none';
+      }
+    }
+    
+    // Delete item
+    function deleteItem(type, id) {
+      if (confirm(`Are you sure you want to delete this ${type}?`)) {
+        let url;
+        switch(type) {
+          case 'course':
+            url = ``.replace('0', id);
+            break;
+          case 'class':
+            url = ``.replace('0', id);
+            break;
+          case 'subject':
+            url = ``.replace('0', id);
+            break;
+          case 'chapter':
+            url = ``.replace('0', id);
+            break;
+          case 'topic':
+            url = ``.replace('0', id);
+            break;
+          case 'subtopic':
+            url = ``.replace('0', id);
+            break;
+        }
+        
+        if (url) {
+          fetch(url, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRFToken': '{{ csrf_token }}',
+              'Content-Type': 'application/json',
+            },
+          })
+          .then(response => {
+            if (response.ok) {
+              window.location.reload();
+            }
+          });
+        }
+      }
+    }
+    
+    // Simple client-side cascading selects for manual forms:
+    (function(){
+      const classSelect = document.getElementById('class_select');
+      const subjectSelect = document.getElementById('subject_select');
+      const chapterSelect = document.getElementById('chapter_select');
+      const topicSelect = document.getElementById('topic_select');
+
+      // Filter subjects when class changes
+      classSelect && classSelect.addEventListener('change', function(){
+        const classId = this.value;
+        Array.from(subjectSelect.options).forEach(opt => {
+          const optClassId = opt.getAttribute('data-class-id') || '';
+          if (!classId) { 
+            opt.style.display = ''; 
+          } else if (optClassId === classId) { 
+            opt.style.display = ''; 
+          } else { 
+            opt.style.display = 'none'; 
+          }
+        });
+        // reset downstream selects
+        subjectSelect.value = '';
+        chapterSelect.value = '';
+        topicSelect.value = '';
+      });
+
+      // Filter chapters when subject changes
+      subjectSelect && subjectSelect.addEventListener('change', function(){
+        const subjectId = this.value;
+        Array.from(chapterSelect.options).forEach(opt => {
+          const optSubjectId = opt.getAttribute('data-subject-id') || '';
+          if (!subjectId) { 
+            opt.style.display = ''; 
+          } else if (optSubjectId === subjectId) { 
+            opt.style.display = ''; 
+          } else { 
+            opt.style.display = 'none'; 
+          }
+        });
+        chapterSelect.value = '';
+        topicSelect.value = '';
+      });
+
+      // Filter topics when chapter changes
+      chapterSelect && chapterSelect.addEventListener('change', function(){
+        const chapterId = this.value;
+        Array.from(topicSelect.options).forEach(opt => {
+          const optChapterId = opt.getAttribute('data-chapter-id') || '';
+          if (!chapterId) { 
+            opt.style.display = ''; 
+          } else if (optChapterId === chapterId) { 
+            opt.style.display = ''; 
+          } else { 
+            opt.style.display = 'none'; 
+          }
+        });
+        topicSelect.value = '';
+      });
+    })();
+  </script>
+</body>
+</html>

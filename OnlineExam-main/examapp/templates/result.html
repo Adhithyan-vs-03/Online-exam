@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Results</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/file/result.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header-top8">
+        <img src="/static/images/nassonline.jpg" alt="Logo" class="logo8">
+        <div class="header-info8">
+            <h3 class="welcome8">Welcome, {{ data.username }}</h3>
+            <a href="{% url 'Login' %}">
+                <button class="reg8">
+                    LogOut <i class="fa fa-sign-out" style="font-size:16px;"></i>
+                </button>
+            </a>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Test Results</h1>
+        <h2>Welcome, {{ username }}</h2>
+
+        <p><strong>Score:</strong> {{ score }}</p>
+        <p><strong>Time Taken:</strong> {{ time_taken }}</p>
+
+        <h3>Question Breakdown</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Question</th>
+                    <th>Your Answer</th>
+                    <th>Correct Answer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for answer in user_answers %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ answer.question }}</td>
+                    <td>{{ answer.selected }}</td>
+                    <td>{{ answer.correct }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="button-container">
+            <a href="{% url 'test_page' %}" class="cta-button">Take Another Test</a>
+            <br>
+            <a href="{% url 'Student' %}" class="cta-button">Go to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 Test Results. All Rights Reserved.</p>
+    </div>
+</body>
+</html>

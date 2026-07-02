@@ -1,0 +1,1785 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Nass Online Exams</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #14b8a6;
+      --accent: #06b6d4;
+      --dark: #111827;
+      --light: #f9fafb;
+      --text: #1f2937;
+      --gray: #6b7280;
+      --error: #dc3545;
+      --success: #28a745;
+      --warning: #ffc107;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f5f7fa;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: linear-gradient(180deg, var(--primary-dark), var(--primary));
+      color: white;
+      transition: all 0.3s;
+      z-index: 1000;
+      box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+
+    .sidebar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-brand img {
+      height: 50px;
+    }
+
+    .sidebar-menu {
+      padding: 1rem 0;
+    }
+
+    .menu-title {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.3s;
+      border-left: 3px solid transparent;
+      cursor: pointer;
+    }
+
+    .menu-item:hover, .menu-item.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-left-color: var(--accent);
+    }
+
+    .menu-item i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .menu-item .menu-arrow {
+      margin-left: auto;
+      transition: transform 0.3s;
+    }
+
+    .submenu {
+      padding-left: 3rem;
+      background: rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease-out;
+    }
+
+    .submenu.show {
+      max-height: 500px;
+    }
+
+    .submenu-item {
+      padding: 0.5rem 0;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      display: block;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .submenu-item:hover, .submenu-item.active {
+      color: white;
+    }
+
+    .submenu-item i {
+      font-size: 0.8rem;
+      margin-right: 0.5rem;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      min-height: 100vh;
+      transition: all 0.3s;
+    }
+
+    /* Topbar */
+    .topbar {
+      height: 70px;
+      background: white;
+      box-shadow: 0 1px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .sidebar-toggle {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: var(--gray);
+      margin-right: 1rem;
+      cursor: pointer;
+    }
+
+    .page-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--dark);
+    }
+
+    /* .back-to-dashboard {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      margin-left: 1rem;
+    } */
+
+    /* .back-to-dashboard:hover {
+      background: var(--primary-dark);
+      color: white;
+    } */
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .notification-badge {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .notification-badge i {
+      font-size: 1.25rem;
+      color: var(--gray);
+    }
+
+    .badge-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--error);
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 0.65rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .user-name {
+      font-weight: 500;
+    }
+
+    .logout-btn {
+      background: var(--error);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+
+    .logout-btn:hover {
+      background: #c82333;
+      color: white;
+    }
+
+    /* Dashboard Content */
+    .dashboard-content {
+      padding: 1.5rem;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .stat-card-icon.students {
+      background: rgba(13, 148, 136, 0.1);
+      color: var(--primary);
+    }
+
+    .stat-card-icon.staff {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--error);
+    }
+
+    .stat-card-icon.courses {
+      background: rgba(255, 193, 7, 0.1);
+      color: var(--warning);
+    }
+
+    .stat-card-icon.packages {
+      background: rgba(147, 51, 234, 0.1);
+      color: #9333ea;
+    }
+
+    .stat-card-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+    }
+
+    .stat-card-change {
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .stat-card-change.increase {
+      color: var(--success);
+    }
+
+    .stat-card-change.decrease {
+      color: var(--error);
+    }
+
+    /* Package Management Styles */
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .package-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .package-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .package-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .package-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .package-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      padding-right: 80px;
+    }
+
+    .package-price {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+    }
+
+    .package-original-price {
+      font-size: 1rem;
+      text-decoration: line-through;
+      opacity: 0.8;
+    }
+
+    .package-body {
+      padding: 1.5rem;
+    }
+
+    .package-features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem 0;
+    }
+
+    .package-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .package-features li:last-child {
+      border-bottom: none;
+    }
+
+    .package-features li i {
+      color: var(--success);
+      font-size: 0.9rem;
+      width: 20px;
+    }
+
+    .package-meta {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .package-meta-item {
+      flex: 1;
+      background: #f8f9fa;
+      padding: 0.75rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .package-meta-label {
+      font-size: 0.7rem;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .package-meta-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .package-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-edit {
+      background: var(--warning);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      flex: 1;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .btn-edit:hover {
+      background: #e0a800;
+      color: white;
+    }
+
+    .btn-delete {
+      background: var(--error);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      flex: 1;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .btn-delete:hover {
+      background: #c82333;
+      color: white;
+    }
+
+    .btn-toggle {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      flex: 1;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .btn-toggle:hover {
+      background: var(--primary-dark);
+      color: white;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-active {
+      background: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+    }
+
+    .status-inactive {
+      background: rgba(220, 53, 69, 0.1);
+      color: var(--error);
+    }
+
+    /* Tables */
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+      background: white;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 1.25rem 1.5rem;
+      border-radius: 10px 10px 0 0 !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .table {
+      margin-bottom: 0;
+    }
+
+    .table th {
+      border-top: none;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gray);
+      padding: 1rem 1.5rem;
+      background: rgba(249, 250, 251, 0.8);
+    }
+
+    .table td {
+      padding: 1rem 1.5rem;
+      vertical-align: middle;
+      border-top: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .badge {
+      font-weight: 500;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.75rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      background: white;
+      border-radius: 12px;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: #cbd5e0;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Loading Spinner */
+    .spinner-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      display: none;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Alert */
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      min-width: 300px;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid var(--success);
+    }
+
+    .alert-danger {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid var(--error);
+    }
+
+    /* Form Styles */
+    .package-form {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    }
+
+    .features-list {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .btn-add-feature {
+      background: var(--primary-light);
+      color: white;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-add-feature:hover {
+      background: var(--primary);
+    }
+
+    .btn-remove-feature {
+      background: var(--error);
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .btn-remove-feature:hover {
+      background: #c82333;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .package-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Spinner -->
+  <div class="spinner-overlay" id="loadingSpinner">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="#" class="sidebar-brand">
+        <img src="{% static 'images/nassonline.jpg' %}" alt="Nass Online Logo">
+      </a>
+    </div>
+    
+    <div class="sidebar-menu">
+      <!-- Dashboard -->
+      <div class="menu-item" onclick="showDashboard()">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+      </div>
+      
+      <!-- Staff Management -->
+      <div class="menu-item" onclick="window.location.href='{% url 'admin_staff_list' %}'">
+        <i class="fas fa-users"></i>
+        <span>Staff Management</span>
+      </div>
+      
+      <!-- Student Management -->
+      <div class="menu-item" onclick="window.location.href='{% url 'student_list' %}'">
+        <i class="fas fa-user-graduate"></i>
+        <span>Student Management</span>
+      </div>
+      
+      <!-- Exam -->
+      <div class="menu-item" onclick="toggleSubmenu('examMenu')">
+        <i class="fas fa-book"></i>
+        <span>Exam</span>
+        <i class="fas fa-chevron-down menu-arrow" id="examArrow"></i>
+      </div>
+      <div class="submenu" id="examMenu">
+        <div class="submenu-item" onclick="window.location.href='{% url 'exam_schedule' %}'">
+          <i class="fas fa-calendar-alt"></i> Exam Details
+        </div>
+      </div>
+      
+      <!-- Packages -->
+      <div class="menu-item" onclick="toggleSubmenu('packageMenu')">
+        <i class="fas fa-box-open"></i>
+        <span>Packages</span>
+        <i class="fas fa-chevron-down menu-arrow" id="packageArrow"></i>
+      </div>
+      <div class="submenu" id="packageMenu">
+        <div class="submenu-item" onclick="window.location.href='{% url 'payment_list' %}'">
+          <i class="fas fa-credit-card"></i> Payment
+        </div>
+        <div class="submenu-item" onclick="showPackageManagement()">
+          <i class="fas fa-edit"></i> Manage Packages
+        </div>
+      </div>
+      
+      <!-- Questions -->
+      <div class="menu-item" onclick="toggleSubmenu('questionMenu')">
+        <i class="fas fa-question-circle"></i>
+        <span>Questions</span>
+        <i class="fas fa-chevron-down menu-arrow" id="questionArrow"></i>
+      </div>
+      <div class="submenu" id="questionMenu">
+        <div class="submenu-item" onclick="window.location.href='{% url 'viewing_all_questions' %}'">
+          <i class="fas fa-eye"></i> View All Questions
+        </div>
+      </div>
+      
+      <!-- Results -->
+      <div class="menu-item" onclick="toggleSubmenu('resultMenu')">
+        <i class="fas fa-chart-line"></i>
+        <span>Results</span>
+        <i class="fas fa-chevron-down menu-arrow" id="resultArrow"></i>
+      </div>
+      <div class="submenu" id="resultMenu">
+        <div class="submenu-item disabled">
+          <i class="fas fa-clock"></i> Coming Soon
+        </div>
+      </div>
+      
+      <!-- Settings -->
+      <div class="menu-item" onclick="toggleSubmenu('settingsMenu')">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+        <i class="fas fa-chevron-down menu-arrow" id="settingsArrow"></i>
+      </div>
+      <div class="submenu" id="settingsMenu">
+        <div class="submenu-item" onclick="alert('Security settings coming soon')">
+          <i class="fas fa-lock"></i> Security
+        </div>
+        <div class="submenu-item" onclick="alert('Complaints management coming soon')">
+          <i class="fas fa-comment-alt"></i> Complaints
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <!-- Topbar -->
+    <nav class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" id="sidebarToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="page-title" id="pageTitle">Admin Dashboard</h1>
+        <div  id="backToDashboardBtn" onclick="showDashboard()">
+          
+        </div>
+      </div>
+      
+      <div class="topbar-right">
+        <div class="notification-badge" onclick="showNotification()">
+          <i class="fas fa-bell"></i>
+          <span class="badge-count">3</span>
+        </div>
+        
+        <div class="user-profile">
+          <div class="user-avatar">
+            {{ data.username|slice:":1"|upper }}
+          </div>
+          <span class="user-name">{{ data.username }}</span>
+        </div>
+        
+        <a href="{% url 'login' %}" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+    </nav>
+    
+    <!-- Dashboard Content -->
+    <div class="dashboard-content" id="dashboardContent">
+      <!-- Stats Cards (Default View) -->
+      <div class="stats-grid">
+        <div class="stat-card fade-in">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Total Students</span>
+            <div class="stat-card-icon students">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+          </div>
+          <h3 class="stat-card-value">{{ total_student }}</h3>
+          <div class="stat-card-change increase">
+            <i class="fas fa-arrow-up"></i> 12% from last month
+          </div>
+        </div>
+        
+        <div class="stat-card fade-in">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Total Staff</span>
+            <div class="stat-card-icon staff">
+              <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+          </div>
+          <h3 class="stat-card-value">{{ total_staff }}</h3>
+          <div class="stat-card-change increase">
+            <i class="fas fa-arrow-up"></i> 5% from last month
+          </div>
+        </div>
+        
+        <div class="stat-card fade-in">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Total Courses</span>
+            <div class="stat-card-icon courses">
+              <i class="fas fa-book"></i>
+            </div>
+          </div>
+          <h3 class="stat-card-value">{{ total_course }}</h3>
+          <div class="stat-card-change increase">
+            <i class="fas fa-arrow-up"></i> 8% from last month
+          </div>
+        </div>
+        
+        <div class="stat-card fade-in">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Total Questions</span>
+            <div class="stat-card-icon packages">
+              <i class="fas fa-question-circle"></i>
+            </div>
+          </div>
+          <h3 class="stat-card-value">{{ total_questions }}</h3>
+          <div class="stat-card-change increase">
+            <i class="fas fa-arrow-up"></i> 15% from last month
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Package Modal -->
+  <div class="modal fade" id="deletePackageModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Confirm Delete Package</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this package?</p>
+          <p><strong>Package:</strong> <span id="deletePackageName"></span></p>
+          <p class="text-danger">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDeletePackageBtn">Delete Package</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Package Modal -->
+  <div class="modal fade" id="packageModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="packageModalTitle">Add New Package</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="packageForm">
+            <input type="hidden" id="packageId" name="packageId">
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="packageName" class="form-label">Package Name *</label>
+                <input type="text" class="form-control" id="packageName" required>
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label for="packageType" class="form-label">Package Type *</label>
+                <select class="form-select" id="packageType" required>
+                  <option value="">Select Type</option>
+                  <option value="jee">JEE</option>
+                  <option value="neet">NEET</option>
+                  <option value="foundation">Foundation</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="packagePrice" class="form-label">Price (₹) *</label>
+                <input type="number" class="form-control" id="packagePrice" min="0" step="0.01" required>
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label for="packageOriginalPrice" class="form-label">Original Price (₹) *</label>
+                <input type="number" class="form-control" id="packageOriginalPrice" min="0" step="0.01" required>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="packageValidity" class="form-label">Validity (months) *</label>
+                <input type="number" class="form-control" id="packageValidity" min="1" max="60" required>
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label for="packageBadge" class="form-label">Badge</label>
+                <input type="text" class="form-control" id="packageBadge" placeholder="e.g., MOST POPULAR">
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="packageDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="packageDescription" rows="2"></textarea>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Subjects</label>
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input subject-checkbox" type="checkbox" value="Physics" id="subjectPhysics">
+                    <label class="form-check-label" for="subjectPhysics">Physics</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input subject-checkbox" type="checkbox" value="Chemistry" id="subjectChemistry">
+                    <label class="form-check-label" for="subjectChemistry">Chemistry</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input subject-checkbox" type="checkbox" value="Mathematics" id="subjectMathematics">
+                    <label class="form-check-label" for="subjectMathematics">Mathematics</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input subject-checkbox" type="checkbox" value="Biology" id="subjectBiology">
+                    <label class="form-check-label" for="subjectBiology">Biology</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input subject-checkbox" type="checkbox" value="English" id="subjectEnglish">
+                    <label class="form-check-label" for="subjectEnglish">English</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check">
+                    <input class="form-check-input subject-checkbox" type="checkbox" value="General" id="subjectGeneral">
+                    <label class="form-check-label" for="subjectGeneral">General</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Features</label>
+              <div id="featuresContainer">
+                <div class="feature-item">
+                  <input type="text" class="form-control" placeholder="Enter feature" value="5000+ Questions">
+                  <button type="button" class="btn-remove-feature" onclick="removeFeature(this)"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="feature-item">
+                  <input type="text" class="form-control" placeholder="Enter feature" value="Full-Length Mock Tests">
+                  <button type="button" class="btn-remove-feature" onclick="removeFeature(this)"><i class="fas fa-times"></i></button>
+                </div>
+              </div>
+              <button type="button" class="btn-add-feature mt-2" onclick="addFeature()">
+                <i class="fas fa-plus"></i> Add Feature
+              </button>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="packageImage" class="form-label">Image URL</label>
+                <input type="url" class="form-control" id="packageImage" placeholder="https://...">
+              </div>
+              
+              <div class="col-md-6 mb-3">
+                <label for="packageDisplayOrder" class="form-label">Display Order</label>
+                <input type="number" class="form-control" id="packageDisplayOrder" min="0" value="0">
+              </div>
+            </div>
+            
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="packageIsActive" checked>
+              <label class="form-check-label" for="packageIsActive">Active</label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="savePackage()">Save Package</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Modal -->
+  <div class="modal fade" id="notificationModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Notifications</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="list-group">
+            <div class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">New Student Registration</h6>
+                <small>5 min ago</small>
+              </div>
+              <p class="mb-1">A new student has registered for JEE package</p>
+            </div>
+            <div class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">Payment Received</h6>
+                <small>1 hour ago</small>
+              </div>
+              <p class="mb-1">Payment of ₹4999 received from Rahul Sharma</p>
+            </div>
+            <div class="list-group-item list-group-item-action">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">New Question Added</h6>
+                <small>3 hours ago</small>
+              </div>
+              <p class="mb-1">15 new Physics questions added by Staff</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap & Custom JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Global variables
+    let deletePackageId = null;
+    let packageModal = null;
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Bootstrap modal
+      const modalElement = document.getElementById('packageModal');
+      if (modalElement) {
+        packageModal = new bootstrap.Modal(modalElement);
+      }
+      
+      // Toggle sidebar on mobile
+      document.getElementById('sidebarToggle').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.toggle('show');
+      });
+      
+      // Check if we should show package management by default
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('section') === 'packages') {
+        showPackageManagement();
+      }
+      
+      // Set up delete confirmation
+      document.getElementById('confirmDeletePackageBtn').addEventListener('click', function() {
+        if (deletePackageId) {
+          deletePackage(deletePackageId);
+        }
+      });
+    });
+
+    // Get CSRF token
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    // Toggle submenu
+    function toggleSubmenu(menuId) {
+      const submenu = document.getElementById(menuId);
+      const arrow = document.getElementById(menuId.replace('Menu', 'Arrow'));
+      
+      if (submenu.classList.contains('show')) {
+        submenu.classList.remove('show');
+        if (arrow) arrow.style.transform = 'rotate(-90deg)';
+      } else {
+        submenu.classList.add('show');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // Show dashboard
+    function showDashboard() {
+      window.location.href = '{% url "admin_dashboard" %}';
+    }
+
+    // Show package management
+    function showPackageManagement() {
+      document.getElementById('pageTitle').textContent = 'Manage Packages';
+      document.getElementById('backToDashboardBtn').style.display = 'inline-block';
+      document.getElementById('sidebarToggle').style.display = 'inline-block';
+      
+      // Update active states
+      document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.submenu-item').forEach(item => item.classList.remove('active'));
+      
+      // Find and activate Packages menu
+      const packageItems = Array.from(document.querySelectorAll('.menu-item')).find(el => el.textContent.includes('Packages'));
+      if (packageItems) packageItems.classList.add('active');
+      
+      const manageItem = Array.from(document.querySelectorAll('.submenu-item')).find(el => el.textContent.includes('Manage Packages'));
+      if (manageItem) manageItem.classList.add('active');
+      
+      // Load package management content
+      loadPackageManagementContent();
+    }
+
+    // Load package management content
+    function loadPackageManagementContent() {
+      const content = document.getElementById('dashboardContent');
+      
+      content.innerHTML = `
+        <!-- Package Management Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="mb-0">Package Management</h2>
+          <button class="btn btn-primary" onclick="addNewPackage()">
+            <i class="fas fa-plus"></i> Add New Package
+          </button>
+        </div>
+
+        <!-- Package Grid -->
+        <div class="package-grid" id="packageGrid">
+          <div class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading packages...</p>
+          </div>
+        </div>
+      `;
+      
+      // Load packages from database
+      loadPackagesFromDatabase();
+    }
+
+    // Load packages from database
+    function loadPackagesFromDatabase() {
+      showLoading();
+      
+      fetch('{% url "get_packages" %}', {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          const grid = document.getElementById('packageGrid');
+          if (grid) {
+            grid.innerHTML = renderPackagesFromData(data.packages);
+          }
+        } else {
+          document.getElementById('packageGrid').innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-exclamation-circle"></i>
+              <h4>Error Loading Packages</h4>
+              <p>${data.message || 'Failed to load packages'}</p>
+              <button class="btn btn-primary" onclick="loadPackagesFromDatabase()">
+                <i class="fas fa-sync-alt"></i> Try Again
+              </button>
+            </div>
+          `;
+        }
+        hideLoading();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('packageGrid').innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <h4>Error Loading Packages</h4>
+            <p>Network error. Please try again.</p>
+            <button class="btn btn-primary" onclick="loadPackagesFromDatabase()">
+              <i class="fas fa-sync-alt"></i> Try Again
+            </button>
+          </div>
+        `;
+        hideLoading();
+      });
+    }
+
+    // Render packages from database data
+    function renderPackagesFromData(packages) {
+      if (!packages || packages.length === 0) {
+        return `
+          <div class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h4>No Packages Found</h4>
+            <p>Click "Add New Package" to create your first package.</p>
+            <button class="btn btn-primary" onclick="addNewPackage()">
+              <i class="fas fa-plus"></i> Add New Package
+            </button>
+          </div>
+        `;
+      }
+
+      let html = '';
+      packages.sort((a, b) => (a.display_order || 999) - (b.display_order || 999));
+
+      packages.forEach(pkg => {
+        const discount = Math.round(((pkg.original_price - pkg.price) / pkg.original_price) * 100);
+        
+        const featuresHtml = pkg.features.slice(0, 4).map(f => `
+          <li><i class="fas fa-check-circle"></i> ${f}</li>
+        `).join('');
+
+        html += `
+          <div class="package-card fade-in">
+            <div class="package-header">
+              ${pkg.badge ? `<span class="package-badge">${pkg.badge}</span>` : ''}
+              <h3 class="package-title">${escapeHtml(pkg.name)}</h3>
+              <div>
+                <span class="package-price">₹${Number(pkg.price).toLocaleString()}</span>
+                <span class="package-original-price ms-2">₹${Number(pkg.original_price).toLocaleString()}</span>
+              </div>
+              <small>Save ${discount}%</small>
+            </div>
+            
+            <div class="package-body">
+              <p class="text-muted mb-3">${escapeHtml(pkg.description || '')}</p>
+              
+              <ul class="package-features">
+                ${featuresHtml}
+                ${pkg.features.length > 4 ? `<li class="text-muted"><i class="fas fa-ellipsis-h"></i> +${pkg.features.length - 4} more features</li>` : ''}
+              </ul>
+              
+              <div class="package-meta">
+                <div class="package-meta-item">
+                  <div class="package-meta-label">Validity</div>
+                  <div class="package-meta-value">${pkg.validity} Months</div>
+                </div>
+                <div class="package-meta-item">
+                  <div class="package-meta-label">Subjects</div>
+                  <div class="package-meta-value">${pkg.subjects.length}</div>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <span class="status-badge ${pkg.is_active ? 'status-active' : 'status-inactive'}">
+                  ${pkg.is_active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              
+              <div class="package-actions">
+                <button class="btn-toggle" onclick="togglePackageStatus(${pkg.id})">
+                  <i class="fas ${pkg.is_active ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                  ${pkg.is_active ? 'Deactivate' : 'Activate'}
+                </button>
+                <button class="btn-edit" onclick="editPackage(${pkg.id})">
+                  <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn-delete" onclick="showDeletePackageModal(${pkg.id}, '${escapeHtml(pkg.name).replace(/'/g, "\\'")}')">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      return html;
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Add new package
+    function addNewPackage() {
+      resetPackageForm();
+      document.getElementById('packageModalTitle').textContent = 'Add New Package';
+      packageModal.show();
+    }
+
+    // Edit package
+    function editPackage(id) {
+      showLoading();
+      
+      fetch(`/get-package/${id}/`, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          const pkg = data.package;
+          
+          // Fill form with package data
+          document.getElementById('packageId').value = pkg.id;
+          document.getElementById('packageName').value = pkg.name;
+          document.getElementById('packageType').value = pkg.type;
+          document.getElementById('packagePrice').value = pkg.price;
+          document.getElementById('packageOriginalPrice').value = pkg.original_price;
+          document.getElementById('packageValidity').value = pkg.validity;
+          document.getElementById('packageBadge').value = pkg.badge || '';
+          document.getElementById('packageDescription').value = pkg.description || '';
+          document.getElementById('packageImage').value = pkg.image || '';
+          document.getElementById('packageDisplayOrder').value = pkg.display_order || 0;
+          document.getElementById('packageIsActive').checked = pkg.is_active;
+          
+          // Set subjects
+          document.querySelectorAll('.subject-checkbox').forEach(cb => {
+            cb.checked = pkg.subjects.includes(cb.value);
+          });
+          
+          // Set features
+          const featuresContainer = document.getElementById('featuresContainer');
+          featuresContainer.innerHTML = '';
+          if (pkg.features && pkg.features.length > 0) {
+            pkg.features.forEach(feature => {
+              if (feature.trim()) {
+                addFeatureWithValue(feature);
+              }
+            });
+          } else {
+            addFeatureWithValue('5000+ Questions');
+            addFeatureWithValue('Full-Length Mock Tests');
+          }
+          
+          document.getElementById('packageModalTitle').textContent = 'Edit Package';
+          packageModal.show();
+        } else {
+          showAlert('Failed to load package: ' + data.message, 'danger');
+        }
+        hideLoading();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error loading package', 'danger');
+        hideLoading();
+      });
+    }
+
+    // Save package (add or update)
+    function savePackage() {
+      // Validate form
+      if (!document.getElementById('packageName').value) {
+        showAlert('Package name is required', 'danger');
+        return;
+      }
+      if (!document.getElementById('packageType').value) {
+        showAlert('Package type is required', 'danger');
+        return;
+      }
+      if (!document.getElementById('packagePrice').value) {
+        showAlert('Package price is required', 'danger');
+        return;
+      }
+      if (!document.getElementById('packageOriginalPrice').value) {
+        showAlert('Original price is required', 'danger');
+        return;
+      }
+      if (!document.getElementById('packageValidity').value) {
+        showAlert('Validity is required', 'danger');
+        return;
+      }
+      
+      showLoading();
+      
+      // Get subjects
+      const subjects = [];
+      document.querySelectorAll('.subject-checkbox:checked').forEach(cb => {
+        subjects.push(cb.value);
+      });
+      
+      // Get features
+      const features = [];
+      document.querySelectorAll('#featuresContainer .feature-item input').forEach(input => {
+        if (input.value.trim()) {
+          features.push(input.value.trim());
+        }
+      });
+      
+      const packageId = document.getElementById('packageId').value;
+      
+      const packageData = {
+        name: document.getElementById('packageName').value,
+        type: document.getElementById('packageType').value,
+        price: parseFloat(document.getElementById('packagePrice').value),
+        original_price: parseFloat(document.getElementById('packageOriginalPrice').value),
+        validity: parseInt(document.getElementById('packageValidity').value),
+        description: document.getElementById('packageDescription').value,
+        badge: document.getElementById('packageBadge').value,
+        image: document.getElementById('packageImage').value,
+        display_order: parseInt(document.getElementById('packageDisplayOrder').value) || 0,
+        is_active: document.getElementById('packageIsActive').checked,
+        subjects: subjects,
+        features: features
+      };
+      
+      const url = packageId ? `/update-package/${packageId}/`: `{% url "save_package" %}`;
+      
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: JSON.stringify(packageData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          showAlert(packageId ? 'Package updated successfully!' : 'Package added successfully!', 'success');
+          packageModal.hide();
+          loadPackagesFromDatabase(); // Reload the package list
+        } else {
+          showAlert('Failed to save package: ' + data.message, 'danger');
+        }
+        hideLoading();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error saving package', 'danger');
+        hideLoading();
+      });
+    }
+
+    // Delete package
+    function deletePackage(id) {
+      showLoading();
+      
+      fetch(`/delete-package/${id}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'X-Requested-With': 'XMLHttpRequest',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          showAlert('Package deleted successfully!', 'success');
+          
+          // Close modal
+          const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deletePackageModal'));
+          if (deleteModal) {
+            deleteModal.hide();
+          }
+          
+          // Reload package list
+          loadPackagesFromDatabase();
+        } else {
+          showAlert('Failed to delete package: ' + data.message, 'danger');
+        }
+        hideLoading();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error deleting package', 'danger');
+        hideLoading();
+      });
+    }
+
+    // Toggle package status
+    function togglePackageStatus(id) {
+      showLoading();
+      
+      fetch(`/toggle-package-status/${id}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'X-Requested-With': 'XMLHttpRequest',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          showAlert(data.message, 'success');
+          loadPackagesFromDatabase(); // Reload the package list
+        } else {
+          showAlert('Failed to update package status', 'danger');
+        }
+        hideLoading();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error updating package status', 'danger');
+        hideLoading();
+      });
+    }
+
+    // Show delete package modal
+    function showDeletePackageModal(id, name) {
+      deletePackageId = id;
+      document.getElementById('deletePackageName').textContent = name;
+      const deleteModal = new bootstrap.Modal(document.getElementById('deletePackageModal'));
+      deleteModal.show();
+    }
+
+    // Add feature to form
+    function addFeature() {
+      addFeatureWithValue('');
+    }
+
+    function addFeatureWithValue(value) {
+      const container = document.getElementById('featuresContainer');
+      const featureDiv = document.createElement('div');
+      featureDiv.className = 'feature-item';
+      featureDiv.innerHTML = `
+        <input type="text" class="form-control" placeholder="Enter feature" value="${escapeHtml(value)}">
+        <button type="button" class="btn-remove-feature" onclick="removeFeature(this)"><i class="fas fa-times"></i></button>
+      `;
+      container.appendChild(featureDiv);
+    }
+
+    // Remove feature from form
+    function removeFeature(button) {
+      const featureItem = button.closest('.feature-item');
+      if (document.querySelectorAll('.feature-item').length > 1) {
+        featureItem.remove();
+      } else {
+        // Clear the input instead of removing last item
+        featureItem.querySelector('input').value = '';
+      }
+    }
+
+    // Reset package form
+    function resetPackageForm() {
+      document.getElementById('packageId').value = '';
+      document.getElementById('packageName').value = '';
+      document.getElementById('packageType').value = '';
+      document.getElementById('packagePrice').value = '';
+      document.getElementById('packageOriginalPrice').value = '';
+      document.getElementById('packageValidity').value = '';
+      document.getElementById('packageBadge').value = '';
+      document.getElementById('packageDescription').value = '';
+      document.getElementById('packageImage').value = '';
+      document.getElementById('packageDisplayOrder').value = '0';
+      document.getElementById('packageIsActive').checked = true;
+      
+      // Reset subjects
+      document.querySelectorAll('.subject-checkbox').forEach(cb => {
+        cb.checked = false;
+      });
+      
+      // Reset features to default
+      const featuresContainer = document.getElementById('featuresContainer');
+      featuresContainer.innerHTML = '';
+      addFeatureWithValue('5000+ Questions');
+      addFeatureWithValue('Full-Length Mock Tests');
+    }
+
+    // Show notifications
+    function showNotification() {
+      const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+      modal.show();
+    }
+
+    // Helper functions
+    function showLoading() {
+      document.getElementById('loadingSpinner').style.display = 'flex';
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingSpinner').style.display = 'none';
+    }
+
+    function showAlert(message, type) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.innerHTML = `
+        <div class="d-flex align-items-center">
+          <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+          <span>${escapeHtml(message)}</span>
+        </div>
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+      `;
+      
+      document.body.appendChild(alertDiv);
+      
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          alertDiv.remove();
+        }
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

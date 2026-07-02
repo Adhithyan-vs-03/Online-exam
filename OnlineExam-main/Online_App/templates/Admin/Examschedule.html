@@ -1,0 +1,166 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Schedule</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-top: 20px;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #4e73df;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .admin-link {
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        .admin-link:hover {
+            text-decoration: underline;
+        }
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #6e707e;
+        }
+        .exam-row:hover {
+            background-color: #f8f9fa;
+        }
+        .upcoming {
+            border-left: 4px solid #4e73df;
+        }
+        .past {
+            border-left: 4px solid #e74a3b;
+            opacity: 0.7;
+        }
+        .today {
+            border-left: 4px solid #1cc88a;
+            background-color: rgba(28, 200, 138, 0.05);
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+        }
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            transition: all 0.3s;
+        }
+        .back-btn:hover {
+            background-color: #5a6268;
+            color: white;
+        }
+        .delete-form {
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <button class="btn back-btn mb-3" onclick="history.back()">
+                    <i class="fas fa-arrow-left me-1"></i> Back
+                </button>
+                <div class="text-center">
+                    <h1 class="display-4"><i class="fas fa-calendar-alt me-2 text-primary"></i>Exam Schedule</h1>
+                    <p class="text-muted">Today is {{ current_date_formatted }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exam Table -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title mb-0">Scheduled Exams</h3>
+                <a href="#" class="admin-link">
+                    <i class="fas fa-cog me-1"></i> Manage in Admin
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Subject</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in exams %}
+                            <tr class="exam-row {% if exam.exam_date == current_date %}today{% elif exam.exam_date < current_date %}past{% else %}upcoming{% endif %}">
+                                <td>
+                                    {% if exam.exam_date == current_date %}
+                                        <span class="badge bg-success status-badge">Today</span>
+                                    {% elif exam.exam_date < current_date %}
+                                        <span class="badge bg-secondary status-badge">Completed</span>
+                                    {% else %}
+                                        <span class="badge bg-primary status-badge">Upcoming</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ exam.formatted_date }}</td>
+                                <td>{{ exam.formatted_time }}</td>
+                                <td>{{ exam.exam_subject }}</td>
+                                <td>
+                                    <form class="delete-form" method="post" action="{% url 'delete_exam' exam.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this exam?');">
+                                            <i class="fas fa-trash-alt"></i> Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">No exams scheduled yet. 
+                                    <a href="#" class="text-decoration-none">Add exams in admin</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="text-muted">
+                To add or remove exams, please use the 
+                <a href="#" class="text-decoration-none">Admin Dashboard</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

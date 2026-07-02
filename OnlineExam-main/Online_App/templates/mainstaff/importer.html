@@ -1,0 +1,340 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AI Content Importer | Main Staff</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { margin:0; padding:0; font-family: "Segoe UI", sans-serif; background:#eef2f7; }
+    .container { width:820px; margin:30px auto; background:#fff; padding:25px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
+    h2 { text-align:center; color:#1a73e8; margin-bottom:20px; }
+    h3 { color:#333; margin-top:0; }
+    label { display:block; font-weight:700; margin-top:10px; color:#333; }
+    select, input[type="text"], input[type="file"] { width:100%; padding:10px; margin-top:5px; border-radius:8px; border:1px solid #bbb; font-size:1rem; }
+    button { padding:12px; background:#1a73e8; color:#fff; border:none; border-radius:8px; font-size:1rem; cursor:pointer; margin-top:12px; }
+    button:hover { background:#1557b0; }
+    .two-col { display:flex; gap:14px; }
+    .two-col > div { flex:1; }
+    
+    /* Back Button */
+    .back-btn { 
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      background: #6c757d;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    .back-btn:hover { background: #545b62; }
+    
+    /* AI Section Styles */
+    .ai-section { border: 2px solid #1a73e8; background: #f0f7ff; padding: 20px; border-radius: 12px; }
+    .ai-section h3 { color: #1a73e8; }
+    .ai-button { background: #1a73e8 !important; width: 100%; }
+    .ai-button:hover { background: #1557b0 !important; }
+    .cancel-button { background: #6c757d !important; }
+    .cancel-button:hover { background: #545b62 !important; }
+    
+    /* Processing Status */
+    #processingStatus { display: none; margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px; }
+    .progress-bar { height: 5px; background: #e9ecef; border-radius: 3px; margin-top: 8px; }
+    #progressFill { height: 100%; background: #1a73e8; width: 0%; transition: width 0.3s; }
+    
+    /* Review Section */
+    #reviewSection { display: none; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #ddd; }
+    .chapter-item { margin: 10px 0; padding: 10px; background: white; border-radius: 5px; border-left: 4px solid #1a73e8; }
+    .topic-item { margin-left: 20px; margin-top: 8px; }
+    .subtopic-list { margin-left: 20px; }
+    
+    /* Messages */
+    .messages { margin: 10px 0; }
+    .alert-success { padding: 10px; background: #d4edda; color: #155724; border-radius: 5px; border: 1px solid #c3e6cb; }
+    .alert-error { padding: 10px; background: #f8d7da; color: #721c24; border-radius: 5px; border: 1px solid #f5c6cb; }
+    .alert-info { padding: 10px; background: #cce7ff; color: #004085; border-radius: 5px; border: 1px solid #b3d7ff; }
+    
+    /* Information Box */
+    .info-box { 
+      background: #e3f2fd; 
+      border-left: 4px solid #2196f3;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 0 8px 8px 0;
+    }
+    .info-box ul { margin: 10px 0; padding-left: 20px; }
+    .info-box li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Back Button -->
+    <a href="{% url 'manage_subjects' %}" class="back-btn">← Back to Manage Subjects</a>
+    
+    <h2>🚀 AI-Powered Content Importer</h2>
+    
+    <!-- Information Box -->
+    <div class="info-box">
+      <h4>How it works:</h4>
+      <ul>
+        <li>Upload PDF files of NCERT, SCERT, NEET, or JEE content</li>
+        <li>AI will automatically analyze and extract chapters, topics, and subtopics</li>
+        <li>Review the extracted structure before saving to database</li>
+        <li>Supports multiple formats and educational boards</li>
+      </ul>
+    </div>
+
+    <!-- Display Messages -->
+    {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert-{% if message.tags %}{{ message.tags }}{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- AI-POWERED CONTENT IMPORTER -->
+    <div class="ai-section">
+      <h3>🎯 Upload & Process Content</h3>
+      
+      <form id="aiUploadForm" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="two-col">
+          <div>
+            <label>Content Source Type</label>
+            <select name="source_type" id="sourceType" required>
+              <option value="">-- Select Type --</option>
+              <option value="ncert">NCERT</option>
+              <option value="scert">SCERT</option>
+              <option value="neet">NEET</option>
+              <option value="jee">JEE</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label>Upload PDF File</label>
+            <input type="file" name="pdf_file" id="pdfFile" accept=".pdf" required>
+          </div>
+        </div>
+        
+        <div class="two-col">
+          <div>
+            <label>Select Class</label>
+            <select name="class_id" id="aiClassSelect" required>
+              <option value="">-- Select Class --</option>
+              {% for c in classes %}
+                <option value="{{ c.id }}">{{ c.class_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label>Select Subject</label>
+            <select name="subject_id" id="aiSubjectSelect" required>
+              <option value="">-- Select Subject --</option>
+              {% for s in subjects %}
+                <option value="{{ s.id }}" data-class-id="{{ s.class_name.id }}">{{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        
+        <button type="submit" id="processBtn" class="ai-button">
+          🚀 Upload & Process with AI
+        </button>
+      </form>
+      
+      <!-- Processing Status -->
+      <div id="processingStatus">
+        <p>🔄 AI is processing your content... This may take a few seconds.</p>
+        <div class="progress-bar">
+          <div id="progressFill"></div>
+        </div>
+      </div>
+      
+      <!-- Review Section (initially hidden) -->
+      <div id="reviewSection">
+        <h4>📋 Review AI-Generated Structure</h4>
+        <div id="structuredContent"></div>
+        <form id="saveContentForm" method="post" action="{% url 'save_ai_content' %}">
+          {% csrf_token %}
+          <input type="hidden" name="structured_data" id="structuredDataInput">
+          <input type="hidden" name="class_id" id="saveClassId">
+          <input type="hidden" name="subject_id" id="saveSubjectId">
+          <input type="hidden" name="source_type" id="saveSourceType">
+          <button type="submit" class="ai-button" style="background: #0d9488; margin-top: 10px;">✅ Save to Database</button>
+          <button type="button" id="cancelBtn" class="cancel-button" style="margin-top: 10px; width: 100%;">❌ Cancel & Upload Another</button>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div style="margin-top: 30px; text-align: center;">
+      <a href="{% url 'manage_subjects' %}" style="color: #1a73e8; text-decoration: none; font-weight: bold;">← Return to Manual Entry</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const aiUploadForm = document.getElementById('aiUploadForm');
+      const processingStatus = document.getElementById('processingStatus');
+      const reviewSection = document.getElementById('reviewSection');
+      const structuredContent = document.getElementById('structuredContent');
+      const progressFill = document.getElementById('progressFill');
+      const saveContentForm = document.getElementById('saveContentForm');
+      const cancelBtn = document.getElementById('cancelBtn');
+      
+      // Filter subjects based on class selection for AI importer
+      const aiClassSelect = document.getElementById('aiClassSelect');
+      const aiSubjectSelect = document.getElementById('aiSubjectSelect');
+      
+      aiClassSelect.addEventListener('change', function() {
+        const classId = this.value;
+        Array.from(aiSubjectSelect.options).forEach(option => {
+          if (option.value === '') return;
+          const optionClassId = option.getAttribute('data-class-id');
+          if (classId && optionClassId === classId) {
+            option.style.display = '';
+          } else {
+            option.style.display = 'none';
+          }
+        });
+        aiSubjectSelect.value = '';
+      });
+      
+      // Handle AI form submission
+      aiUploadForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        console.log('Form submission started');
+        
+        const formData = new FormData(this);
+        const processBtn = document.getElementById('processBtn');
+        
+        // Show processing status
+        processingStatus.style.display = 'block';
+        reviewSection.style.display = 'none';
+        processBtn.disabled = true;
+        processBtn.textContent = 'Processing...';
+        
+        // Simulate progress
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += 5;
+          progressFill.style.width = Math.min(progress, 90) + '%';
+        }, 200);
+        
+        try {
+          console.log('Sending request to:', '{% url "ai_process_content" %}');
+          
+          // Get CSRF token
+          const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+          
+          const response = await fetch('{% url "ai_process_content" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin'
+          });
+          
+          console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
+          
+          if (!response.ok) {
+            throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+          }
+          
+          const result = await response.json();
+          console.log('Response JSON:', result);
+          
+          clearInterval(progressInterval);
+          progressFill.style.width = '100%';
+          
+          if (result.success) {
+            // Show review section
+            displayStructuredContent(result.structured_data);
+            reviewSection.style.display = 'block';
+            
+            // Set hidden form values
+            document.getElementById('structuredDataInput').value = JSON.stringify(result.structured_data);
+            document.getElementById('saveClassId').value = formData.get('class_id');
+            document.getElementById('saveSubjectId').value = formData.get('subject_id');
+            document.getElementById('saveSourceType').value = formData.get('source_type');
+            
+          } else {
+            alert('Error: ' + result.error);
+          }
+          
+        } catch (error) {
+          clearInterval(progressInterval);
+          console.error('Detailed error:', error);
+          alert('Failed to process: ' + error.message + '\nCheck browser console (F12) for details.');
+        } finally {
+          processingStatus.style.display = 'none';
+          processBtn.disabled = false;
+          processBtn.textContent = '🚀 Upload & Process with AI';
+          progressFill.style.width = '0%';
+        }
+      });
+      
+      // Cancel button
+      cancelBtn.addEventListener('click', function() {
+        reviewSection.style.display = 'none';
+        aiUploadForm.reset();
+        window.scrollTo(0, 0);
+      });
+      
+      // Save form submission
+      saveContentForm.addEventListener('submit', function(e) {
+        // Let the form submit normally via Django
+        console.log('Saving content to database...');
+      });
+      
+      // Display structured content for review
+      function displayStructuredContent(data) {
+        let html = `<h5>Book: ${data.book_title || 'Untitled'}</h5>`;
+        
+        if (data.chapters && data.chapters.length > 0) {
+          data.chapters.forEach(chapter => {
+            html += `<div class="chapter-item">
+              <strong>Chapter ${chapter.chapter_number || ''}: ${chapter.chapter_title || 'Untitled Chapter'}</strong>`;
+            
+            if (chapter.topics && chapter.topics.length > 0) {
+              chapter.topics.forEach(topic => {
+                html += `<div class="topic-item">
+                  <div>📖 <strong>Topic:</strong> ${topic.topic_heading || 'Untitled Topic'}</div>`;
+                
+                if (topic.subtopics && topic.subtopics.length > 0) {
+                  html += `<div class="subtopic-list">
+                    <strong>Subtopics:</strong> ${topic.subtopics.join(', ')}
+                  </div>`;
+                }
+                
+                if (topic.key_concepts && topic.key_concepts.length > 0) {
+                  html += `<div class="subtopic-list">
+                    <strong>Key Concepts:</strong> ${topic.key_concepts.join(', ')}
+                  </div>`;
+                }
+                
+                html += `</div>`;
+              });
+            } else {
+              html += `<div class="topic-item">No topics found in this chapter.</div>`;
+            }
+            
+            html += `</div>`;
+          });
+        } else {
+          html += `<p>No chapters found in the document.</p>`;
+        }
+        
+        structuredContent.innerHTML = html;
+      }
+    });
+  </script>
+</body>
+</html>

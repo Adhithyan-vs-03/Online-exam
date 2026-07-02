@@ -1,0 +1,428 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Nass Online Exams</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --accent: #06b6d4;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --text: #333;
+      --error: #dc3545;
+      --success: #28a745;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f5f5f5;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .background-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('/static/images/education.jpg') center/cover no-repeat;
+      filter: brightness(0.7);
+      z-index: -1;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 2.5rem;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 450px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      margin: 1rem;
+    }
+
+    .container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 1.5rem;
+      color: var(--primary-dark);
+      cursor: pointer;
+      transition: color 0.3s ease;
+      background: none;
+      border: none;
+      z-index: 10;
+    }
+
+    .close-btn:hover {
+      color: var(--error);
+    }
+
+    h1 {
+      color: var(--primary-dark);
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .register-link a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .register-link a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary);
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 15px 12px 45px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+    }
+
+    button[type="submit"] {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button[type="submit"]:hover {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(13, 148, 136, 0.3);
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin-top: -1rem;
+    }
+
+    .forgot-password a {
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
+    }
+
+    .forgot-password a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    .messages {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      max-width: 300px;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      animation: slideIn 0.5s forwards;
+      position: relative;
+    }
+
+    .alert-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+      .container {
+        padding: 1.5rem;
+        margin: 1rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        padding: 10px 12px 10px 40px;
+      }
+    }
+
+    /* Social login options */
+    .social-login {
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+
+    .social-login p {
+      color: var(--text);
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .social-login p::before,
+    .social-login p::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 30%;
+      height: 1px;
+      background: #ddd;
+    }
+
+    .social-login p::before {
+      left: 0;
+    }
+
+    .social-login p::after {
+      right: 0;
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .social-icons a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: white;
+      transition: transform 0.3s ease;
+    }
+
+    .social-icons a:hover {
+      transform: translateY(-3px);
+    }
+
+    .facebook {
+      background-color: #3b5998;
+    }
+
+    .google {
+      background-color: #db4437;
+    }
+
+    .twitter {
+      background-color: #1da1f2;
+    }
+  </style>
+</head>
+<body>
+    <div class="background-container"></div>
+    <div class="container">
+        <button class="close-btn" onclick="window.location.href='/'">
+            <i class="fas fa-times"></i>
+        </button>
+        <h1>Welcome Back</h1>
+        <p class="register-link">Don't have an account? 
+          <a href="{% url 'Register' %}">Register here</a>
+        </p>
+        <form id="login-form" action="" method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="username" placeholder="Username" name="username" required>
+                <span id="username-error" class="error-message">Please enter a valid username</span>
+            </div>
+
+            <div class="form-group">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" id="password" placeholder="Password" name="password" required>
+                <span id="password-error" class="error-message">Please enter your password</span>
+                <div class="forgot-password">
+                    <a href="#">Forgot password?</a>
+                </div>
+            </div>
+
+            <button type="submit">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+
+        <!-- <div class="social-login">
+            <p>Or login with</p>
+            <div class="social-icons">
+                <a href="#" class="facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="google"><i class="fab fa-google"></i></a>
+                <a href="#" class="twitter"><i class="fab fa-twitter"></i></a>
+            </div>
+        </div> -->
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+            <button onclick="this.parentElement.style.display='none'" class="close-btn" style="font-size: 1rem; right: 5px; top: 5px;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script>
+        // Form validation
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            let valid = true;
+            
+            // Username validation
+            const username = document.getElementById('username');
+            const usernameError = document.getElementById('username-error');
+            if (username.value.trim() === '') {
+                usernameError.style.display = 'block';
+                username.style.borderColor = 'var(--error)';
+                valid = false;
+            } else {
+                usernameError.style.display = 'none';
+                username.style.borderColor = '';
+            }
+
+            // Password validation
+            const password = document.getElementById('password');
+            const passwordError = document.getElementById('password-error');
+            if (password.value.trim() === '') {
+                passwordError.style.display = 'block';
+                password.style.borderColor = 'var(--error)';
+                valid = false;
+            } else {
+                passwordError.style.display = 'none';
+                password.style.borderColor = '';
+            }
+
+            if (!valid) {
+                e.preventDefault();
+            }
+        });
+
+        // Close button functionality
+        document.querySelector('.close-btn').addEventListener('click', function() {
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

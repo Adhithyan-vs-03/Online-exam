@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Biology Question - Admin Panel</title>
+    <style>
+        /* --- Global Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* --- Header Section --- */
+        .header {
+            background: linear-gradient(135deg, #1d976c 0%, #93f9b9 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header h1 i {
+            font-size: 2.2rem;
+        }
+
+        /* --- Main Content --- */
+        .content {
+            padding: 30px;
+        }
+
+        /* --- Form Styles --- */
+        .edit-form {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #e1e7ef;
+        }
+
+        .form-section h3 {
+            color: #1d3557;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1d976c;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            color: #1d976c;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e7ef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1d976c;
+            box-shadow: 0 0 0 3px rgba(29, 151, 108, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        /* --- Options Section --- */
+        .options-container {
+            background: #fff;
+            border: 1px solid #e1e7ef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #ddd;
+        }
+
+        .option-row.correct {
+            background: #e8f5e9;
+            border-left-color: #28a745;
+        }
+
+        .option-checkbox {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
+        .option-label {
+            font-weight: 600;
+            min-width: 40px;
+            color: #2c3e50;
+        }
+
+        /* --- File Upload --- */
+        .file-upload {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .file-preview {
+            max-width: 200px;
+            border-radius: 8px;
+            border: 2px solid #e1e7ef;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .current-file {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        /* --- Button Styles --- */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e1e7ef;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1d976c 0%, #93f9b9 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(29, 151, 108, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* --- Dynamic Fields --- */
+        .dynamic-field {
+            display: none;
+        }
+
+        .dynamic-field.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Alert Messages --- */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .option-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .form-section {
+                padding: 15px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Header Section -->
+    <div class="header">
+        <h1><i class="fas fa-edit"></i> Edit Biology Question</h1>
+        <p>Question ID: {{ question.id }} | Last Updated: {{ question.updated_at|date:"F j, Y, g:i a" }}</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        {% if messages %}
+        <div class="alert alert-{% if messages.tags %}{{ messages.tags }}{% else %}info{% endif %}">
+            <i class="fas fa-info-circle"></i>
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="edit-form">
+            {% csrf_token %}
+            
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="chapter"><i class="fas fa-book"></i> Chapter</label>
+                        <input type="text" id="chapter" name="chapter" class="form-control" 
+                               value="{{ question.chapter }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="topic"><i class="fas fa-tag"></i> Topic</label>
+                        <input type="text" id="topic" name="topic" class="form-control" 
+                               value="{{ question.topic }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="question_type"><i class="fas fa-question-circle"></i> Question Type</label>
+                        <select id="question_type" name="question_type" class="form-control" onchange="toggleFields()" required>
+                            <option value="objective" {% if question.question_type == "objective" %}selected{% endif %}>Objective (MCQ)</option>
+                            <option value="descriptive" {% if question.question_type == "descriptive" %}selected{% endif %}>Descriptive</option>
+                            <option value="match_following" {% if question.question_type == "match_following" %}selected{% endif %}>Match Following</option>
+                            <option value="fill_in_the_blanks" {% if question.question_type == "fill_in_the_blanks" %}selected{% endif %}>Fill in the Blanks</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question & Answer Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-question"></i> Question & Answer</h3>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="question"><i class="fas fa-pen"></i> Question Text</label>
+                        <textarea id="question" name="question" class="form-control" rows="3" required>{{ question.question }}</textarea>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="answer"><i class="fas fa-check-circle"></i> Answer</label>
+                        <textarea id="answer" name="answer" class="form-control" rows="3" required>{{ question.answer }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Biology Specific Fields -->
+            <!-- <div class="form-section">
+                <h3><i class="fas fa-dna"></i> Biology Specific</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="formula"><i class="fas fa-square-root-alt"></i> Formula (if any)</label>
+                        <input type="text" id="formula" name="formula" class="form-control" 
+                               value="{{ question.formula|default:'' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="diagram_reference"><i class="fas fa-image"></i> Diagram Reference</label>
+                        <input type="text" id="diagram_reference" name="diagram_reference" class="form-control" 
+                               value="{{ question.diagram_reference|default:'' }}">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="diagram_image"><i class="fas fa-upload"></i> Diagram Image</label>
+                        
+                        {% if question.diagram_image %}
+                        <div class="current-file">
+                            <i class="fas fa-image" style="color: #1d976c;"></i>
+                            <span>Current: {{ question.diagram_image.name|default:"No image" }}</span>
+                            {% if question.diagram_image.url %}
+                            <a href="{{ question.diagram_image.url }}" target="_blank" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        
+                    </div>
+                </div>
+            </div> -->
+
+            <!-- Objective Options Section -->
+            <div class="form-section dynamic-field" id="objectiveFields">
+                <h3><i class="fas fa-list-ol"></i> Multiple Choice Options</h3>
+                <div class="options-container">
+                    <div class="form-group">
+                        <label><i class="fas fa-check-double"></i> Select Correct Options:</label>
+                    </div>
+                    
+                    <div class="option-row {% if '1' in correct_options or 1 in correct_options %}correct{% endif %}">
+                        <input type="checkbox" name="correct_options[]" value="1" class="option-checkbox"
+                               {% if '1' in correct_options or 1 in correct_options %}checked{% endif %}>
+                        <span class="option-label">A:</span>
+                        <input type="text" name="option1" class="form-control" placeholder="Option 1"
+                               value="{{ question.option1|default:'' }}">
+                    </div>
+                    
+                    <div class="option-row {% if '2' in correct_options or 2 in correct_options %}correct{% endif %}">
+                        <input type="checkbox" name="correct_options[]" value="2" class="option-checkbox"
+                               {% if '2' in correct_options or 2 in correct_options %}checked{% endif %}>
+                        <span class="option-label">B:</span>
+                        <input type="text" name="option2" class="form-control" placeholder="Option 2"
+                               value="{{ question.option2|default:'' }}">
+                    </div>
+                    
+                    <div class="option-row {% if '3' in correct_options or 3 in correct_options %}correct{% endif %}">
+                        <input type="checkbox" name="correct_options[]" value="3" class="option-checkbox"
+                               {% if '3' in correct_options or 3 in correct_options %}checked{% endif %}>
+                        <span class="option-label">C:</span>
+                        <input type="text" name="option3" class="form-control" placeholder="Option 3"
+                               value="{{ question.option3|default:'' }}">
+                    </div>
+                    
+                    <div class="option-row {% if '4' in correct_options or 4 in correct_options %}correct{% endif %}">
+                        <input type="checkbox" name="correct_options[]" value="4" class="option-checkbox"
+                               {% if '4' in correct_options or 4 in correct_options %}checked{% endif %}>
+                        <span class="option-label">D:</span>
+                        <input type="text" name="option4" class="form-control" placeholder="Option 4"
+                               value="{{ question.option4|default:'' }}">
+                    </div>
+                    
+                    <div class="option-row {% if '5' in correct_options or 5 in correct_options %}correct{% endif %}">
+                        <input type="checkbox" name="correct_options[]" value="5" class="option-checkbox"
+                               {% if '5' in correct_options or 5 in correct_options %}checked{% endif %}>
+                        <span class="option-label">E:</span>
+                        <input type="text" name="option5" class="form-control" placeholder="Option 5 (Optional)"
+                               value="{{ question.option5|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Match Following Fields -->
+            <div class="form-section dynamic-field" id="matchFields">
+                <h3><i class="fas fa-random"></i> Match Following Details</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="match_items"><i class="fas fa-list"></i> Match Items (comma-separated)</label>
+                        <textarea id="match_items" name="match_items" class="form-control" rows="3">{{ question.match_items|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="match_count"><i class="fas fa-hashtag"></i> Match Count</label>
+                        <input type="number" id="match_count" name="match_count" class="form-control" 
+                               value="{{ question.match_count|default:'4' }}" min="2" max="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fill in Blanks Fields -->
+            <div class="form-section dynamic-field" id="fillFields">
+                <h3><i class="fas fa-edit"></i> Fill in Blanks Details</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="blank_positions"><i class="fas fa-map-marker-alt"></i> Blank Positions</label>
+                        <textarea id="blank_positions" name="blank_positions" class="form-control" rows="3">{{ question.blank_positions|default:'' }}</textarea>
+                        <small class="text-muted">Describe where blanks should appear in the question</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="blank_count"><i class="fas fa-hashtag"></i> Blank Count</label>
+                        <input type="number" id="blank_count" name="blank_count" class="form-control" 
+                               value="{{ question.blank_count|default:'1' }}" min="1" max="10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Button Group -->
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Question
+                </button>
+                
+                
+                
+                <!-- <a href="{% url 'delete_biology_question' question.id %}" 
+                   class="btn btn-danger" 
+                   onclick="return confirm('Are you sure you want to delete this question?')">
+                    <i class="fas fa-trash"></i> Delete Question
+                </a> -->
+            </div>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Biology Question Editor &copy; {% now "Y" %}</p>
+        <p>Created: {{ question.created_at|date:"F j, Y" }} | Last Updated: {{ question.updated_at|date:"F j, Y, g:i a" }}</p>
+    </div>
+</div>
+
+<script>
+    // Initialize field visibility based on current question type
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleFields();
+    });
+
+    function toggleFields() {
+        const questionType = document.getElementById('question_type').value;
+        
+        // Hide all dynamic fields
+        document.getElementById('objectiveFields').classList.remove('active');
+        document.getElementById('matchFields').classList.remove('active');
+        document.getElementById('fillFields').classList.remove('active');
+        
+        // Show relevant fields based on question type
+        if (questionType === 'objective') {
+            document.getElementById('objectiveFields').classList.add('active');
+        } else if (questionType === 'match_following') {
+            document.getElementById('matchFields').classList.add('active');
+        } else if (questionType === 'fill_in_the_blanks') {
+            document.getElementById('fillFields').classList.add('active');
+        }
+    }
+
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+            preview.src = '';
+        }
+    }
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const questionType = document.getElementById('question_type').value;
+        const questionText = document.getElementById('question').value.trim();
+        const answerText = document.getElementById('answer').value.trim();
+        
+        if (!questionText) {
+            alert('Please enter a question.');
+            e.preventDefault();
+            return false;
+        }
+        
+        if (!answerText) {
+            alert('Please enter an answer.');
+            e.preventDefault();
+            return false;
+        }
+        
+        if (questionType === 'objective') {
+            const checkboxes = document.querySelectorAll('input[name="correct_options[]"]:checked');
+            if (checkboxes.length === 0) {
+                alert('Please select at least one correct option for objective questions.');
+                e.preventDefault();
+                return false;
+            }
+        }
+        
+        return true;
+    });
+
+    // Auto-expand textareas
+    document.querySelectorAll('textarea').forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    });
+</script>
+
+</body>
+</html>

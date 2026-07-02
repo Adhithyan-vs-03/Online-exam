@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+  <div class="flex h-screen overflow-hidden">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-900 text-white hidden md:flex flex-col">
+      <div class="text-2xl font-bold text-center py-6 border-b border-gray-700">Exam Admin</div>
+      <nav class="flex flex-col p-4 space-y-2">
+        <a href="#" class="hover:bg-gray-700 p-2 rounded">📊 Dashboard</a>
+        <a href="#" class="hover:bg-gray-700 p-2 rounded">👨‍🎓 Students</a>
+        <a href="#" class="hover:bg-gray-700 p-2 rounded">👩‍🏫 Staff</a>
+        <a href="#" class="hover:bg-gray-700 p-2 rounded">📝 Exams</a>
+        <a href="#" class="hover:bg-gray-700 p-2 rounded">📚 Questions</a>
+        <a href="#" class="hover:bg-gray-700 p-2 rounded">📈 Results</a>
+        <a href="#" class="hover:bg-gray-700 p-2 rounded">🔔 Notifications</a>
+        <a href="#" class="hover:bg-gray-700 p-2 rounded">⚙️ Settings</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-y-auto">
+      <!-- Topbar -->
+      <header class="bg-white shadow flex justify-between items-center px-6 py-4">
+        <h2 class="text-2xl font-semibold">Dashboard</h2>
+        <div class="flex items-center space-x-4">
+          <button class="relative">
+            🔔
+            <span class="absolute -top-1 -right-2 bg-red-500 text-xs text-white rounded-full px-1">3</span>
+          </button>
+          <div class="relative">
+            <button class="flex items-center space-x-2">
+              <span>Admin</span>
+              <img src="https://i.pravatar.cc/30" class="w-8 h-8 rounded-full" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <main class="p-6 space-y-6">
+        <!-- Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div class="bg-white shadow rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">Students</h3>
+              <span class="text-2xl text-blue-500">👨‍🎓</span>
+            </div>
+            <p class="text-3xl font-bold mt-2">850</p>
+          </div>
+          <div class="bg-white shadow rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">Exams</h3>
+              <span class="text-2xl text-green-500">📝</span>
+            </div>
+            <p class="text-3xl font-bold mt-2">120</p>
+          </div>
+          <div class="bg-white shadow rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">Results</h3>
+              <span class="text-2xl text-purple-500">📈</span>
+            </div>
+            <p class="text-3xl font-bold mt-2">400</p>
+          </div>
+          <div class="bg-white shadow rounded-xl p-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg font-semibold">Upcoming</h3>
+              <span class="text-2xl text-red-500">📅</span>
+            </div>
+            <p class="text-3xl font-bold mt-2">8</p>
+          </div>
+        </div>
+
+        <!-- Charts (Placeholder) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white p-4 shadow rounded-xl h-64">
+            <h4 class="font-semibold mb-2">Exam Schedule</h4>
+            <div class="h-full flex items-center justify-center text-gray-400">[Chart Placeholder]</div>
+          </div>
+          <div class="bg-white p-4 shadow rounded-xl h-64">
+            <h4 class="font-semibold mb-2">Recent Performance</h4>
+            <div class="h-full flex items-center justify-center text-gray-400">[Chart Placeholder]</div>
+          </div>
+        </div>
+
+        <!-- Tabbed Section -->
+        <div class="bg-white p-4 shadow rounded-xl">
+          <h4 class="font-semibold mb-4">Recent Activities</h4>
+          <ul class="divide-y divide-gray-200">
+            <li class="py-2">✅ Created a new exam for Class 10 on 10-Apr</li>
+            <li class="py-2">📥 Imported 150 student records on 09-Apr</li>
+            <li class="py-2">📢 Sent notifications about results release</li>
+            <li class="py-2">📄 Uploaded new question papers</li>
+          </ul>
+        </div>
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

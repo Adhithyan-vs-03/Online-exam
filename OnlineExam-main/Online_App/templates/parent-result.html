@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent - Student Exam Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .result-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .result-footer .total {
+            font-weight: bold;
+        }
+
+        .result-footer .percentage {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Parent - Student Exam Results</h1>
+
+        <!-- Parent Form to Enter Student Details -->
+        <h2>Enter Student Details</h2>
+        <form action="{% url 'Parent_result' %}" method="POST">
+            {% csrf_token %}
+            <label for="student_name">Student Name:</label>
+            <input type="text" id="student_name" name="student_name" required>
+
+            <label for="student_email">Student Email:</label>
+            <input type="email" id="student_email" name="student_email" required>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        {% if student %}
+            <h2>Student Exam Results</h2>
+            <p><strong>Name:</strong> {{ student.name }}</p>
+            <p><strong>Course:</strong> {{ student.course }}</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Physics</td>
+                        <td>{{ student.physics_marks }}</td>
+                    </tr>
+                    <tr>
+                        <td>Chemistry</td>
+                        <td>{{ student.chemistry_marks }}</td>
+                    </tr>
+                    <tr>
+                        <td>Biology</td>
+                        <td>{{ student.biology_marks }}</td>
+                    </tr>
+                    <tr>
+                        <td>Mathematics</td>
+                        <td>{{ student.mathematics_marks }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="result-footer">
+                <p><strong>Total Marks:</strong> {{ student.total_marks }}</p>
+                <p><strong>Percentage:</strong> {{ student.percentage }}%</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

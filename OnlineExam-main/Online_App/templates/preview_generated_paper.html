@@ -1,0 +1,66 @@
+<!-- templates/preview_generated_paper.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Preview: {{ paper.exam_name }}</h1>
+        <div class="space-x-2">
+            <a href="{% url 'edit_generated_paper' paper.id %}" 
+               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-edit mr-2"></i>Edit
+            </a>
+            <a href="{% url 'teacher_generated_papers' %}" 
+               class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+                <i class="fas fa-arrow-left mr-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <h2 class="text-xl font-bold mb-4">Paper Details</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <strong>School:</strong> {{ paper.school_name }}
+            </div>
+            <div>
+                <strong>Class:</strong> {{ paper.class_name }}
+            </div>
+            <div>
+                <strong>Total Marks:</strong> {{ paper.total_marks }}
+            </div>
+            <div>
+                <strong>Time:</strong> {{ paper.time_duration }}
+            </div>
+            <div>
+                <strong>Questions:</strong> {{ paper.total_questions }}
+            </div>
+            <div>
+                <strong>Status:</strong>
+                {% if paper.is_published %}
+                <span class="text-green-600 font-bold">Published</span>
+                {% else %}
+                <span class="text-yellow-600 font-bold">Draft</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Show Paper Content -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Paper Content</h2>
+        {% if paper.paper_html %}
+        <div class="border p-4 rounded bg-gray-50">
+            {{ paper.paper_html|safe }}
+        </div>
+        {% else %}
+        <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-file-alt text-4xl mb-4"></i>
+            <p>No content preview available</p>
+            <p class="text-sm">Edit the paper to generate preview</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

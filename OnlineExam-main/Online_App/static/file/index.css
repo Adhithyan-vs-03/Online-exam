@@ -1,0 +1,255 @@
+
+html{
+    scroll-behavior: smooth;
+}
+body {
+    font-family: Arial, sans-serif;
+    /* background-image: url("/static/images/student.webp"); */
+    background: linear-gradient( #1d6e2b,#5dd2f3,#1d6e2b);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-size: 100%;
+    margin-left: 2%;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #ddd;
+}
+.title {
+    flex-grow: 1;
+    margin-left: 30%;
+    text-shadow: 5px 5px 5px white;
+}
+
+.imge{
+    margin-top: -8%;
+}
+.imge img{
+    border-radius: 15px;
+}
+
+.hai {
+    width: 35px;
+    height: 5px;
+    background-color: black;
+    margin: 6px 0;
+}
+.den {
+    position: fixed;
+    right: 5%;
+    top: 7%;
+    margin-bottom: 30%; 
+    cursor: pointer;
+    color: #f0e2e2;
+}
+a button {
+    background-color: #024e59;
+    color: #f0e2e2;
+    font-size: 20px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px; 
+}
+
+a button:hover {
+    background-color: #013740;
+}
+
+.buttons-container {
+    position: absolute;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px; 
+    margin-left: 70%;
+}
+
+.hidden{
+    display: none;
+    position: fixed;
+    background-color: #024e59;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    top: 14%;
+    right:5%;
+    border-radius: 12px;
+    opacity: 0.8;
+}
+
+.hidden button{
+    color: rgb(255, 255, 255);
+    display: block;
+    padding: 5px 0;
+    border: none;
+    background-color:#024e59;
+    font-size: large;
+    border-radius: 5px;
+    padding: 5%;
+}
+.hidden button a{
+    color: #ffffff;
+}
+
+.hidden button:hover{
+    color: white;
+    background-color: #022f36;
+}
+.hidden button a:hover{
+    color: white;
+    background-color: #022f36;
+}
+.popup img{
+    width: 50%;
+    height: 25%;
+    border-radius: 5%;
+}
+
+.overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none; 
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10%;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    color: #ddd;
+}
+
+.close-popup{
+    position: fixed;
+    background-color: #5dd2f3;
+    color: rgb(0, 0, 0);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-top: 15px;
+    cursor: pointer;
+    top: 0%;
+    right: 20%;
+}
+
+.close-popup:hover{
+    background-color: #25b4a1;
+}
+
+.contact img{
+    width: 3%;
+    height: 3%;
+}
+.contact{
+    display:flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+}
+.contact-btn a{
+    text-decoration: none;
+    color: black;
+}
+
+.media a img{
+    gap: 50px;
+    width: 3%;
+    height: 3%;
+    margin: 20px;
+    
+}
+.media{
+    display:block;
+    text-align: center;
+}
+.gallery{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    overflow: hidden;
+}
+.gallery img{
+    width: 80%;
+    height: 100%;
+    border-radius: 8px;
+    transition: transform 0.2s;
+
+}
+.gallery img:hover{
+    transform: scale(1.1);
+}
+.img-detail h1:hover{
+    transform: scale(1.1);
+}
+.img-detail h1{
+    transition:transform 0.2s;
+}
+.cr{
+    font-style: oblique;
+}
+.img-detail{
+    width: 300px;
+    margin: 10px 0;
+    padding-right: 15%;
+    align-self: center;
+}
+
+.img-det{
+    display: flex;
+    align-content: center;
+    gap: 0;
+}
+.next-pre{
+    width: 90%;
+    height: 10%;
+    display: flex;
+    justify-content: center;
+    gap: 90%;
+    position:relative;
+    bottom: 10px;
+    left: 5%;
+}
+.next-pre button{
+    border-radius: 20%;
+    transition:transform 0.2s;
+}
+.next-pre button:hover{
+    transform: scale(1.2);
+    background-color: black;
+    color: white;
+}   
+.down-arrow{
+    font-size: 500%;
+    position: absolute;
+    right: 10%;
+    top: 60%;
+    animation-name: down-arrow;
+    animation-duration: 1s;
+    animation-iteration-count: 2;
+}
+@keyframes down-arrow{
+    from{top: 40%;}
+    to{top: 60%;}
+}

@@ -1,0 +1,135 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header Styling */
+.header-top8 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #61bbe8;
+    padding: 15px;
+    color: white;
+}
+
+.logo8 {
+    height: 50px;
+}
+
+.header-info8 {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Adds spacing between buttons */
+}
+
+.welcome8 {
+    font-size: 18px;
+}
+
+/* Buttons Styling */
+.reg8, #backButton {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.reg8:hover {
+    background-color: #cc0000;
+}
+
+#backButton {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+#backButton:hover {
+    background-color: #c82333 !important;
+}
+
+/* Table Styling */
+h2 {
+    color: #333;
+    margin-top: 20px;
+}
+
+.table-container {
+    width: 80%;
+    margin: auto;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #61bbe8;
+    color: white;
+    font-size: 16px;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #bde0f5;
+    transition: background-color 0.3s ease-in-out;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .header-top8 {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .header-info8 {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .table-container {
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    th, td {
+        font-size: 14px;
+        padding: 10px;
+    }
+}

@@ -1,0 +1,604 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* REMOVE problematic animations that might cause visibility issues */
+    .fade-in-up {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+    
+    /* Ensure all elements are visible by default */
+    * {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Simple visible styles - no complex animations that might fail */
+    .glass-effect {
+        background: white;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+    }
+    
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-gradient:hover {
+        opacity: 0.9;
+    }
+    
+    .score-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .grade-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    
+    .badge-success { background: #10b981; color: white; }
+    .badge-warning { background: #f59e0b; color: white; }
+    .badge-danger { background: #ef4444; color: white; }
+    
+    /* Ensure all content is visible */
+    #answerKeyDisplay {
+        display: none; /* Hidden by default, shown by JS */
+    }
+    
+    #answerKeyDisplay.visible {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Progress bar */
+    .progress-container {
+        width: 100%;
+        background: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+        height: 10px;
+        margin-top: 8px;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Include jsPDF library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Header Section - SIMPLIFIED -->
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">📋 Exam Evaluation Details</h1>
+                <div class="flex flex-wrap items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-book text-blue-500"></i>
+                        <span class="text-lg font-semibold text-gray-700">{{ submission.exam_title }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-calendar text-gray-400"></i>
+                        <span class="text-gray-600">Evaluated: {{ submission.evaluated_at|date:"F j, Y, g:i a" }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-user text-gray-400"></i>
+                        <span class="text-gray-600">By: {{ submission.evaluated_by.get_full_name|default:submission.evaluated_by.username }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <a href="{% url 'student_evaluated_exams' %}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center gap-2">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to List
+                </a>
+                {% if submission.marked_answer_sheet and submission.marked_answer_sheet.url %}
+                <a href="{{ submission.marked_answer_sheet.url }}" download class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2">
+                    <i class="fas fa-download"></i>
+                    Download Answer Key
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Score Cards - SIMPLIFIED -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- Score Card -->
+        <div class="glass-effect p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p class="text-sm text-gray-500">Your Score</p>
+                    <h3 class="text-2xl font-bold text-gray-900">{{ submission.obtained_marks }}/{{ submission.total_marks }}</h3>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <i class="fas fa-chart-bar text-blue-600"></i>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-600">Progress</span>
+                    <span class="font-bold text-blue-600">{{ submission.percentage|floatformat:1 }}%</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: {{ submission.percentage }}%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Percentage Card -->
+        <div class="glass-effect p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p class="text-sm text-gray-500">Percentage</p>
+                    <h3 class="text-2xl font-bold text-gray-900">{{ submission.percentage|floatformat:1 }}%</h3>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                    <i class="fas fa-percent text-green-600"></i>
+                </div>
+            </div>
+            <div>
+                <span class="grade-badge 
+                    {% if submission.percentage >= 90 %}badge-success
+                    {% elif submission.percentage >= 70 %}badge-warning
+                    {% else %}badge-danger{% endif %}">
+                    {% if submission.percentage >= 90 %}Excellent
+                    {% elif submission.percentage >= 80 %}Very Good
+                    {% elif submission.percentage >= 70 %}Good
+                    {% elif submission.percentage >= 60 %}Satisfactory
+                    {% elif submission.percentage >= 40 %}Needs Improvement
+                    {% else %}Fail{% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <!-- Grade Card -->
+        <div class="glass-effect p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p class="text-sm text-gray-500">Final Grade</p>
+                    <h3 class="text-2xl font-bold text-gray-900">{{ submission.grade }}</h3>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                    <i class="fas fa-award text-yellow-600"></i>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600">Overall performance</p>
+        </div>
+        
+        <!-- Status Card -->
+        <div class="glass-effect p-6">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p class="text-sm text-gray-500">Status</p>
+                    <h3 class="text-2xl font-bold text-gray-900">Evaluated</h3>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                    <i class="fas fa-check-circle text-purple-600"></i>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600">Completed {{ submission.evaluated_at|date:"M d, Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left: Main Content -->
+        <div class="lg:col-span-2">
+            <!-- Answer Key Section -->
+            <div class="glass-effect p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-yellow-500 flex items-center justify-center">
+                        <i class="fas fa-key text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Answer Key</h2>
+                        <p class="text-gray-600">View and download all questions with correct answers</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="toggleAnswerKey()" class="btn-gradient">
+                            <i class="fas fa-eye"></i>
+                            <span id="viewBtnText">View Answer Key</span>
+                        </button>
+                        
+                        {% if submission.marked_answer_sheet and submission.marked_answer_sheet.url %}
+                        <a href="{{ submission.marked_answer_sheet.url }}" download class="btn-gradient" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="fas fa-download"></i>
+                            Download PDF
+                        </a>
+                        {% elif has_answer_key_pdf %}
+                        <a href="{% url 'download_answer_key_pdf' submission.id %}" class="btn-gradient" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="fas fa-download"></i>
+                            Download PDF
+                        </a>
+                        {% else %}
+                        <button onclick="generateAndDownloadPDF()" class="btn-gradient" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <i class="fas fa-file-pdf"></i>
+                            Generate Questions PDF
+                        </button>
+                        {% endif %}
+                        
+                        <button onclick="printAnswerKey()" class="btn-gradient" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                            <i class="fas fa-print"></i>
+                            Print
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Answer Key Display -->
+                <div id="answerKeyDisplay" class="mt-6" style="display: none;">
+                    <div class="bg-white rounded-lg border border-gray-200 p-6" id="pdfContent">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">📝 Questions with Answers</h3>
+                        
+                        {% if question_marks %}
+                        <div class="space-y-6">
+                            {% for question, data in question_marks.items %}
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <!-- Question Header -->
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                            <span class="font-bold text-blue-800">{{ forloop.counter }}</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-bold text-gray-900">Question {{ forloop.counter }}</h4>
+                                            <p class="text-sm text-gray-500">Marks: {{ data.marks|default:0 }}/{{ data.max_marks|default:1 }}</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 rounded-full text-sm font-medium 
+                                        {% if data.marks == data.max_marks %}bg-green-100 text-green-800
+                                        {% elif data.marks > 0 %}bg-yellow-100 text-yellow-800
+                                        {% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ data.marks|default:0 }}/{{ data.max_marks|default:1 }}
+                                    </span>
+                                </div>
+
+                                <!-- Question -->
+                                <div class="mb-4">
+                                    <h5 class="font-medium text-gray-700 mb-2">Question:</h5>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <p class="text-gray-800">{{ data.question|default:question|truncatechars:300 }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Answers -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <!-- Correct Answer -->
+                                    <div>
+                                        <h6 class="font-medium text-green-700 mb-2">Correct Answer:</h6>
+                                        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                            <p class="text-gray-800">
+                                                {% if data.correct_answer %}
+                                                    {{ data.correct_answer }}
+                                                {% else %}
+                                                    <span class="text-gray-500">Not provided</span>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Student's Answer -->
+                                    <div>
+                                        <h6 class="font-medium text-red-700 mb-2">Your Answer:</h6>
+                                        <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                                            <p class="text-gray-800">
+                                                {% if data.student_answer %}
+                                                    {{ data.student_answer }}
+                                                {% else %}
+                                                    <span class="text-gray-500">Not attempted</span>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="mb-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                        {% if data.student_answer %}
+                                            {% if data.student_answer == data.correct_answer %}bg-green-100 text-green-800
+                                            {% else %}bg-red-100 text-red-800{% endif %}
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {% if data.student_answer %}
+                                            {% if data.student_answer == data.correct_answer %}
+                                            <i class="fas fa-check-circle mr-2"></i> Correct
+                                            {% else %}
+                                            <i class="fas fa-times-circle mr-2"></i> Incorrect
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fas fa-minus-circle mr-2"></i> Not Attempted
+                                        {% endif %}
+                                    </span>
+                                </div>
+
+                                <!-- Feedback -->
+                                {% if data.feedback %}
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <h6 class="font-medium text-blue-700 mb-2">Teacher's Feedback:</h6>
+                                    <div class="bg-blue-50 p-4 rounded-lg">
+                                        <p class="text-gray-700">{{ data.feedback }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-blue-700">
+                                        <i class="fas fa-info-circle"></i>
+                                        Showing {{ question_marks|length }} questions
+                                    </p>
+                                </div>
+                                <div class="text-blue-800 font-bold">
+                                    Total: {{ submission.obtained_marks }}/{{ submission.total_marks }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-info-circle text-gray-400 text-4xl mb-4"></i>
+                            <p class="text-gray-600">No answer key data available</p>
+                            <p class="text-gray-500">The answer key will be available soon.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Preview -->
+                {% if question_marks %}
+                <div class="mt-6">
+                    <h4 class="font-bold text-gray-800 mb-4">Quick Preview</h4>
+                    <div class="space-y-3">
+                        {% for question, data in question_marks.items|slice:":3" %}
+                        <div class="bg-white p-4 rounded-lg border border-gray-200">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="font-medium text-gray-600">Q{{ forloop.counter }}:</span>
+                                        <span class="text-sm text-gray-700">{{ data.question|default:question|truncatechars:60 }}</span>
+                                    </div>
+                                    <div class="text-sm">
+                                        <p class="text-gray-600">
+                                            <span class="font-medium">Correct:</span> {{ data.correct_answer|truncatechars:30|default:"N/A" }}
+                                        </p>
+                                        <p class="text-gray-500">
+                                            <span class="font-medium">Your Answer:</span> {{ data.student_answer|truncatechars:30|default:"Not attempted" }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded 
+                                    {% if data.student_answer == data.correct_answer %}bg-green-100 text-green-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {% if data.student_answer == data.correct_answer %}✓ Correct
+                                    {% else %}✗ Incorrect{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if question_marks|length > 3 %}
+                        <p class="text-sm text-gray-500 text-center mt-2">
+                            ... and {{ question_marks|length|add:"-3" }} more questions.
+                            <button onclick="toggleAnswerKey()" class="text-blue-600 hover:underline font-medium ml-1">
+                                View all →
+                            </button>
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right: Sidebar -->
+        <div class="lg:col-span-1">
+            <!-- Quick Actions -->
+            <!-- <div class="glass-effect p-6 mb-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
+                
+                {% if submission.marked_answer_sheet and submission.marked_answer_sheet.url %}
+                <div class="space-y-3">
+                    <button onclick="toggleAnswerKey()" class="w-full text-left bg-blue-50 text-blue-800 p-4 rounded-lg hover:bg-blue-100 flex items-center gap-3">
+                        <i class="fas fa-eye text-blue-500"></i>
+                        <div>
+                            <p class="font-medium">View Questions</p>
+                            <p class="text-sm text-blue-600">See all questions with answers</p>
+                        </div>
+                    </button>
+                    
+                    <a href="{{ submission.marked_answer_sheet.url }}" download class="block w-full text-left bg-green-50 text-green-800 p-4 rounded-lg hover:bg-green-100 flex items-center gap-3">
+                        <i class="fas fa-download text-green-500"></i>
+                        <div>
+                            <p class="font-medium">Download PDF</p>
+                            <p class="text-sm text-green-600">Save answer key as PDF</p>
+                        </div>
+                    </a>
+                    
+                    <button onclick="printAnswerKey()" class="w-full text-left bg-purple-50 text-purple-800 p-4 rounded-lg hover:bg-purple-100 flex items-center gap-3">
+                        <i class="fas fa-print text-purple-500"></i>
+                        <div>
+                            <p class="font-medium">Print</p>
+                            <p class="text-sm text-purple-600">Print answer key</p>
+                        </div>
+                    </button>
+                </div>
+                {% else %}
+                <div class="text-center py-6">
+                    <i class="fas fa-file-pdf text-gray-300 text-4xl mb-3"></i>
+                    <p class="text-gray-600 mb-1">PDF Not Available</p>
+                    <p class="text-gray-500 text-sm">The answer key PDF will be uploaded by your teacher soon.</p>
+                </div>
+                {% endif %}
+            </div> -->
+
+            <!-- Evaluation Details -->
+            <div class="glass-effect p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Evaluation Details</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Evaluated by</span>
+                        <span class="font-medium">{{ submission.evaluated_by.get_full_name|default:submission.evaluated_by.username }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Evaluation Date</span>
+                        <span class="font-medium">{{ submission.evaluated_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Status</span>
+                        <span class="font-medium text-green-600">Evaluated</span>
+                    </div>
+                    <!-- <div class="flex justify-between items-center py-2">
+                        <span class="text-gray-600">Time Taken</span>
+                        <span class="font-medium">{{ submission.time_taken|default:"N/A" }}</span>
+                    </div> -->
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="glass-effect p-6 mt-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Navigation</h3>
+                <div class="space-y-3">
+                    <!-- <a href="{% url 'student_exam_results' %}" class="block w-full text-left bg-gray-50 text-gray-800 p-4 rounded-lg hover:bg-gray-100 flex items-center gap-3">
+                        <i class="fas fa-list text-gray-500"></i>
+                        <div>
+                            <p class="font-medium">View All Results</p>
+                            <p class="text-sm text-gray-500">See your previous exam results</p>
+                        </div>
+                    </a> -->
+                    
+                    <a href="{% url 'student_available_exams' %}" class="block w-full text-left bg-gray-50 text-gray-800 p-4 rounded-lg hover:bg-gray-100 flex items-center gap-3">
+                        <i class="fas fa-play-circle text-gray-500"></i>
+                        <div>
+                            <p class="font-medium">Take Another Exam</p>
+                            <p class="text-sm text-gray-500">Start a new exam attempt</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SIMPLIFIED JavaScript -->
+<script>
+    // Toggle Answer Key
+    function toggleAnswerKey() {
+        const answerKeyDisplay = document.getElementById('answerKeyDisplay');
+        const viewBtnText = document.getElementById('viewBtnText');
+        
+        if (answerKeyDisplay.style.display === 'none' || answerKeyDisplay.style.display === '') {
+            answerKeyDisplay.style.display = 'block';
+            viewBtnText.textContent = 'Hide Answer Key';
+            
+            // Scroll to answer key
+            answerKeyDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            answerKeyDisplay.style.display = 'none';
+            viewBtnText.textContent = 'View Answer Key';
+        }
+    }
+    
+    // Generate PDF
+    async function generateAndDownloadPDF() {
+        const downloadBtn = event.currentTarget;
+        const originalText = downloadBtn.innerHTML;
+        
+        // Show loading
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating...';
+        downloadBtn.disabled = true;
+        
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            const element = document.getElementById('pdfContent');
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            });
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.9);
+            const imgWidth = 190;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            // Add header
+            pdf.setFontSize(16);
+            pdf.text("Answer Key - {{ submission.exam_title }}", 105, 15, { align: 'center' });
+            
+            // Add student info
+            pdf.setFontSize(10);
+            pdf.text(`Student: {{ request.user.get_full_name|default:request.user.username }}`, 20, 25);
+            pdf.text(`Score: {{ submission.obtained_marks }}/{{ submission.total_marks }} ({{ submission.percentage|floatformat:1 }}%)`, 20, 32);
+            
+            // Add image
+            pdf.addImage(imgData, 'JPEG', 10, 40, imgWidth, imgHeight);
+            
+            // Save
+            const filename = 'Answer_Key_{{ submission.id }}.pdf';
+            pdf.save(filename);
+            
+            // Show success
+            downloadBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Downloaded!';
+            setTimeout(() => {
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            downloadBtn.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i> Error!';
+            setTimeout(() => {
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }, 2000);
+        }
+    }
+    
+    // Print function
+    function printAnswerKey() {
+        window.print();
+    }
+</script>
+{% endblock %}

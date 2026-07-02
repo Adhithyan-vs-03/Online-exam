@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Question</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    <link rel="stylesheet" href="/static/file/addquestion.css">
+    {{ form.media }}  <!-- Load CKEditor scripts -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+        }
+        .header-top8 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2c3e50;
+            padding: 15px 30px;
+            color: #fff;
+        }
+        .logo8 {
+            height: 50px;
+        }
+        .header-info8 {
+            display: flex;
+            align-items: center;
+        }
+        .welcome8 {
+            margin-right: 15px;
+        }
+        .reg8 {
+            background: #e74c3c;
+            border: none;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .reg8:hover {
+            background: #c0392b;
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        button[type="submit"] {
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 10px auto;
+            transition: background 0.3s;
+        }
+        button[type="submit"]:hover {
+            background: #219150;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="header-top8">
+        <img src="/static/images/nassonline.jpg" alt="Logo" class="logo8">
+        <div class="header-info8">
+            <h3 class="welcome8">Welcome, {{ data.username }}</h3>
+            <a href="{% url 'login' %}">
+                <button class="reg8">
+                    LogOut <i class="fa fa-sign-out"></i>
+                </button>
+            </a>
+        </div>
+    </div>
+    
+    <h2>Add a New Question</h2>
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <button type="submit">Save Question</button>
+    </form>
+</body>
+</html>

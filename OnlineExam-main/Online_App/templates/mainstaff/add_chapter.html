@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Chapter</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: #eef6ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            width: 420px;
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        h2 {
+            color: #0d9488;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p {
+            text-align: center;
+            color: #475569;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-top: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            background: #0d9488;
+            padding: 12px;
+            color: white;
+            margin-top: 14px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #0f766e;
+        }
+
+        .back {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            color: #1e293b;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>Add Chapter</h2>
+    <p>Subject: <b>{{ subject.name }}</b></p>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <label>Chapter Name</label>
+        <input type="text" name="chapter_name" placeholder="Enter Chapter Name" required>
+
+        <button type="submit">Save Chapter</button>
+
+        <a href="{% url 'subject_added' subject.id %}" class="back">← Back</a>
+    </form>
+</div>
+
+</body>
+</html>

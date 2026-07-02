@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nass Online Exam Platform - Smart Exam Solutions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="/static/images/nasso.jpg">
+    <style>
+        :root {
+            --primary: #0d9488;  /* Teal-600 */
+            --primary-dark: #0f766e;  /* Teal-700 */
+            --primary-light: #14b8a6;  /* Teal-500 */
+            --accent: #06b6d4;  /* Cyan-500 */
+            --dark: #111827;
+            --light: #f9fafb;
+            --text: #1f2937;
+            --gray: #6b7280;
+        }
+
+        /* Base Styles */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+            background-color: var(--light);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        a {
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn {
+            padding: 0.75rem 1.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand img:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.25rem;
+            border-radius: 0.5rem;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .navbar .btn-outline-light {
+            border: 2px solid white;
+            color: white;
+        }
+
+        .navbar .btn-outline-light:hover {
+            background-color: white;
+            color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(200, 199, 199, 0.9), rgba(15, 118, 110, 0.9)), 
+                        url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            padding: 6rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            animation: fadeInDown 1s ease;
+        }
+
+        .hero .lead {
+            font-size: 1.35rem;
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+            opacity: 0.9;
+        }
+
+        .hero .btn-lg {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            height: 100%;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Exam Carousel */
+        .exam-carousel {
+            padding: 4rem 0;
+            background-color: var(--light);
+        }
+
+        .carousel-item img {
+            height: 500px;
+            object-fit: cover;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .carousel-control-prev, .carousel-control-next {
+            width: 5%;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-dark));
+            color: white;
+        }
+
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 0 auto;
+            max-width: 800px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .testimonial-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .testimonial-text::before {
+            content: '"';
+            font-size: 5rem;
+            color: rgba(255, 255, 255, 0.1);
+            position: absolute;
+            left: -1rem;
+            top: -1.5rem;
+        }
+
+        /* Countdown */
+        .countdown {
+            padding: 4rem 0;
+            background-color: white;
+        }
+
+        .countdown-box {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            display: inline-block;
+            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.3);
+        }
+
+        #countdown {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Footer Specific Styles */
+        .footer {
+            background: linear-gradient(135deg, var(--dark), #0f766e);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/dark-stripes.png');
+            opacity: 0.05;
+            pointer-events: none;
+        }
+        
+        .footer a.hover-white:hover {
+            color: white !important;
+            text-decoration: none;
+        }
+        
+        .footer .social-links a {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .footer .social-links a:hover {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+            transform: translateY(-3px);
+        }
+        
+        .footer .list-unstyled li {
+            transition: transform 0.3s ease;
+        }
+        
+        .footer .list-unstyled li:hover {
+            transform: translateX(5px);
+        }
+        
+        .footer .newsletter .form-control {
+            background-color: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            color: white;
+        }
+        
+        .footer .newsletter .form-control::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .footer .row > div {
+                margin-bottom: 2rem;
+            }
+            
+            .footer .text-md-end {
+                text-align: center !important;
+            }
+            
+            .footer .list-inline {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.75rem;
+            }
+            
+            .hero .lead {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 4rem 0;
+            }
+            
+            .hero h1 {
+                font-size: 2.25rem;
+            }
+            
+            .carousel-item img {
+                height: 350px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero {
+                padding: 3rem 0;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            #countdown {
+                font-size: 1.75rem;
+            }
+            
+            .navbar-brand img {
+                height: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="/static/images/nassonline.jpg" alt="Nass Online Logo">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'Register' %}">REGISTER</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">SIGN IN</a>
+                    </li>
+                </ul>
+                <div class="ms-lg-3 mt-3 mt-lg-0">
+                    <a href="{% url 'login' %}" class="btn btn-outline-light">Start Your Exam</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero text-center">
+        <div class="container">
+            <h1 class="display-4">Welcome to NassOnline Exams</h1>
+            <p class="lead">Your Ultimate Online Exam Solution for Success!</p>
+            <a href="{% url 'login' %}" class="btn btn-primary btn-lg mt-3">Start Your Exam Now</a>
+            
+            <div class="row mt-5 pt-4">
+                <div class="col-lg-8 mx-auto">
+                    <div class="bg-white p-4 rounded-3 shadow-sm" style="color: var(--text);">
+                        <h3><i class="fas fa-graduation-cap text-primary me-2"></i> Unlock Your Future with Our Online Exams</h3>
+                        <p class="mb-0">Welcome to Nass Online Exams, your trusted destination for seamless and efficient online examinations. Our mission is to empower learners, job seekers, and professionals by providing them with a secure, flexible, and user-friendly platform to assess and enhance their knowledge and skills.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Why Choose NassOnline Exams?</h2>
+                <p class="lead text-muted">Experience the future of online examinations</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>Secure Platform</h4>
+                        <p>Advanced security measures to ensure fair and cheat-proof examinations with encrypted data transmission.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h4>Flexible Timing</h4>
+                        <p>Take exams at your convenience with our 24/7 available platform from anywhere in the world.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4>Instant Results</h4>
+                        <p>Get immediate scoring and detailed performance analytics to track your progress.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Exam Carousel -->
+    <section class="exam-carousel">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Our Exam Environment</h2>
+                <p class="lead text-muted">Experience our intuitive testing interface</p>
+            </div>
+            
+            <div id="examCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="/static/gallery/image1.jpg" class="d-block w-100" alt="Exam Interface">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="/static/gallery/image2.jpg" class="d-block w-100" alt="Dashboard">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="/static/gallery/image3.jpg" class="d-block w-100" alt="Results">
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#examCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#examCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container text-center">
+            <h2 class="mb-5">What Our Students Say</h2>
+            
+            <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">This platform made my certification exams completely stress-free! The interface is intuitive and the practice tests were incredibly helpful.</p>
+                            <h5 class="mt-3">- Sarah Johnson</h5>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <div class="testimonial-card">
+                            <p class="testimonial-text">As an instructor, I appreciate the robust security features and detailed analytics that help me understand my students' performance.</p>
+                            <h5 class="mt-3">- Prof. Michael Chen</h5>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Countdown -->
+    <!-- <section class="countdown text-center">
+        <div class="container">
+            <h2 class="mb-4">Next Exam Starts In</h2>
+            <div class="countdown-box">
+                <div id="countdown" class="mb-2"></div>
+                <p class="mb-0">Don't miss your chance to certify your skills!</p>
+            </div>
+            <a href="{% url 'Register' %}" class="btn btn-primary mt-4">Register Now</a>
+        </div>
+    </section> -->
+
+    <!-- Footer Section -->
+    <footer class="footer bg-dark text-white pt-5 pb-4">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Company Info -->
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <div class="footer-brand d-flex align-items-center mb-3">
+                        <!-- <img src="/static/images/nassonline.jpg" alt="Nass Online Logo" height="40" class="me-2"> -->
+                        <span class="h5 mb-0">Nass Online Exams</span>
+                    </div>
+                    <p class="text-white">Your trusted online examination platform for secure, flexible, and efficient testing solutions.</p>
+                    
+                    <div class="trust-badges mt-4">
+                        <div class="d-flex flex-wrap gap-2">
+                            <div class="badge bg-light text-dark p-2 rounded">
+                                <i class="fas fa-shield-alt me-1 text-primary"></i> Secure Platform
+                            </div>
+                            <div class="badge bg-light text-dark p-2 rounded">
+                                <i class="fas fa-clock me-1 text-primary"></i> 24/7 Availability
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-2 col-md-3 mb-4 mb-md-0">
+                    <h5 class="text-uppercase mb-4">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'Register' %}" class="text-white-50 hover-white">Register</a></li>
+                        <li class="mb-2"><a href="{% url 'login' %}" class="text-white-50 hover-white">Sign In</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 hover-white">Exams</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 hover-white">Pricing</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 hover-white">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5 class="text-uppercase mb-4">Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3 d-flex align-items-start">
+                            <i class="fas fa-map-marker-alt mt-1 me-2 text-primary"></i>
+                            <span class="text-white-50">Nass Online Practise Pvt Ltd, Trivandrum.</span>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <i class="fas fa-phone-alt me-2 text-primary"></i>
+                            <a href="tel:7270000222" class="text-white-50 hover-white">727 0000 222</a>
+                        </li>
+                        <li class="mb-3 d-flex align-items-center">
+                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            <a href="mailto:care@nassonline.in" class="text-white-50 hover-white">care@nassonline.in</a>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <i class="fas fa-globe me-2 text-primary"></i>
+                            <a href="https://nassonline.in/" target="_blank" class="text-white-50 hover-white">nassonline.in</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Social & Newsletter -->
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="text-uppercase mb-4">Connect With Us</h5>
+                    <div class="social-links mb-4">
+                        <a href="https://www.facebook.com/NassOnlinetvm" target="_blank" class="btn btn-sm btn-outline-light rounded-3 me-2">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/nass-online-trivandrum/" target="_blank" class="btn btn-sm btn-outline-light rounded-3 me-2">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://www.instagram.com/nassonlineadme/" target="_blank" class="btn btn-sm btn-outline-light rounded-3 me-2">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://x.com/NassOnline" target="_blank" class="btn btn-sm btn-outline-light rounded-3 me-2">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://www.youtube.com/@nassonline1857" target="_blank" class="btn btn-sm btn-outline-light rounded-3">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+
+                    <div class="newsletter">
+                        <h6 class="mb-3">Subscribe to our newsletter</h6>
+                        <form class="input-group">
+                            <input type="email" class="form-control form-control-sm" placeholder="Your email">
+                            <button class="btn btn-primary btn-sm" type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4 bg-secondary">
+
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-white-50">&copy; 2025 Nass Online. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item"><a href="#" class="text-white-50 hover-white">Privacy Policy</a></li>
+                        <li class="list-inline-item mx-2">•</li>
+                        <li class="list-inline-item"><a href="#" class="text-white-50 hover-white">Terms of Service</a></li>
+                        <li class="list-inline-item mx-2">•</li>
+                        <li class="list-inline-item"><a href="#" class="text-white-50 hover-white">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Countdown Timer
+        function updateCountdown() {
+            const examDate = new Date("March 1, 2025 10:00:00").getTime();
+            const now = new Date().getTime();
+            const distance = examDate - now;
+            
+            if (distance < 0) {
+                document.getElementById("countdown").innerHTML = "Exam has started!";
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById("countdown").innerHTML = 
+                `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+        
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+        
+        // Initialize carousels
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousels = document.querySelectorAll('.carousel');
+            carousels.forEach(carousel => {
+                new bootstrap.Carousel(carousel, {
+                    interval: 5000,
+                    pause: 'hover'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

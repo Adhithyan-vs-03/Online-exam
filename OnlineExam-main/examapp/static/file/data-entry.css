@@ -1,0 +1,133 @@
+/* Header container styles */
+.header-top7 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #f4f4f4; /* Optional: Add a background color */
+    position: fixed; /* Fix it to the top-left of the window */
+    top: 0;
+    left: 0;
+    width: 100%; /* Full width */
+    z-index: 1000; /* Ensure it stays on top */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow */
+    height: 70px; /* Ensure a consistent height for the header */
+    box-sizing: border-box; /* Include padding in height */
+}
+
+/* Ensure the rest of the content is not hidden */
+.container7 {
+    margin-top: 80px; /* Add space equal to the header height */
+    display: flex; /* Add flex layout to align the sidebar and cards */
+    gap: 20px; /* Space between sidebar and cards */
+}
+
+/* Logo styling */
+.header-top7 .logo7 {
+    border-radius: 15px;
+    width: 150px;
+    height: auto;
+}
+
+/* Welcome Admin and Logout button container */
+.header-info7 {
+    display: flex;
+    align-items: center; /* Vertically align items */
+    gap: 20px; /* Space between elements */
+}
+
+/* Welcome message styling */
+.welcome7 {
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Logout button styling */
+.reg7 {
+    background-color: #024e59;
+    color: #fff;
+    font-size: 16px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between text and icon */
+}
+
+/* Hover effect for the logout button */
+.reg7:hover {
+    background-color: #013740;
+    color: #ffffff;
+}
+
+aside{
+    width: 250px;
+    height: 100vh;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+}
+aside ul{
+    list-style: none;
+    padding: 0;
+    margin: 0 ;
+    }
+aside ul li img{
+    width: 25px;
+    height: 25px;
+    position: relative;
+    top: 5px;
+}
+aside ul li{
+    padding: 10px;
+    padding-left: 20px;
+    cursor: pointer;
+    background-color: #024e59;
+    color: white;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+aside ul li:hover{
+    background-color: #0f798a;
+}
+.dropdown-menu7{
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+    margin-top: 5px;
+    padding-left: 20px;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+.dropdown-menu7 li {
+    background-color: #4b64d3;
+    margin: 3px 0;
+    border-radius: 5px;
+}
+.dropdown-menu7 li:hover {
+    background-color: #0d3168;
+}
+.dropdown7.active .dropdown-menu7{
+    opacity: 1;
+    visibility: visible;
+    max-height: 200px;
+}
+.sub-dropdown-menu7{
+    display: none;
+    padding-left: 15px;
+    transition: max-height 0.3s ease;
+    overflow: hidden;
+    max-height: 0;
+}
+.sub-dropdown-menu7 li{
+    background-color: #07530b;
+}
+.sub-dropdown-menu7 li:hover{
+    background-color: #147219;
+}
+.sub-dropdown7.active > .sub-dropdown-menu7 {
+    display: block;
+    max-height: 150px;
+}

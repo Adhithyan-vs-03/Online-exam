@@ -1,0 +1,1802 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Student Dashboard | Learning Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #eef2ff 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #c7d2fe;
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #818cf8;
+    }
+    
+    /* Glass morphism */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .hover-lift {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .hover-lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Sidebar Styles */
+    .sidebar-item {
+      display: flex !important;
+      align-items: center !important;
+      width: 100% !important;
+      padding: 0.875rem 1rem !important;
+      border-radius: 1rem !important;
+      transition: all 0.3s ease !important;
+      cursor: pointer !important;
+      gap: 0.875rem !important;
+      margin-bottom: 0.5rem !important;
+      background: white !important;
+      border: 1px solid transparent !important;
+    }
+    
+    .sidebar-item:hover {
+      background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%) !important;
+      border-color: #e0e7ff !important;
+      transform: translateX(4px);
+    }
+    
+    .sidebar-item.active {
+      background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%) !important;
+      border-left: 4px solid #6366f1 !important;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+    }
+    
+    .sidebar-icon {
+      width: 2.25rem !important;
+      height: 2.25rem !important;
+      border-radius: 0.75rem !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      color: white !important;
+      flex-shrink: 0 !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    .sidebar-item:hover .sidebar-icon {
+      transform: scale(1.05) rotate(3deg);
+    }
+    
+    .sidebar-text {
+      font-weight: 500 !important;
+      color: #1e293b !important;
+      flex: 1 !important;
+      font-size: 0.95rem !important;
+    }
+    
+    .sidebar-arrow {
+      margin-left: auto !important;
+      color: #94a3b8 !important;
+      font-size: 0.75rem !important;
+      transition: all 0.2s ease !important;
+    }
+    
+    .sidebar-item:hover .sidebar-arrow {
+      color: #6366f1 !important;
+      transform: translateX(4px);
+    }
+    
+    /* Exam Dropdown */
+    .exam-dropdown details {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    
+    .exam-dropdown summary {
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.875rem !important;
+      padding: 0.875rem 1rem !important;
+      border-radius: 1rem !important;
+      background: white !important;
+      cursor: pointer !important;
+      list-style: none !important;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+    
+    .exam-dropdown summary:hover {
+      background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%) !important;
+      border-color: #e0e7ff !important;
+    }
+    
+    .exam-dropdown summary::-webkit-details-marker {
+      display: none;
+    }
+    
+    .exam-dropdown .dropdown-content {
+      padding: 0.75rem 0 0.75rem 2.75rem !important;
+    }
+    
+    .exam-dropdown .dropdown-item {
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.75rem !important;
+      padding: 0.625rem 1rem !important;
+      border-radius: 0.75rem !important;
+      background: #f9fafb !important;
+      transition: all 0.2s ease !important;
+      cursor: pointer !important;
+      margin-bottom: 0.25rem;
+    }
+    
+    .exam-dropdown .dropdown-item:hover {
+      background: #eff6ff !important;
+      color: #4f46e5 !important;
+      transform: translateX(4px);
+    }
+    
+    /* Notification Badge */
+    .notification-badge {
+      animation: pulse 2s infinite;
+      background: linear-gradient(135deg, #ef4444, #ec4899);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: bold;
+      border-radius: 9999px;
+      min-width: 1.5rem;
+      height: 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.375rem;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.9; }
+    }
+    
+    /* Package Card */
+    .package-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1.25rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+    
+    .package-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+    }
+    
+    .package-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Form Inputs */
+    .form-input {
+      transition: all 0.2s ease;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    /* Radio Card */
+    .radio-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 1rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      background: white;
+    }
+    
+    .radio-card:hover {
+      border-color: #818cf8;
+      background: #f5f3ff;
+      transform: translateY(-2px);
+    }
+    
+    .radio-card.selected {
+      border-color: #6366f1;
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+    
+    /* Status Badges */
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+    
+    .status-active {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-expired {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    /* Admin Stat Cards */
+    .admin-stat-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.25rem;
+      transition: all 0.3s ease;
+      border: 1px solid #f1f5f9;
+    }
+    
+    .admin-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.75rem;
+    }
+    
+    .data-table th {
+      background: #f8fafc;
+      padding: 0.875rem 1rem;
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 0.875rem;
+      text-align: left;
+    }
+    
+    .data-table td {
+      background: white;
+      padding: 1rem;
+      color: #475569;
+      font-size: 0.875rem;
+      border-radius: 0.75rem;
+    }
+    
+    /* Responsive Table Container */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 1rem;
+    }
+    
+    /* Animations */
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in {
+      animation: slideIn 0.4s ease-out;
+    }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .sidebar-text, .sidebar-arrow {
+        font-size: 0.875rem;
+      }
+      
+      .sidebar-icon {
+        width: 2rem !important;
+        height: 2rem !important;
+      }
+      
+      .data-table th, .data-table td {
+        font-size: 0.75rem;
+        padding: 0.75rem;
+      }
+      
+      .admin-stat-card h3 {
+        font-size: 1.25rem;
+      }
+    }
+    
+    /* Loading Spinner */
+    .loading-spinner {
+      display: inline-block;
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 2px solid #e2e8f0;
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="glass-card shadow-lg sticky top-0 z-50 w-full">
+  <div class="flex items-center justify-between px-4 md:px-8 py-4">
+    <div class="flex items-center space-x-3">
+      <div class="gradient-bg p-2.5 rounded-xl shadow-md">
+        <i class="fas fa-graduation-cap text-white text-xl md:text-2xl"></i>
+      </div>
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          {% if user.is_staff %}Admin Dashboard{% else %}Student Dashboard{% endif %}
+        </h1>
+        <p class="text-xs md:text-sm text-gray-500 hidden sm:block">
+          {% if user.is_staff %}Manage students and purchases{% else %}Welcome to your learning portal{% endif %}
+        </p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3 md:gap-4">
+      <!-- Notifications Button -->
+      <button onclick="showNotifications()" class="relative p-2 rounded-full hover:bg-gray-100 transition-all">
+        <i class="fas fa-bell text-gray-600 text-lg md:text-xl"></i>
+        {% if unread_notifications_count > 0 %}
+        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+          {{ unread_notifications_count }}
+        </span>
+        {% endif %}
+      </button>
+      
+      <!-- User Profile Dropdown -->
+      <div class="relative group">
+        <div class="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-purple-50 px-3 md:px-4 py-2 rounded-full shadow-sm cursor-pointer">
+          <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center text-white font-semibold text-sm">
+            {{ user.username|first|upper }}
+          </div>
+          <div class="hidden md:block">
+            <span class="font-semibold text-gray-800 text-sm">Hi, {{ user.username }}</span>
+            <p class="text-xs text-gray-500">{% if user.is_staff %}Admin{% else %}Student{% endif %}</p>
+          </div>
+          <i class="fas fa-chevron-down text-gray-400 text-xs hidden md:block"></i>
+        </div>
+      </div>
+      
+      <!-- Logout Button -->
+      <a href="{% url 'logout' %}" class="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all flex items-center gap-2 text-sm md:text-base">
+        <i class="fas fa-sign-out-alt"></i>
+        <span class="hidden sm:inline">Logout</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Main Container -->
+<div class="flex flex-col md:flex-row min-h-[calc(100vh-76px)]">
+  <!-- Sidebar -->
+  <aside class="w-full md:w-72 lg:w-80 flex-shrink-0 md:sticky md:top-20 md:h-[calc(100vh-80px)] overflow-y-auto">
+    <div class="glass-card m-4 rounded-2xl shadow-lg p-4">
+      <!-- Dashboard -->
+      <div onclick="showDashboard()" class="sidebar-item" id="sidebarDashboard">
+        <div class="sidebar-icon" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">
+          <i class="fas fa-home"></i>
+        </div>
+        <span class="sidebar-text">Dashboard</span>
+        <i class="fas fa-chevron-right sidebar-arrow"></i>
+      </div>
+
+      {% if not user.is_staff %}
+      <!-- Profile -->
+      <div onclick="showProfile()" class="sidebar-item" id="sidebarProfile">
+        <div class="sidebar-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+          <i class="fas fa-user"></i>
+        </div>
+        <span class="sidebar-text">Profile</span>
+        <i class="fas fa-chevron-right sidebar-arrow"></i>
+      </div>
+
+      <!-- Purchase History -->
+      <div onclick="showPurchaseHistory()" class="sidebar-item" id="sidebarPurchaseHistory">
+        <div class="sidebar-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+          <i class="fas fa-history"></i>
+        </div>
+        <span class="sidebar-text">My Purchases</span>
+        <i class="fas fa-chevron-right sidebar-arrow"></i>
+      </div>
+
+      <!-- Exam Dropdown -->
+      <div class="exam-dropdown">
+        <details>
+          <summary>
+            <div class="sidebar-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <span class="sidebar-text">Exam</span>
+            <i class="fas fa-chevron-down sidebar-arrow"></i>
+          </summary>
+          <div class="dropdown-content">
+            <div onclick="showAvailableExams()" class="dropdown-item">
+              <i class="fas fa-play-circle text-blue-500"></i>
+              <span>Conduct Exam</span>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Packages -->
+      <div onclick="showPackages()" class="sidebar-item" id="sidebarPackages">
+        <div class="sidebar-icon" style="background: linear-gradient(135deg, #a855f7, #ec4899);">
+          <i class="fas fa-box-open"></i>
+        </div>
+        <span class="sidebar-text">Packages</span>
+        <i class="fas fa-chevron-right sidebar-arrow"></i>
+      </div>
+      
+      <!-- Feedback -->
+      <div onclick="showFeedback()" class="sidebar-item" id="sidebarFeedback">
+        <div class="sidebar-icon" style="background: linear-gradient(135deg, #14b8a6, #06b6d4);">
+          <i class="fas fa-comment-dots"></i>
+        </div>
+        <span class="sidebar-text">Feedback</span>
+        <i class="fas fa-chevron-right sidebar-arrow"></i>
+      </div>
+      {% else %}
+      <!-- Admin Sidebar -->
+      <div onclick="showAllStudents()" class="sidebar-item" id="sidebarAllStudents">
+        <div class="sidebar-icon" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">
+          <i class="fas fa-users"></i>
+        </div>
+        <span class="sidebar-text">All Students</span>
+        <i class="fas fa-chevron-right sidebar-arrow"></i>
+      </div>
+
+      <div onclick="showAllPurchases()" class="sidebar-item" id="sidebarAllPurchases">
+        <div class="sidebar-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <span class="sidebar-text">All Purchases</span>
+        <i class="fas fa-chevron-right sidebar-arrow"></i>
+      </div>
+      {% endif %}
+
+      <!-- Notifications -->
+      <div onclick="showNotifications()" class="sidebar-item" id="sidebarNotifications">
+        <div class="sidebar-icon" style="background: linear-gradient(135deg, #eab308, #f97316);">
+          <i class="fas fa-bell"></i>
+        </div>
+        <span class="sidebar-text">Notifications</span>
+        {% if unread_notifications_count > 0 %}
+        <span class="notification-badge">{{ unread_notifications_count }}</span>
+        {% else %}
+        <i class="fas fa-chevron-right sidebar-arrow"></i>
+        {% endif %}
+      </div>
+    </div>
+  </aside>
+  
+  <!-- Main Content -->
+  <main class="flex-1 p-4 md:p-6 overflow-y-auto">
+    <!-- ============ PACKAGE CARDS SECTION ============ -->
+    <section id="packageCards" class="hidden fade-in">
+      <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Available Packages</h2>
+          <p class="text-gray-600">Choose from our premium exam preparation packages</p>
+        </div>
+        {% if packages %}
+        <div class="flex gap-2">
+          <select id="packageFilter" class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500" onchange="filterPackages(this.value)">
+            <option value="all">All Packages</option>
+            <option value="jee">JEE</option>
+            <option value="neet">NEET</option>
+            <option value="foundation">Foundation</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        {% endif %}
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="packagesContainer">
+        {% for package in packages %}
+        {% if package.is_active %}
+        <div class="package-card hover-lift package-item" data-category="{{ package.type|lower }}">
+          <div class="relative h-48 overflow-hidden">
+            <div class="absolute inset-0 
+              {% if package.type == 'jee' %}bg-gradient-to-br from-blue-500 to-cyan-400
+              {% elif package.type == 'neet' %}bg-gradient-to-br from-green-500 to-emerald-400
+              {% elif package.type == 'foundation' %}bg-gradient-to-br from-orange-500 to-yellow-400
+              {% else %}bg-gradient-to-br from-purple-500 to-pink-400{% endif %} opacity-10"></div>
+            
+            {% if package.image %}
+              <img src="{{ package.image.url }}" alt="{{ package.name }}" class="w-full h-full object-cover">
+            {% else %}
+              <div class="w-full h-full flex items-center justify-center bg-gray-50">
+                <i class="fas 
+                  {% if package.type == 'jee' %}fa-atom text-6xl text-blue-300
+                  {% elif package.type == 'neet' %}fa-stethoscope text-6xl text-green-300
+                  {% elif package.type == 'foundation' %}fa-layer-group text-6xl text-orange-300
+                  {% else %}fa-gem text-6xl text-purple-300{% endif %}"></i>
+              </div>
+            {% endif %}
+            
+            {% if package.badge %}
+            <div class="absolute top-3 right-3">
+              <span class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                {{ package.badge }}
+              </span>
+            </div>
+            {% elif package.original_price and package.original_price > package.price %}
+            <div class="absolute top-3 right-3">
+              <span class="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                SAVE ₹{{ package.original_price|floatformat:0|add:"-"|add:package.price|floatformat:0 }}
+              </span>
+            </div>
+            {% endif %}
+
+            <div class="absolute bottom-3 left-3">
+              <span class="bg-white/95 backdrop-blur-sm text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
+                {{ package.get_type_display|default:package.type|upper }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xl font-bold text-gray-800">{{ package.name }}</h3>
+              <div class="w-10 h-10 bg-gradient-to-br 
+                {% if package.type == 'jee' %}from-blue-100 to-cyan-100
+                {% elif package.type == 'neet' %}from-green-100 to-emerald-100
+                {% elif package.type == 'foundation' %}from-orange-100 to-yellow-100
+                {% else %}from-purple-100 to-pink-100{% endif %} rounded-full flex items-center justify-center">
+                <i class="fas 
+                  {% if package.type == 'jee' %}fa-atom text-blue-600
+                  {% elif package.type == 'neet' %}fa-stethoscope text-green-600
+                  {% elif package.type == 'foundation' %}fa-layer-group text-orange-600
+                  {% else %}fa-gem text-purple-600{% endif %} text-lg"></i>
+              </div>
+            </div>
+            
+            <p class="text-gray-600 mb-4 line-clamp-2">{{ package.description|default:"Comprehensive exam preparation package"|truncatechars:100 }}</p>
+            
+            {% if package.features %}
+            <div class="mb-4 space-y-2">
+              {% for feature in package.get_features_list|slice:":3" %}
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <i class="fas fa-check-circle text-green-500 text-xs"></i>
+                <span>{{ feature|truncatechars:35 }}</span>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if package.subjects.all %}
+            <div class="mb-4">
+              <div class="flex flex-wrap gap-1.5">
+                {% for subject in package.subjects.all|slice:":4" %}
+                <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-medium">{{ subject.name }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+            
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <span class="text-2xl font-bold text-gray-800">₹{{ package.price }}</span>
+                {% if package.original_price %}
+                <span class="text-sm text-gray-400 line-through ml-2">₹{{ package.original_price }}</span>
+                {% endif %}
+              </div>
+              <span class="text-xs text-gray-500 flex items-center gap-1">
+                <i class="fas fa-clock"></i> {{ package.validity_days }} days
+              </span>
+            </div>
+            
+            {% if package.id in purchased_package_ids %}
+            <button class="w-full bg-gray-100 text-gray-500 py-3 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 font-semibold" disabled>
+              <i class="fas fa-check-circle text-green-500"></i>
+              <span>Purchased</span>
+            </button>
+            {% else %}
+            <a href="{% url 'payment' package.id %}" class="block">
+              <button class="w-full bg-gradient-to-r 
+                {% if package.type == 'jee' %}from-blue-600 to-cyan-500
+                {% elif package.type == 'neet' %}from-green-600 to-emerald-500
+                {% elif package.type == 'foundation' %}from-orange-600 to-yellow-500
+                {% else %}from-purple-600 to-pink-500{% endif %} text-white py-3 rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2 font-semibold">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Buy Now</span>
+              </button>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+        {% empty %}
+        <div class="col-span-3 text-center py-16">
+          <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+          <p class="text-gray-500 text-lg">No packages available at the moment.</p>
+          <p class="text-gray-400 text-sm mt-2">Check back later for new packages</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    
+    <!-- ============ PROFILE SECTION ============ -->
+    <section id="profileSection" class="hidden fade-in">
+      <div class="glass-card rounded-2xl shadow-lg overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold text-white">
+                {% if student_profile %}Edit Profile{% else %}Complete Profile{% endif %}
+              </h2>
+              <p class="text-blue-100 text-sm mt-1">
+                {% if student_profile %}Update your profile information{% else %}Complete your profile to unlock all features{% endif %}
+              </p>
+            </div>
+            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <i class="fas fa-user-edit text-white text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
+        <form id="profileForm" action="{% url 'student_profile' %}" method="POST" class="p-6 space-y-6">
+          {% csrf_token %}
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-user text-blue-500 w-5"></i>
+                First Name <span class="text-red-500">*</span>
+              </label>
+              <input required name="first_name" type="text" 
+                    value="{{ student_profile.first_name|default:user.first_name }}" 
+                    class="form-input w-full rounded-xl px-4 py-3 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-user text-blue-500 w-5"></i>
+                Last Name <span class="text-red-500">*</span>
+              </label>
+              <input required name="last_name" type="text" 
+                    value="{{ student_profile.last_name|default:user.last_name }}" 
+                    class="form-input w-full rounded-xl px-4 py-3 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-birthday-cake text-blue-500 w-5"></i>
+                Date of Birth <span class="text-red-500">*</span>
+              </label>
+              <input required name="date_of_birth" type="date" 
+                    value="{{ student_profile.date_of_birth|date:'Y-m-d'|default:'' }}" 
+                    class="form-input w-full rounded-xl px-4 py-3 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-phone text-blue-500 w-5"></i>
+                Mobile Number <span class="text-red-500">*</span>
+              </label>
+              <input required name="mobile_number" type="tel" pattern="[0-9]{10}" 
+                    value="{{ student_profile.mobile_number|default:'' }}" 
+                    placeholder="10-digit mobile number"
+                    class="form-input w-full rounded-xl px-4 py-3 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-user-shield text-blue-500 w-5"></i>
+                Guardian Name <span class="text-red-500">*</span>
+              </label>
+              <input required name="guardian_name" type="text" 
+                    value="{{ student_profile.guardian_name|default:'' }}" 
+                    class="form-input w-full rounded-xl px-4 py-3 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-phone-alt text-blue-500 w-5"></i>
+                Guardian Number <span class="text-red-500">*</span>
+              </label>
+              <input required name="guardian_number" type="tel" pattern="[0-9]{10}" 
+                    value="{{ student_profile.guardian_number|default:'' }}" 
+                    placeholder="Guardian's mobile number"
+                    class="form-input w-full rounded-xl px-4 py-3 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-envelope text-blue-500 w-5"></i>
+                Email Address <span class="text-red-500">*</span>
+              </label>
+              <input required name="email" type="email" 
+                    value="{{ student_profile.email|default:user.email }}" 
+                    class="form-input w-full rounded-xl px-4 py-3 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-venus-mars text-blue-500 w-5"></i>
+                Gender <span class="text-red-500">*</span>
+              </label>
+              <div class="flex gap-4 mt-2">
+                <label class="radio-card flex-1 p-3 text-center cursor-pointer {% if student_profile.gender == 'Male' %}selected{% endif %}">
+                  <input type="radio" name="gender" value="Male" 
+                        {% if student_profile.gender == 'Male' %}checked{% endif %} 
+                        required class="hidden">
+                  <i class="fas fa-mars text-blue-500 text-xl mb-2"></i>
+                  <div class="font-medium text-sm">Male</div>
+                </label>
+                <label class="radio-card flex-1 p-3 text-center cursor-pointer {% if student_profile.gender == 'Female' %}selected{% endif %}">
+                  <input type="radio" name="gender" value="Female" 
+                        {% if student_profile.gender == 'Female' %}checked{% endif %} 
+                        required class="hidden">
+                  <i class="fas fa-venus text-pink-500 text-xl mb-2"></i>
+                  <div class="font-medium text-sm">Female</div>
+                </label>
+              </div>
+            </div>
+            
+            <div class="space-y-2 md:col-span-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-home text-blue-500 w-5"></i>
+                Address <span class="text-red-500">*</span>
+              </label>
+              <textarea name="address" rows="3" 
+                        class="form-input w-full rounded-xl px-4 py-3 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
+                        required>{{ student_profile.address|default:'' }}</textarea>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                <i class="fas fa-map-pin text-blue-500 w-5"></i>
+                Pin Code <span class="text-red-500">*</span>
+              </label>
+              <input required name="pin_code" type="text" pattern="[0-9]{6}" 
+                    value="{{ student_profile.pin_code|default:'' }}" 
+                    placeholder="6-digit PIN code"
+                    class="form-input w-full rounded-xl px-4 py-3 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
+            </div>
+          </div>
+
+          <!-- Qualification -->
+          <div class="border-t pt-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-graduation-cap text-green-600"></i>
+              </div>
+              Qualification Details
+            </h3>
+            
+            <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-5">
+              <div class="grid grid-cols-4 gap-3 mb-3 text-sm font-semibold text-gray-700">
+                <span>Examination</span>
+                <span>Board</span>
+                <span>Percentage</span>
+                <span>Year</span>
+              </div>
+              
+              <div class="grid grid-cols-4 gap-3 items-center mb-4">
+                <span class="font-medium text-gray-800">Class X</span>
+                <input name="classX_board" type="text" 
+                      value="{{ student_profile.classX_board|default:'' }}" 
+                      placeholder="e.g., CBSE" 
+                      class="border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-blue-500">
+                <input name="classX_percentage" type="number" step="0.01" 
+                      value="{{ student_profile.classX_percentage|default:'' }}" 
+                      placeholder="%" 
+                      class="border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-blue-500">
+                <input name="classX_year" type="number" 
+                      value="{{ student_profile.classX_year|default:'' }}" 
+                      placeholder="YYYY" 
+                      class="border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-blue-500">
+              </div>
+              
+              <div class="grid grid-cols-4 gap-3 items-center">
+                <span class="font-medium text-gray-800">Class XII</span>
+                <input name="classXII_board" type="text" 
+                      value="{{ student_profile.classXII_board|default:'' }}" 
+                      placeholder="e.g., CBSE" 
+                      class="border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-blue-500">
+                <input name="classXII_percentage" type="number" step="0.01" 
+                      value="{{ student_profile.classXII_percentage|default:'' }}" 
+                      placeholder="%" 
+                      class="border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-blue-500">
+                <input name="classXII_year" type="number" 
+                      value="{{ student_profile.classXII_year|default:'' }}" 
+                      placeholder="YYYY" 
+                      class="border border-gray-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Course Selection -->
+          <div class="border-t pt-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-book-open text-purple-600"></i>
+              </div>
+              Courses Applied For <span class="text-red-500">*</span>
+            </h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <label class="radio-card p-4 text-center cursor-pointer {% if student_profile.course_applied_for == 'jee' %}selected{% endif %}">
+                <input type="radio" name="course_applied_for" value="jee" 
+                      {% if student_profile.course_applied_for == 'jee' %}checked{% endif %} 
+                      required class="hidden">
+                <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <i class="fas fa-atom text-blue-600 text-2xl"></i>
+                </div>
+                <h4 class="font-bold text-gray-800">JEE</h4>
+                <p class="text-xs text-gray-500">Engineering</p>
+              </label>
+              
+              <label class="radio-card p-4 text-center cursor-pointer {% if student_profile.course_applied_for == 'neet' %}selected{% endif %}">
+                <input type="radio" name="course_applied_for" value="neet" 
+                      {% if student_profile.course_applied_for == 'neet' %}checked{% endif %} 
+                      required class="hidden">
+                <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <i class="fas fa-stethoscope text-green-600 text-2xl"></i>
+                </div>
+                <h4 class="font-bold text-gray-800">NEET</h4>
+                <p class="text-xs text-gray-500">Medical</p>
+              </label>
+              
+              <label class="radio-card p-4 text-center cursor-pointer {% if student_profile.course_applied_for == 'combined' %}selected{% endif %}">
+                <input type="radio" name="course_applied_for" value="combined" 
+                      {% if student_profile.course_applied_for == 'combined' %}checked{% endif %} 
+                      required class="hidden">
+                <div class="w-14 h-14 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <i class="fas fa-gem text-purple-600 text-2xl"></i>
+                </div>
+                <h4 class="font-bold text-gray-800">COMBINED</h4>
+                <p class="text-xs text-gray-500">Both</p>
+              </label>
+            </div>
+          </div>
+
+          <div class="border-t pt-6 flex flex-col sm:flex-row gap-3 justify-end">
+            <button type="button" onclick="showDashboard()" class="bg-gray-100 text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-200 transition-all font-medium flex items-center justify-center gap-2">
+              <i class="fas fa-times"></i>
+              Cancel
+            </button>
+            <button type="submit" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2">
+              <i class="fas fa-check-circle"></i>
+              {% if student_profile %}Update Profile{% else %}Save Profile{% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+    
+    <!-- ============ PURCHASE HISTORY SECTION ============ -->
+    <section id="purchaseHistorySection" class="hidden fade-in">
+      <div class="glass-card rounded-2xl shadow-lg p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">My Purchase History</h2>
+            <p class="text-gray-600">Track all your purchased packages and their status</p>
+          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-shopping-bag text-green-600 text-xl"></i>
+          </div>
+        </div>
+        
+        {% if purchases %}
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Package Name</th>
+                <th>Purchase Date</th>
+                <th>Amount</th>
+                <th>Valid Until</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for purchase in purchases %}
+              <tr>
+                <td class="font-semibold text-gray-800">{{ purchase.package.name }}</td>
+                <td>{{ purchase.purchase_date|date:"d M Y" }}</td>
+                <td class="font-semibold">₹{{ purchase.amount }}</td>
+                <td>{{ purchase.valid_until|date:"d M Y" }}</td>
+                <td>
+                  {% if purchase.is_active %}
+                    <span class="status-badge status-active"><i class="fas fa-circle text-xs"></i> Active</span>
+                  {% else %}
+                    <span class="status-badge status-expired"><i class="fas fa-circle text-xs"></i> Expired</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <button onclick="viewPackageDetails('{{ purchase.package.id }}')" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                    View Details →
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+          <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-shopping-bag text-gray-400 text-4xl"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">No Purchases Yet</h3>
+          <p class="text-gray-600 mb-6">You haven't purchased any packages yet.</p>
+          <button onclick="showPackages()" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all">
+            Browse Packages
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+    
+    <!-- ============ ADMIN: ALL STUDENTS SECTION ============ -->
+    <section id="allStudentsSection" class="hidden fade-in">
+      <div class="glass-card rounded-2xl shadow-lg p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">All Students</h2>
+            <p class="text-gray-600">Manage and view all registered students</p>
+          </div>
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2 rounded-xl text-white font-semibold">
+            Total: {{ students|length }}
+          </div>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="admin-stat-card">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-gray-600 text-sm">Total Students</span>
+              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-users text-blue-600"></i>
+              </div>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">{{ students|length }}</h3>
+            <p class="text-xs text-gray-500 mt-1">Registered users</p>
+          </div>
+          
+          <div class="admin-stat-card">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-gray-600 text-sm">Active Today</span>
+              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-user-check text-green-600"></i>
+              </div>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">{{ active_today|default:"0" }}</h3>
+            <p class="text-xs text-gray-500 mt-1">Last 24 hours</p>
+          </div>
+          
+          <div class="admin-stat-card">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-gray-600 text-sm">Total Purchases</span>
+              <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-shopping-cart text-purple-600"></i>
+              </div>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">{{ total_purchases|default:"0" }}</h3>
+            <p class="text-xs text-gray-500 mt-1">All time</p>
+          </div>
+          
+          <div class="admin-stat-card">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-gray-600 text-sm">Revenue</span>
+              <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-rupee-sign text-yellow-600"></i>
+              </div>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800">₹{{ total_revenue|default:"0"|floatformat:0 }}</h3>
+            <p class="text-xs text-gray-500 mt-1">Total earnings</p>
+          </div>
+        </div>
+        
+        <!-- Students Table -->
+        <div class="table-container">
+          <table class="data-table w-full">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Contact</th>
+                <th>Course</th>
+                <th>Joined</th>
+                <th>Purchases</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for student in students %}
+              <tr>
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                      {{ student.user.username|first|upper }}
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-800">{{ student.user.get_full_name|default:student.user.username }}</p>
+                      <p class="text-xs text-gray-500">{{ student.user.email }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="text-sm">
+                    <div>{{ student.mobile_number|default:"-" }}</div>
+                    <div class="text-xs text-gray-400">{{ student.guardian_name|truncatechars:15 }}</div>
+                  </div>
+                </td>
+                <td>
+                  {% if student.course_applied_for %}
+                    <span class="status-badge 
+                      {% if student.course_applied_for == 'jee' %}bg-blue-100 text-blue-600
+                      {% elif student.course_applied_for == 'neet' %}bg-green-100 text-green-600
+                      {% else %}bg-purple-100 text-purple-600{% endif %} text-xs">
+                      {{ student.course_applied_for|upper }}
+                    </span>
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td class="text-sm">{{ student.user.date_joined|date:"d M Y" }}</td>
+                <td class="text-center font-semibold">{{ student.purchase_count|default:"0" }}</td>
+                <td>
+                  {% if student.is_active %}
+                    <span class="status-badge status-active text-xs">Active</span>
+                  {% else %}
+                    <span class="status-badge status-expired text-xs">Inactive</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============ ADMIN: ALL PURCHASES SECTION ============ -->
+    <section id="allPurchasesSection" class="hidden fade-in">
+      <div class="glass-card rounded-2xl shadow-lg p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">All Purchases</h2>
+            <p class="text-gray-600">Complete purchase history of all students</p>
+          </div>
+          <div class="bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 rounded-xl text-white font-semibold">
+            Total Revenue: ₹{{ total_revenue|default:"0"|floatformat:0 }}
+          </div>
+        </div>
+        
+        <div class="flex flex-wrap gap-3 mb-6">
+          <select id="purchaseFilter" class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500" onchange="filterPurchases(this.value)">
+            <option value="all">All Purchases</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
+          <select id="statusFilter" class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500" onchange="filterByStatus(this.value)">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+        
+        <div class="table-container">
+          <table class="data-table w-full">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Package</th>
+                <th>Purchase Date</th>
+                <th>Amount</th>
+                <th>Valid Until</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for purchase in all_purchases %}
+              <tr>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      {{ purchase.student.user.username|first|upper }}
+                    </div>
+                    <span class="text-sm">{{ purchase.student.user.get_full_name|default:purchase.student.user.username }}</span>
+                  </div>
+                </td>
+                <td class="font-medium">{{ purchase.package.name }}</td>
+                <td class="text-sm">{{ purchase.purchase_date|date:"d M Y" }}</td>
+                <td class="font-semibold">₹{{ purchase.amount }}</td>
+                <td class="text-sm">{{ purchase.valid_until|date:"d M Y" }}</td>
+                <td>
+                  {% if purchase.is_active %}
+                    <span class="status-badge status-active"><i class="fas fa-circle text-xs"></i> Active</span>
+                  {% else %}
+                    <span class="status-badge status-expired"><i class="fas fa-circle text-xs"></i> Expired</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-center py-12 text-gray-500">
+                  No purchases found
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============ AVAILABLE EXAMS SECTION ============ -->
+    <section id="availableExamsSection" class="hidden fade-in">
+      <div class="glass-card rounded-2xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Available Exams</h2>
+        <div class="grid gap-6">
+          {% for exam in available_exams %}
+          <div class="bg-white rounded-xl p-6 hover:shadow-lg transition-all border border-gray-100">
+            <div class="flex flex-col sm:flex-row gap-4">
+              <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center text-white flex-shrink-0">
+                <i class="fas fa-file-alt text-xl"></i>
+              </div>
+              <div class="flex-1">
+                <h3 class="font-bold text-xl text-gray-800 mb-2">{{ exam.name }}</h3>
+                <p class="text-gray-600 mb-4">{{ exam.description|default:"Test your knowledge with this comprehensive exam" }}</p>
+                <div class="flex flex-wrap gap-4 text-sm text-gray-600 mb-5">
+                  <span class="flex items-center gap-1"><i class="fas fa-clock text-blue-500"></i> {{ exam.duration }} minutes</span>
+                  <span class="flex items-center gap-1"><i class="fas fa-question-circle text-blue-500"></i> {{ exam.total_questions }} Questions</span>
+                  <span class="flex items-center gap-1"><i class="fas fa-star text-blue-500"></i> Total Marks: {{ exam.total_marks }}</span>
+                </div>
+                <button onclick="startExam('{{ exam.id }}')" class="bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-6 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
+                  Start Exam <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-center py-16">
+            <i class="fas fa-file-alt text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg">No exams available at the moment.</p>
+            <p class="text-gray-400 text-sm mt-2">Check back later for new exams</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============ NOTIFICATIONS SECTION ============ -->
+    <section id="notificationsSection" class="hidden fade-in">
+      <div class="glass-card rounded-2xl shadow-lg p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+          <h2 class="text-2xl font-bold text-gray-800">All Notifications</h2>
+          {% if unread_notifications_count > 0 %}
+          <span class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-3 py-1.5 rounded-full text-sm font-medium">
+            {{ unread_notifications_count }} unread
+          </span>
+          {% endif %}
+        </div>
+        
+        <div class="space-y-4">
+          {% for notification in notifications %}
+          <div class="bg-white rounded-xl p-4 hover:shadow-md transition-all border-l-4 {% if notification.notification_type == 'info' %}border-blue-500{% elif notification.notification_type == 'offer' %}border-green-500{% else %}border-purple-500{% endif %}">
+            <div class="flex flex-col sm:flex-row gap-4">
+              <div class="w-10 h-10 {% if notification.notification_type == 'info' %}bg-blue-100{% elif notification.notification_type == 'offer' %}bg-green-100{% else %}bg-purple-100{% endif %} rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas {% if notification.notification_type == 'info' %}fa-info-circle text-blue-600{% elif notification.notification_type == 'offer' %}fa-gift text-green-600{% else %}fa-calendar-check text-purple-600{% endif %} text-lg"></i>
+              </div>
+              <div class="flex-1">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-2">
+                  <h3 class="font-semibold text-gray-800">{{ notification.title }}</h3>
+                  <span class="text-xs text-gray-400">{{ notification.created_at|timesince }} ago</span>
+                </div>
+                <p class="text-gray-600 text-sm">{{ notification.message }}</p>
+                {% if not notification.is_read %}
+                <button onclick="markNotificationRead('{{ notification.id }}')" class="mt-3 text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+                  Mark as read →
+                </button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-center py-16">
+            <i class="fas fa-bell-slash text-5xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg">No notifications yet</p>
+            <p class="text-gray-400 text-sm mt-2">Check back later for updates</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============ FEEDBACK SECTION ============ -->
+    <section id="feedbackSection" class="hidden fade-in">
+      <div class="glass-card rounded-2xl shadow-lg p-6">
+        <div class="max-w-2xl mx-auto">
+          <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-blue-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <i class="fas fa-comment-dots text-white text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">We Value Your Feedback</h2>
+            <p class="text-gray-600">Help us improve your learning experience</p>
+          </div>
+          
+          <form id="feedbackForm" class="space-y-6" onsubmit="submitFeedback(event)">
+            {% csrf_token %}
+            <div>
+              <label class="block font-semibold text-gray-700 mb-3 text-center">How would you rate your experience?</label>
+              <div class="flex justify-center gap-3" id="ratingStars">
+                <button type="button" class="rating-star w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-yellow-100 transition-all group" data-rating="1">
+                  <i class="fas fa-star text-gray-300 text-xl group-hover:text-yellow-500 transition star-icon"></i>
+                </button>
+                <button type="button" class="rating-star w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-yellow-100 transition-all group" data-rating="2">
+                  <i class="fas fa-star text-gray-300 text-xl group-hover:text-yellow-500 transition star-icon"></i>
+                </button>
+                <button type="button" class="rating-star w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-yellow-100 transition-all group" data-rating="3">
+                  <i class="fas fa-star text-gray-300 text-xl group-hover:text-yellow-500 transition star-icon"></i>
+                </button>
+                <button type="button" class="rating-star w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-yellow-100 transition-all group" data-rating="4">
+                  <i class="fas fa-star text-gray-300 text-xl group-hover:text-yellow-500 transition star-icon"></i>
+                </button>
+                <button type="button" class="rating-star w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-yellow-100 transition-all group" data-rating="5">
+                  <i class="fas fa-star text-gray-300 text-xl group-hover:text-yellow-500 transition star-icon"></i>
+                </button>
+              </div>
+              <input type="hidden" name="rating" id="selectedRating" value="0" required>
+              <p class="text-center text-sm text-gray-500 mt-3" id="ratingText">Click a star to rate</p>
+            </div>
+            
+            <div>
+              <label class="block font-semibold text-gray-700 mb-2">Your Feedback</label>
+              <textarea name="message" id="feedbackMessage" rows="5" class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="Share your thoughts, suggestions, or concerns..." required></textarea>
+            </div>
+            
+            <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-3 rounded-xl hover:shadow-lg transition-all font-semibold flex items-center justify-center gap-2" id="submitFeedbackBtn">
+              <i class="fas fa-paper-plane"></i>
+              Submit Feedback
+            </button>
+          </form>
+          
+          <div id="feedbackSuccessMessage" class="hidden text-center py-8">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-check-circle text-green-500 text-4xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Thank You!</h3>
+            <p class="text-gray-600 mb-6">Your feedback has been submitted successfully.</p>
+            <button onclick="resetFeedbackForm()" class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white px-6 py-2.5 rounded-lg hover:shadow-lg transition-all font-medium">
+              Submit Another Feedback
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============ WELCOME / DASHBOARD SECTION ============ -->
+    <section id="welcomeSection" class="fade-in">
+      <div class="glass-card rounded-2xl shadow-lg p-6 md:p-8">
+        <!-- Hero Banner -->
+        <div class="relative mb-8 rounded-2xl overflow-hidden">
+          <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-85"></div>
+          <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+               alt="Students studying" 
+               class="w-full h-48 md:h-56 object-cover mix-blend-overlay">
+          <div class="absolute inset-0 flex flex-col md:flex-row items-center justify-between p-6 md:p-8">
+            <div class="text-center md:text-left mb-4 md:mb-0">
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Hi, {{ user.username }}! 👋</h2>
+              <p class="text-blue-100">
+                {% if user.is_staff %}
+                You have {{ pending_actions|default:"0" }} pending actions
+                {% else %}
+                Ready to continue your learning journey?
+                {% endif %}
+              </p>
+            </div>
+            <div class="bg-white/20 backdrop-blur-lg rounded-xl p-4 text-center">
+              <span class="text-3xl font-bold text-white">{{ days_until_exam|default:"15" }}</span>
+              <p class="text-blue-100 text-sm">Days until<br>JEE Mains</p>
+            </div>
+          </div>
+        </div>
+
+        {% if user.is_staff %}
+        <!-- Admin Dashboard Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white hover:shadow-xl transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Total Students</h3>
+              <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-users text-2xl"></i>
+              </div>
+            </div>
+            <p class="text-3xl font-bold">{{ students|length }}</p>
+            <p class="text-blue-100 text-sm mt-2">Registered students</p>
+          </div>
+          
+          <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white hover:shadow-xl transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Total Purchases</h3>
+              <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-shopping-cart text-2xl"></i>
+              </div>
+            </div>
+            <p class="text-3xl font-bold">{{ total_purchases|default:"0" }}</p>
+            <p class="text-green-100 text-sm mt-2">Package purchases</p>
+          </div>
+          
+          <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white hover:shadow-xl transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Total Revenue</h3>
+              <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <i class="fas fa-rupee-sign text-2xl"></i>
+              </div>
+            </div>
+            <p class="text-3xl font-bold">₹{{ total_revenue|default:"0"|floatformat:0 }}</p>
+            <p class="text-purple-100 text-sm mt-2">Total earnings</p>
+          </div>
+        </div>
+        
+        <!-- Recent Purchases -->
+        <div class="bg-white rounded-xl p-6 shadow-sm">
+          <h3 class="font-bold text-gray-800 mb-4 text-lg">Recent Purchases</h3>
+          <div class="divide-y divide-gray-100">
+            {% for purchase in recent_purchases|slice:":5" %}
+            <div class="flex items-center justify-between py-3 hover:bg-gray-50 px-3 rounded-lg transition-all">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                  <i class="fas fa-user text-blue-600"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-800">{{ purchase.student.user.get_full_name|default:purchase.student.user.username }}</p>
+                  <p class="text-sm text-gray-500">{{ purchase.package.name }}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="font-semibold text-gray-800">₹{{ purchase.amount }}</p>
+                <p class="text-xs text-gray-400">{{ purchase.purchase_date|timesince }} ago</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+        <!-- Student Dashboard Stats -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-gray-800">Weekly Performance Trend</h3>
+              <select class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500">
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+                <option>Last 3 months</option>
+              </select>
+            </div>
+            
+            <!-- Graph -->
+            <div class="h-48 relative">
+              <svg class="w-full h-full" viewBox="0 0 400 160" preserveAspectRatio="none">
+                <line x1="0" y1="120" x2="400" y2="120" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="0" y1="80" x2="400" y2="80" stroke="#e5e7eb" stroke-width="1"/>
+                <line x1="0" y1="40" x2="400" y2="40" stroke="#e5e7eb" stroke-width="1"/>
+                
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                
+                <path d="M 0,140 L 57,95 L 114,110 L 171,70 L 228,85 L 285,45 L 342,60 L 400,20 L 400,160 L 0,160 Z" fill="url(#gradient)"/>
+                <path d="M 0,140 L 57,95 L 114,110 L 171,70 L 228,85 L 285,45 L 342,60 L 400,20" stroke="#6366f1" stroke-width="3" fill="none"/>
+                
+                <circle cx="0" cy="140" r="4" fill="#6366f1" stroke="white" stroke-width="2"/>
+                <circle cx="57" cy="95" r="4" fill="#6366f1" stroke="white" stroke-width="2"/>
+                <circle cx="114" cy="110" r="4" fill="#6366f1" stroke="white" stroke-width="2"/>
+                <circle cx="171" cy="70" r="4" fill="#6366f1" stroke="white" stroke-width="2"/>
+                <circle cx="228" cy="85" r="4" fill="#6366f1" stroke="white" stroke-width="2"/>
+                <circle cx="285" cy="45" r="4" fill="#6366f1" stroke="white" stroke-width="2"/>
+                <circle cx="342" cy="60" r="4" fill="#6366f1" stroke="white" stroke-width="2"/>
+                <circle cx="400" cy="20" r="4" fill="#6366f1" stroke="white" stroke-width="2"/>
+              </svg>
+              
+              <div class="flex justify-between mt-2 text-xs text-gray-500 px-2">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Stats Cards -->
+          <div class="space-y-4">
+            <div class="bg-gradient-to-br from-indigo-500 to-blue-500 rounded-xl p-4 text-white">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-indigo-100 text-sm">Questions Attempted</p>
+                  <p class="text-3xl font-bold">{{ total_questions_attempted|default:"1,247" }}</p>
+                </div>
+                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <i class="fas fa-pencil-alt text-2xl"></i>
+                </div>
+              </div>
+              <div class="mt-2 text-xs text-indigo-100">+124 vs yesterday</div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-5 shadow-sm">
+              <h3 class="font-bold text-gray-800 mb-4">Your Packages</h3>
+              <div class="space-y-3">
+                {% for purchase in purchases|slice:":3" %}
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">{{ purchase.package.name|truncatechars:20 }}</span>
+                  {% if purchase.is_active %}
+                  <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium">Active</span>
+                  {% else %}
+                  <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Expired</span>
+                  {% endif %}
+                </div>
+                {% empty %}
+                <p class="text-sm text-gray-500 text-center py-4">No packages purchased yet</p>
+                {% endfor %}
+              </div>
+              {% if purchases %}
+              <button onclick="showPurchaseHistory()" class="mt-4 text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                View all <i class="fas fa-arrow-right"></i>
+              </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Motivational Quote -->
+        <div class="relative rounded-xl overflow-hidden mt-6">
+          <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+               alt="Study motivation" 
+               class="w-full h-32 md:h-40 object-cover">
+          <div class="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-purple-900/80 flex items-center justify-center">
+            <p class="text-white text-base md:text-lg font-medium italic px-4 text-center">"The future belongs to those who believe in the beauty of their dreams."</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="{% static 'file/student.js' %}"></script>
+<script>
+// Helper Functions
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-6 right-6 glass-card rounded-xl shadow-lg p-4 max-w-md z-50 border-l-4 ${type === 'error' ? 'border-red-500' : 'border-green-500'} animate-slide-in`;
+    notification.innerHTML = `
+        <div class="flex items-start gap-3">
+            <div class="w-8 h-8 ${type === 'error' ? 'bg-red-100' : 'bg-green-100'} rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas ${type === 'error' ? 'fa-exclamation-triangle text-red-600' : 'fa-check text-green-600'}"></i>
+            </div>
+            <div class="flex-1">
+                <p class="font-semibold text-gray-800">${type === 'error' ? 'Error' : 'Success'}</p>
+                <p class="text-gray-600 text-sm mt-1">${message}</p>
+            </div>
+            <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.remove(), 5000);
+}
+
+function setActiveSidebar(activeId) {
+    document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+    const activeElement = document.getElementById(activeId);
+    if (activeElement) activeElement.classList.add('active');
+}
+
+// Navigation Functions
+function showDashboard() {
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('welcomeSection').classList.remove('hidden');
+    setActiveSidebar('sidebarDashboard');
+}
+
+function showProfile() {
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('profileSection').classList.remove('hidden');
+    setActiveSidebar('sidebarProfile');
+}
+
+function showPackages() {
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('packageCards').classList.remove('hidden');
+    setActiveSidebar('sidebarPackages');
+}
+
+function showPurchaseHistory() {
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('purchaseHistorySection').classList.remove('hidden');
+    setActiveSidebar('sidebarPurchaseHistory');
+}
+
+function showAvailableExams() {
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('availableExamsSection').classList.remove('hidden');
+    // Don't set active sidebar for dropdown item
+}
+
+function showNotifications() {
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('notificationsSection').classList.remove('hidden');
+    setActiveSidebar('sidebarNotifications');
+}
+
+function showFeedback() {
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('feedbackSection').classList.remove('hidden');
+    setActiveSidebar('sidebarFeedback');
+    setTimeout(() => initRatingStars(), 100);
+}
+
+function showAllStudents() {
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('allStudentsSection').classList.remove('hidden');
+    setActiveSidebar('sidebarAllStudents');
+}
+
+function showAllPurchases() {
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('allPurchasesSection').classList.remove('hidden');
+    setActiveSidebar('sidebarAllPurchases');
+}
+
+function viewPackageDetails(packageId) {
+    window.location.href = `/package/${packageId}/`;
+}
+
+function startExam(examId) {
+    window.location.href = `/exam/${examId}/start/`;
+}
+
+function markNotificationRead(notificationId) {
+    fetch(`/notification/${notificationId}/read/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    }).then(response => response.json()).then(data => {
+        if (data.success) location.reload();
+    });
+}
+
+function filterPackages(category) {
+    document.querySelectorAll('.package-item').forEach(pkg => {
+        pkg.style.display = (category === 'all' || pkg.dataset.category === category) ? 'block' : 'none';
+    });
+}
+
+function filterPurchases(filter) { console.log('Filtering:', filter); }
+function filterByStatus(status) { console.log('Status filter:', status); }
+
+// Radio Card Selection
+document.querySelectorAll('.radio-card').forEach(card => {
+    card.addEventListener('click', function() {
+        this.closest('.grid')?.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        const radio = this.querySelector('input[type="radio"]');
+        if (radio) radio.checked = true;
+    });
+});
+
+// Rating Stars
+let currentRating = 0;
+
+function initRatingStars() {
+    const stars = document.querySelectorAll('.rating-star');
+    const ratingText = document.getElementById('ratingText');
+    const ratingInput = document.getElementById('selectedRating');
+    
+    stars.forEach(star => {
+        star.onclick = (e) => {
+            e.preventDefault();
+            currentRating = parseInt(star.dataset.rating);
+            ratingInput.value = currentRating;
+            stars.forEach((s, i) => {
+                const icon = s.querySelector('.star-icon');
+                if (i < currentRating) {
+                    icon.classList.remove('text-gray-300');
+                    icon.classList.add('text-yellow-500');
+                } else {
+                    icon.classList.remove('text-yellow-500');
+                    icon.classList.add('text-gray-300');
+                }
+            });
+            const messages = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+            ratingText.textContent = messages[currentRating] || 'Click a star to rate';
+        };
+        
+        star.onmouseenter = () => {
+            const rating = parseInt(star.dataset.rating);
+            stars.forEach((s, i) => {
+                const icon = s.querySelector('.star-icon');
+                if (i < rating) {
+                    icon.classList.remove('text-gray-300');
+                    icon.classList.add('text-yellow-400');
+                }
+            });
+        };
+        
+        star.onmouseleave = () => {
+            stars.forEach((s, i) => {
+                const icon = s.querySelector('.star-icon');
+                if (i < currentRating) {
+                    icon.classList.remove('text-yellow-400');
+                    icon.classList.add('text-yellow-500');
+                } else {
+                    icon.classList.remove('text-yellow-400', 'text-yellow-500');
+                    icon.classList.add('text-gray-300');
+                }
+            });
+        };
+    });
+}
+
+function resetRating() {
+    currentRating = 0;
+    document.getElementById('selectedRating').value = 0;
+    document.getElementById('ratingText').textContent = 'Click a star to rate';
+    document.querySelectorAll('.rating-star .star-icon').forEach(icon => {
+        icon.classList.remove('text-yellow-500', 'text-yellow-400');
+        icon.classList.add('text-gray-300');
+    });
+}
+
+async function submitFeedback(event) {
+    event.preventDefault();
+    const rating = document.getElementById('selectedRating').value;
+    const message = document.getElementById('feedbackMessage').value;
+    const submitBtn = document.getElementById('submitFeedbackBtn');
+    
+    if (rating === '0') {
+        showNotification('Please select a rating', 'error');
+        return;
+    }
+    if (!message.trim()) {
+        showNotification('Please enter your feedback', 'error');
+        return;
+    }
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="loading-spinner"></div> Submitting...';
+    
+    try {
+        const response = await fetch('/submit-feedback/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ rating: parseInt(rating), message: message })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('feedbackForm').classList.add('hidden');
+            document.getElementById('feedbackSuccessMessage').classList.remove('hidden');
+            showNotification('Feedback submitted successfully! Thank you!', 'success');
+        } else {
+            showNotification(data.error || 'Error submitting feedback', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Feedback';
+        }
+    } catch (error) {
+        showNotification('Network error. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Feedback';
+    }
+}
+
+function resetFeedbackForm() {
+    document.getElementById('feedbackForm').reset();
+    document.getElementById('feedbackForm').classList.remove('hidden');
+    document.getElementById('feedbackSuccessMessage').classList.add('hidden');
+    document.getElementById('submitFeedbackBtn').disabled = false;
+    document.getElementById('submitFeedbackBtn').innerHTML = '<i class="fas fa-paper-plane"></i> Submit Feedback';
+    resetRating();
+}
+
+// Initialize on load
+window.onload = function() {
+    showDashboard();
+    {% for message in messages %}
+    showNotification("{{ message|escapejs }}", "success");
+    {% endfor %}
+    initRatingStars();
+    
+    // Make radio cards interactive
+    document.querySelectorAll('.radio-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const group = this.closest('.grid');
+            if (group) {
+                group.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+            }
+            this.classList.add('selected');
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+};
+</script>
+</body>
+</html>

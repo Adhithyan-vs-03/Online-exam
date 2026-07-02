@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Plan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0;
+            padding: 20px; 
+            background-color: #f5f5f5; 
+        }
+        .container { 
+            max-width: 500px; 
+            margin: 50px auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+            text-align: center;
+        }
+        h1 { 
+            color: #333; 
+            margin-top: 0;
+        }
+        .plan-details { 
+            background: #f9f9f9; 
+            padding: 20px; 
+            border-radius: 6px; 
+            margin: 20px 0; 
+            text-align: left;
+        }
+        .btn { 
+            padding: 10px 20px; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 16px;
+        }
+        .btn-confirm { 
+            background: #f74a4a; 
+        }
+        .btn-confirm:hover {
+            background: #d32f2f;
+        }
+        .btn-cancel { 
+            background: #6c757d; 
+        }
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+        .warning-icon {
+            font-size: 50px;
+            color: #ff9800;
+            margin-bottom: 15px;
+        }
+        .back-button {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: #4a6cf7;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        .back-button i {
+            margin-right: 8px;
+        }
+        .back-button:hover {
+            background: #3a5bd9;
+        }
+    </style>
+</head>
+<body>
+    <a href="{% url 'plan_list' %}" class="back-button">
+        <i class="fas fa-arrow-left"></i> Back to Plans
+    </a>
+
+    <div class="container">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h1>Delete Plan</h1>
+        <p>Are you sure you want to delete the following plan?</p>
+        <p style="color: #f74a4a; font-weight: bold;">This action cannot be undone.</p>
+        
+        <div class="plan-details">
+            <h2>{{ plan.name }}</h2>
+            <p><strong>Type:</strong> 
+                {% if plan.plan_type == 'neet' %}NEET
+                {% elif plan.plan_type == 'jee' %}JEE
+                {% else %}NEET + JEE Combined
+                {% endif %}
+            </p>
+            <p><strong>Price:</strong> ₹{{ plan.price }} /{{ plan.duration }}</p>
+            <p><strong>Users:</strong> {{ plan.users }}</p>
+            <p><strong>Practice Tests:</strong> {{ plan.practice_tests }}</p>
+            <p><strong>Mock Tests:</strong> {{ plan.full_length_mocks }}</p>
+            <p><strong>Doubt Sessions:</strong> {{ plan.doubt_sessions }}</p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-confirm">
+                <i class="fas fa-trash"></i> Yes, Delete Plan
+            </button>
+            <a href="{% url 'plan_list' %}" class="btn btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </form>
+    </div>
+</body>
+</html>

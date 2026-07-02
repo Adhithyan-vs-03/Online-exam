@@ -1,0 +1,669 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Interface - {{ paper.title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .question-navigation {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+        }
+        .question-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .question-btn.answered { background: #10b981; color: white; border-color: #10b981; }
+        .question-btn.current { background: #3b82f6; color: white; border-color: #3b82f6; }
+        .question-btn.marked { background: #f59e0b; color: white; border-color: #f59e0b; }
+        .subject-tab { 
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .subject-tab.active {
+            border-bottom-color: #3b82f6;
+            color: #3b82f6;
+        }
+        .exam-timer {
+            font-variant-numeric: tabular-nums;
+        }
+        .exam-timer.warning { color: #f59e0b; }
+        .exam-timer.danger { color: #ef4444; animation: pulse 1s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Exam Header -->
+    <div class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0">
+                <div>
+                    <h1 class="text-xl font-bold text-gray-800">{{ paper.title }}</h1>
+                    <div class="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                        <span><i class="far fa-clock mr-1"></i> Duration: {{ exam_time_minutes }} minutes</span>
+                        <span><i class="fas fa-star mr-1"></i> Total Marks: {{ paper.total_marks }}</span>
+                        <span><i class="fas fa-calendar mr-1"></i> {{ paper.exam_date }}</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <!-- Timer -->
+                    <div class="text-center">
+                        <div class="text-sm text-gray-500">Time Remaining</div>
+                        <div id="examTimer" class="exam-timer text-2xl font-bold text-gray-800">
+                            {{ exam_time_minutes|stringformat:"02d" }}:00
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button id="submitExamBtn" 
+                            class="px-6 py-2 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-lg hover:from-red-700 hover:to-pink-700 transition font-semibold">
+                        <i class="fas fa-paper-plane mr-2"></i> Submit Exam
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Subject Tabs -->
+        <div class="border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex space-x-8 overflow-x-auto">
+                    <button class="subject-tab py-3 px-1 font-medium text-gray-600 hover:text-gray-800 whitespace-nowrap active"
+                            onclick="switchSubject('mathematics')">
+                        <i class="fas fa-calculator mr-2"></i> Mathematics
+                        <span class="ml-2 text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">{{ paper.mathematics_questions.count }}</span>
+                    </button>
+                    <button class="subject-tab py-3 px-1 font-medium text-gray-600 hover:text-gray-800 whitespace-nowrap"
+                            onclick="switchSubject('physics')">
+                        <i class="fas fa-atom mr-2"></i> Physics
+                        <span class="ml-2 text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full">{{ paper.physics_questions.count }}</span>
+                    </button>
+                    <button class="subject-tab py-3 px-1 font-medium text-gray-600 hover:text-gray-800 whitespace-nowrap"
+                            onclick="switchSubject('chemistry')">
+                        <i class="fas fa-flask mr-2"></i> Chemistry
+                        <span class="ml-2 text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">{{ paper.chemistry_questions.count }}</span>
+                    </button>
+                    <button class="subject-tab py-3 px-1 font-medium text-gray-600 hover:text-gray-800 whitespace-nowrap"
+                            onclick="switchSubject('biology')">
+                        <i class="fas fa-dna mr-2"></i> Biology
+                        <span class="ml-2 text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">{{ paper.biology_questions.count }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Exam Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Left: Question Navigation -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow p-6 sticky top-40">
+                    <h3 class="font-bold text-gray-800 mb-4">Question Navigation</h3>
+                    
+                    <!-- Question Grid -->
+                    <div class="question-navigation mb-6" id="questionGrid">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center">
+                            <div class="question-btn mr-3 current"></div>
+                            <span class="text-gray-600">Current Question</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="question-btn mr-3 answered"></div>
+                            <span class="text-gray-600">Answered</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="question-btn mr-3 marked"></div>
+                            <span class="text-gray-600">Marked for Review</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="question-btn mr-3"></div>
+                            <span class="text-gray-600">Not Answered</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Summary -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div class="text-center p-3 bg-green-50 rounded-lg">
+                                <div class="text-2xl font-bold text-green-700" id="answeredCount">0</div>
+                                <div class="text-green-600">Answered</div>
+                            </div>
+                            <div class="text-center p-3 bg-yellow-50 rounded-lg">
+                                <div class="text-2xl font-bold text-yellow-700" id="markedCount">0</div>
+                                <div class="text-yellow-600">Marked</div>
+                            </div>
+                            <div class="text-center p-3 bg-blue-50 rounded-lg">
+                                <div class="text-2xl font-bold text-blue-700" id="currentNumber">1</div>
+                                <div class="text-blue-600">Current</div>
+                            </div>
+                            <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                <div class="text-2xl font-bold text-gray-700" id="remainingCount">{{ total_questions }}</div>
+                                <div class="text-gray-600">Remaining</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Question Display -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-xl shadow p-8">
+                    <!-- Subject Header -->
+                    <div class="mb-6">
+                        <h2 id="currentSubject" class="text-2xl font-bold text-gray-800 mb-2">Mathematics</h2>
+                        <p class="text-gray-600" id="subjectInstructions">
+                            This section contains {{ paper.mathematics_questions.count }} questions. 
+                            Each correct answer carries 4 marks, 1 mark will be deducted for each wrong answer.
+                        </p>
+                    </div>
+                    
+                    <!-- Question Display Area -->
+                    <div id="questionDisplay" class="space-y-8 min-h-[400px]">
+                        <!-- Questions will be loaded here -->
+                        <div class="text-center py-16">
+                            <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-4"></i>
+                            <p class="text-gray-600">Loading questions...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between mt-8 pt-8 border-t border-gray-200">
+                        <button id="prevBtn" onclick="prevQuestion()"
+                                class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled>
+                            <i class="fas fa-arrow-left mr-2"></i> Previous
+                        </button>
+                        
+                        <div class="space-x-4">
+                            <button onclick="markForReview()" 
+                                    class="px-6 py-3 border border-yellow-300 text-yellow-700 rounded-lg hover:bg-yellow-50 transition">
+                                <i class="far fa-bookmark mr-2"></i> Mark for Review
+                            </button>
+                            <button onclick="clearResponse()"
+                                    class="px-6 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition">
+                                <i class="fas fa-eraser mr-2"></i> Clear Response
+                            </button>
+                        </div>
+                        
+                        <button id="nextBtn" onclick="nextQuestion()"
+                                class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition">
+                            Next <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Warning Modal -->
+                <div id="warningModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-2xl p-8 max-w-md mx-4">
+                        <div class="text-center mb-6">
+                            <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Warning!</h3>
+                            <p class="text-gray-600">You have <span id="unansweredCount">0</span> unanswered questions. Are you sure you want to submit?</p>
+                        </div>
+                        <div class="flex justify-center space-x-4">
+                            <button onclick="hideWarning()"
+                                    class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                Continue Exam
+                            </button>
+                            <button onclick="forceSubmit()"
+                                    class="px-6 py-2 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-lg hover:from-red-700 hover:to-pink-700">
+                                Submit Anyway
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Exam state
+        const examState = {
+            currentSubject: 'mathematics',
+            currentQuestionIndex: 0,
+            answers: {},
+            markedQuestions: [],
+            startTime: new Date(),
+            totalTime: {{ exam_time_minutes }} * 60, // in seconds
+            timeRemaining: {{ exam_time_minutes }} * 60,
+            timerInterval: null
+        };
+        
+        // Questions data structure
+        const questions = {
+            mathematics: [
+                {% for q in paper.mathematics_questions.all %}
+                {
+                    id: {{ q.id }},
+                    number: {{ forloop.counter }},
+                    text: `{{ q.question|escapejs }}`,
+                    type: '{{ q.question_type }}',
+                    marks: 4,
+                    options: {% if q.question_type == 'objective' %}
+                        [
+                            {% if q.option1 %}'{{ q.option1|escapejs }}'{% endif %},
+                            {% if q.option2 %}'{{ q.option2|escapejs }}'{% endif %},
+                            {% if q.option3 %}'{{ q.option3|escapejs }}'{% endif %},
+                            {% if q.option4 %}'{{ q.option4|escapejs }}'{% endif %},
+                            {% if q.option5 %}'{{ q.option5|escapejs }}'{% endif %}
+                        ].filter(opt => opt)
+                    {% else %}[]{% endif %},
+                    correct_options: '{{ q.correct_options|escapejs }}'
+                },
+                {% endfor %}
+            ],
+            physics: [
+                {% for q in paper.physics_questions.all %}
+                {
+                    id: {{ q.id }},
+                    number: {{ forloop.counter }},
+                    text: `{{ q.question|escapejs }}`,
+                    type: '{{ q.question_type }}',
+                    marks: 4,
+                    options: {% if q.question_type == 'objective' %}
+                        [
+                            {% if q.option1 %}'{{ q.option1|escapejs }}'{% endif %},
+                            {% if q.option2 %}'{{ q.option2|escapejs }}'{% endif %},
+                            {% if q.option3 %}'{{ q.option3|escapejs }}'{% endif %},
+                            {% if q.option4 %}'{{ q.option4|escapejs }}'{% endif %},
+                            {% if q.option5 %}'{{ q.option5|escapejs }}'{% endif %}
+                        ].filter(opt => opt)
+                    {% else %}[]{% endif %}
+                },
+                {% endfor %}
+            ],
+            chemistry: [
+                {% for q in paper.chemistry_questions.all %}
+                {
+                    id: {{ q.id }},
+                    number: {{ forloop.counter }},
+                    text: `{{ q.question|escapejs }}`,
+                    type: '{{ q.question_type }}',
+                    marks: 4,
+                    options: {% if q.question_type == 'objective' %}
+                        [
+                            {% if q.option1 %}'{{ q.option1|escapejs }}'{% endif %},
+                            {% if q.option2 %}'{{ q.option2|escapejs }}'{% endif %},
+                            {% if q.option3 %}'{{ q.option3|escapejs }}'{% endif %},
+                            {% if q.option4 %}'{{ q.option4|escapejs }}'{% endif %},
+                            {% if q.option5 %}'{{ q.option5|escapejs }}'{% endif %}
+                        ].filter(opt => opt)
+                    {% else %}[]{% endif %}
+                },
+                {% endfor %}
+            ],
+            biology: [
+                {% for q in paper.biology_questions.all %}
+                {
+                    id: {{ q.id }},
+                    number: {{ forloop.counter }},
+                    text: `{{ q.question|escapejs }}`,
+                    type: '{{ q.question_type }}',
+                    marks: 4,
+                    options: {% if q.question_type == 'objective' %}
+                        [
+                            {% if q.option1 %}'{{ q.option1|escapejs }}'{% endif %},
+                            {% if q.option2 %}'{{ q.option2|escapejs }}'{% endif %},
+                            {% if q.option3 %}'{{ q.option3|escapejs }}'{% endif %},
+                            {% if q.option4 %}'{{ q.option4|escapejs }}'{% endif %},
+                            {% if q.option5 %}'{{ q.option5|escapejs }}'{% endif %}
+                        ].filter(opt => opt)
+                    {% else %}[]{% endif %}
+                },
+                {% endfor %}
+            ]
+        };
+        
+        // Initialize exam
+        document.addEventListener('DOMContentLoaded', function() {
+            initExam();
+            startTimer();
+            updateNavigation();
+            updateQuestionDisplay();
+            updateSummary();
+        });
+        
+        // Initialize exam
+        function initExam() {
+            // Build question grid
+            let questionNumber = 1;
+            const grid = document.getElementById('questionGrid');
+            grid.innerHTML = '';
+            
+            ['mathematics', 'physics', 'chemistry', 'biology'].forEach(subject => {
+                questions[subject].forEach((q, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'question-btn';
+                    btn.textContent = questionNumber;
+                    btn.dataset.subject = subject;
+                    btn.dataset.index = index;
+                    btn.dataset.globalIndex = questionNumber - 1;
+                    btn.onclick = () => goToQuestion(subject, index);
+                    
+                    grid.appendChild(btn);
+                    questionNumber++;
+                });
+            });
+        }
+        
+        // Timer functions
+        function startTimer() {
+            updateTimerDisplay();
+            examState.timerInterval = setInterval(() => {
+                examState.timeRemaining--;
+                updateTimerDisplay();
+                
+                if (examState.timeRemaining <= 0) {
+                    clearInterval(examState.timerInterval);
+                    autoSubmit();
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const timer = document.getElementById('examTimer');
+            const minutes = Math.floor(examState.timeRemaining / 60);
+            const seconds = examState.timeRemaining % 60;
+            
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Change color based on time
+            timer.classList.remove('warning', 'danger');
+            if (examState.timeRemaining <= 300) { // 5 minutes
+                timer.classList.add('danger');
+            } else if (examState.timeRemaining <= 600) { // 10 minutes
+                timer.classList.add('warning');
+            }
+        }
+        
+        // Navigation functions
+        function switchSubject(subject) {
+            examState.currentSubject = subject;
+            examState.currentQuestionIndex = 0;
+            
+            // Update tabs
+            document.querySelectorAll('.subject-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update subject header
+            document.getElementById('currentSubject').textContent = 
+                subject.charAt(0).toUpperCase() + subject.slice(1);
+            
+            updateQuestionDisplay();
+            updateNavigation();
+        }
+        
+        function goToQuestion(subject, index) {
+            examState.currentSubject = subject;
+            examState.currentQuestionIndex = index;
+            updateQuestionDisplay();
+            updateNavigation();
+        }
+        
+        function nextQuestion() {
+            const currentQuestions = questions[examState.currentSubject];
+            if (examState.currentQuestionIndex < currentQuestions.length - 1) {
+                examState.currentQuestionIndex++;
+            } else {
+                // Move to next subject
+                const subjects = ['mathematics', 'physics', 'chemistry', 'biology'];
+                const currentIndex = subjects.indexOf(examState.currentSubject);
+                if (currentIndex < subjects.length - 1) {
+                    examState.currentSubject = subjects[currentIndex + 1];
+                    examState.currentQuestionIndex = 0;
+                    document.querySelectorAll('.subject-tab')[currentIndex + 1].click();
+                }
+            }
+            updateQuestionDisplay();
+            updateNavigation();
+        }
+        
+        function prevQuestion() {
+            if (examState.currentQuestionIndex > 0) {
+                examState.currentQuestionIndex--;
+            } else {
+                // Move to previous subject
+                const subjects = ['mathematics', 'physics', 'chemistry', 'biology'];
+                const currentIndex = subjects.indexOf(examState.currentSubject);
+                if (currentIndex > 0) {
+                    examState.currentSubject = subjects[currentIndex - 1];
+                    examState.currentQuestionIndex = questions[examState.currentSubject].length - 1;
+                    document.querySelectorAll('.subject-tab')[currentIndex - 1].click();
+                }
+            }
+            updateQuestionDisplay();
+            updateNavigation();
+        }
+        
+        function updateNavigation() {
+            // Update question buttons
+            document.querySelectorAll('.question-btn').forEach(btn => {
+                btn.classList.remove('current', 'answered', 'marked');
+                
+                const subject = btn.dataset.subject;
+                const index = parseInt(btn.dataset.index);
+                const globalIndex = parseInt(btn.dataset.globalIndex);
+                
+                // Check if answered
+                const questionId = `${subject}_${questions[subject][index].id}`;
+                if (examState.answers[questionId]) {
+                    btn.classList.add('answered');
+                }
+                
+                // Check if marked
+                if (examState.markedQuestions.includes(questionId)) {
+                    btn.classList.add('marked');
+                }
+                
+                // Check if current
+                if (subject === examState.currentSubject && 
+                    index === examState.currentQuestionIndex) {
+                    btn.classList.add('current');
+                    document.getElementById('currentNumber').textContent = globalIndex + 1;
+                }
+            });
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = 
+                examState.currentQuestionIndex === 0 && 
+                examState.currentSubject === 'mathematics';
+            
+            // Update summary
+            updateSummary();
+        }
+        
+        function updateQuestionDisplay() {
+            const container = document.getElementById('questionDisplay');
+            const currentQuestions = questions[examState.currentSubject];
+            const question = currentQuestions[examState.currentQuestionIndex];
+            const questionId = `${examState.currentSubject}_${question.id}`;
+            
+            let html = `
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">
+                            Question ${examState.currentQuestionIndex + 1} of ${currentQuestions.length}
+                        </h3>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                            ${question.marks} marks
+                        </span>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                        <p class="text-gray-800 text-lg mb-4">${question.text}</p>
+                        
+                        ${question.type === 'objective' ? `
+                            <div class="space-y-3 mt-6">
+                                ${question.options.map((opt, idx) => `
+                                    <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                        <input type="radio" name="answer_${questionId}" 
+                                               value="${idx}" 
+                                               ${examState.answers[questionId] == idx ? 'checked' : ''}
+                                               onchange="saveAnswer(${idx})"
+                                               class="h-5 w-5 text-blue-600">
+                                        <span class="ml-3 text-gray-800">${String.fromCharCode(65 + idx)}. ${opt}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="mt-6">
+                                <textarea id="descriptive_answer_${questionId}" 
+                                          rows="4"
+                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                          placeholder="Type your answer here..."
+                                          oninput="saveAnswer(this.value)">${examState.answers[questionId] || ''}</textarea>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        // Answer management
+        function saveAnswer(value) {
+            const question = questions[examState.currentSubject][examState.currentQuestionIndex];
+            const questionId = `${examState.currentSubject}_${question.id}`;
+            
+            examState.answers[questionId] = value;
+            updateNavigation();
+        }
+        
+        function markForReview() {
+            const question = questions[examState.currentSubject][examState.currentQuestionIndex];
+            const questionId = `${examState.currentSubject}_${question.id}`;
+            
+            if (!examState.markedQuestions.includes(questionId)) {
+                examState.markedQuestions.push(questionId);
+            }
+            updateNavigation();
+        }
+        
+        function clearResponse() {
+            const question = questions[examState.currentSubject][examState.currentQuestionIndex];
+            const questionId = `${examState.currentSubject}_${question.id}`;
+            
+            delete examState.answers[questionId];
+            const index = examState.markedQuestions.indexOf(questionId);
+            if (index > -1) {
+                examState.markedQuestions.splice(index, 1);
+            }
+            
+            // Clear input
+            if (question.type === 'objective') {
+                document.querySelector(`input[name="answer_${questionId}"]:checked`)?.checked = false;
+            } else {
+                document.getElementById(`descriptive_answer_${questionId}`).value = '';
+            }
+            
+            updateNavigation();
+        }
+        
+        // Summary functions
+        function updateSummary() {
+            let answered = 0;
+            let marked = examState.markedQuestions.length;
+            let total = 0;
+            
+            Object.keys(questions).forEach(subject => {
+                total += questions[subject].length;
+                questions[subject].forEach(q => {
+                    const questionId = `${subject}_${q.id}`;
+                    if (examState.answers[questionId]) {
+                        answered++;
+                    }
+                });
+            });
+            
+            document.getElementById('answeredCount').textContent = answered;
+            document.getElementById('markedCount').textContent = marked;
+            document.getElementById('remainingCount').textContent = total - answered;
+        }
+        
+        // Submit functions
+        document.getElementById('submitExamBtn').addEventListener('click', function() {
+            showWarning();
+        });
+        
+        function showWarning() {
+            let unanswered = 0;
+            Object.keys(questions).forEach(subject => {
+                questions[subject].forEach(q => {
+                    const questionId = `${subject}_${q.id}`;
+                    if (!examState.answers[questionId]) {
+                        unanswered++;
+                    }
+                });
+            });
+            
+            document.getElementById('unansweredCount').textContent = unanswered;
+            document.getElementById('warningModal').classList.remove('hidden');
+        }
+        
+        function hideWarning() {
+            document.getElementById('warningModal').classList.add('hidden');
+        }
+        
+        function forceSubmit() {
+            clearInterval(examState.timerInterval);
+            submitExam();
+        }
+        
+        function autoSubmit() {
+            alert('Time is up! Your exam will be submitted automatically.');
+            submitExam();
+        }
+        
+        function submitExam() {
+            // In a real implementation, this would send data to the server
+            console.log('Submitting exam:', examState);
+            
+            // Show submission screen
+            document.body.innerHTML = `
+                <div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+                    <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-lg text-center">
+                        <i class="fas fa-check-circle text-6xl text-green-500 mb-6"></i>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4">Exam Submitted Successfully!</h2>
+                        <p class="text-gray-600 mb-8">Your answers have been saved. Results will be available soon.</p>
+                        <a href="/student/dashboard/" 
+                           class="inline-block px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition">
+                            Return to Dashboard
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Prevent accidental refresh/close
+        window.addEventListener('beforeunload', function(e) {
+            if (examState.timeRemaining > 0) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            }
+        });
+    </script>
+</body>
+</html>

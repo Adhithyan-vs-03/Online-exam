@@ -1,0 +1,370 @@
+/* * Reset styles */ 
+body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-image: url("/static/images/pexels-t.jpg"); /* Path to your background image */
+    background-size: cover; /* Cover the entire page */
+    background-repeat: no-repeat; /* Prevent repeating */
+    background-attachment: fixed; /* Keep it fixed while scrolling */
+    background-position: center; /* Center the image */
+    
+    
+}
+
+/* Header container styles */
+.header-top1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #bfb4b4; /* Optional: Add a background color */
+    position: fixed; /* Fix it to the top-left of the window */
+    top: 0;
+    left: 0;
+    width: 100%; /* Full width */
+    z-index: 1000; /* Ensure it stays on top */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional shadow */
+    height: 70px; /* Ensure a consistent height for the header */
+    box-sizing: border-box; /* Include padding in height */
+}
+/* Ensure the rest of the content is not hidden */
+.container2 {
+    margin-top: 80px; /* Add space equal to the header height */
+    display: flex; /* Add flex layout to align the sidebar and cards */
+    gap: 20px; /* Space between sidebar and cards */
+    align-content: baseline;
+    padding: 20px;
+    margin-left: 270px; /* Push content away from sidebar */
+}
+
+/* Logo styling */
+.header-top1 .logo1 {
+    border-radius: 15px;
+    width: 180px;
+    height: auto;
+}
+
+/* Header info (welcome and logout button) */
+.header-info1 {
+    display: flex;
+    align-items: center; /* Vertically align items */
+    gap: 20px; /* Space between elements */
+}
+
+/* Welcome message styling */
+.welcome1 {
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Logout button styling */
+.reg1 {
+    background-color: #024e59;
+    color: #fff;
+    font-size: 16px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between text and icon */
+}
+
+/* Hover effect for logout button */
+.reg1:hover {
+    background-color: #013740;
+    color: #ffffff;
+}
+
+/* Main container styling (below header) */
+.container2 {
+    margin-top: 80px; /* Account for fixed header height */
+    display: flex; /* Flex layout for sidebar and cards */
+    gap: 20px;
+    align-content: baseline;
+    padding: 20px;
+}
+
+/* Sidebar styles */
+aside {
+    width: 250px;
+    height: 100vh;
+    padding: 10px;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    position: absolute; /* Fixes the sidebar to the left */
+    left: 0;
+    top: 70px; /* Aligns with the header */
+    overflow-y: auto; /* Enables scrolling if content overflows */
+    z-index: 100; /* Ensures it stays above other elements */
+    background: transparent;
+}
+
+aside ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+aside ul li {
+    padding: 10px;
+    padding-left: 20px;
+    cursor: pointer;
+    background-color: #024e59;
+    color: white;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+aside ul li:hover {
+    background-color: #0f798a;
+}
+
+aside ul li img {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+    top: 5px;
+}
+
+/* Cards container */
+.cards-container {
+    display: flex; /* Use flexbox for side-by-side alignment */
+    justify-content: space-between; /* Equal space between cards */
+    align-items: stretch; /* Ensures equal height */
+    gap: 15px; /* Adds spacing between cards */
+    padding: 20px;
+    max-width: 1000px; /* Set maximum width */
+    margin: 0 auto; /* Center the container */
+}
+
+/* Individual card styling */
+.card {
+    flex: 1; /* Makes all cards equal width */
+    max-width: 30%; /* Ensures 3 cards fit properly */
+    border: 1px solid #ddd;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-radius: 8px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+}
+
+.card img {
+    width: 100%; /* Ensures images fit inside the card */
+    height: auto;
+    border-radius: 5px;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+/* Responsive design */
+@media (max-width: 1024px) {
+    .card {
+        width: calc(50% - 20px); /* Two cards per row on medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .card {
+        width: 100%; /* One card per row on smaller screens */
+    }
+}
+
+
+/* Exam Dropdown */
+.dropdown0 {
+    position: relative;
+    cursor: pointer;
+}
+
+.dropdown-menu0 {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background-color: rgb(255, 255, 255);
+    border: 1px solid #0d0707;
+    list-style: none;
+    padding: 20px;
+    margin: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu0 li {
+    padding: 8px 15px;
+    cursor: pointer;
+    color: #d1d5f5;
+}
+
+.dropdown-menu0 li:hover {
+    background-color: #ffffff;
+}
+
+.profile-button {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 20px;
+    padding: 20px;
+}
+
+form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: auto;
+}
+
+table {
+    width: 100%;
+}
+
+td {
+    padding: 10px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+.error-message {
+    color: red;
+    font-size: 12px;
+    display: none;
+}
+
+fieldset {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+legend {
+    font-weight: bold;
+}
+
+input[type="radio"] {
+    margin-right: 5px;
+}
+
+#backButton {
+    background-color: #dc3545;
+}
+
+#backButton:hover {
+    background-color: #c82333;
+}
+
+
+h3 {
+    font-family: Arial, sans-serif; /* Font style */
+    font-size: 24px;              /* Font size */
+    font-style: italic;
+    font-weight: bold;            /* Font weight */
+    color: #051203;               /* Text color */
+    text-align: center;           /* Center align text */
+    margin: 20px 0;               /* Top and bottom margin */
+    line-height: 1.5;             /* Line height for better readability */
+    text-transform: uppercase;    /* Make text uppercase */
+    letter-spacing: 1px;          /* Space between letters */
+  }
+
+  .error-message {
+    color: #d9534f;           /* Red color for warning */
+    font-weight: bold;        /* Bold font */
+    text-decoration: none;    /* Remove underline */
+    padding: 5px 10px;        /* Add some padding */
+    display: inline-block;    /* Make it behave like a button */
+    font-size: 14px;          /* Adjust font size */
+    transition: all 0.3s ease; /* Smooth hover effect */
+  }
+
+
+  .popup {
+    display: none;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+.popup-content {
+    text-align: center;
+}
+.close-btn {
+    float: right;
+    font-size: 20px;
+    cursor: pointer;
+}
+.notification-icon, .cart-icon {
+    font-size: 22px;
+    color: #333;
+    cursor: pointer;
+    margin-right: 15px;
+    position: relative;
+}
+
+.notification-icon:hover, .cart-icon:hover {
+    color: #024e59;
+}
+
+/* Notification and Cart Badge */
+.notification-icon::after, .cart-icon::after {
+    content: "3"; /* Example number */
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background: red;
+    color: white;
+    font-size: 12px;
+    padding: 3px 6px;
+    border-radius: 50%;
+    font-weight: bold;
+    display: inline-block;
+}
+
+
+

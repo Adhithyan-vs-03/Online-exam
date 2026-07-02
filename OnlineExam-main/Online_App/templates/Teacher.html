@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Academic Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .sidebar-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-item:hover::before {
+            transform: translateX(0);
+        }
+        
+        .sidebar-item.active {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-left: 4px solid #667eea;
+        }
+        
+        .sidebar-item.active::before {
+            display: none;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .form-input {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+        
+        .form-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 87, 108, 0.3);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .dashboard-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+        
+        .table-row {
+            transition: all 0.2s ease;
+        }
+        
+        .table-row:hover {
+            background-color: rgba(102, 126, 234, 0.05);
+        }
+        
+        .tab-content {
+            animation: fadeIn 0.4s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .welcome-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        /* Dropdown animation */
+        #create-exam-dropdown {
+            transition: all 0.3s ease;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+  <!-- Main Container -->
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-72 bg-gradient-to-b from-white to-blue-50 shadow-xl flex flex-col relative z-10">
+      <!-- Logo Section -->
+      <div class="p-8 text-center border-b border-blue-100">
+        <div class="flex items-center justify-center space-x-3">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
+            <i class="fas fa-chalkboard-teacher text-white text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">EduPortal</h1>
+            <p class="text-sm text-gray-500 mt-1">Teacher Dashboard</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Navigation -->
+      <nav class="flex-1 p-6 space-y-3">
+        <!-- Profile -->
+        <div class="sidebar-item card p-4">
+          <a href="#" class="flex items-center space-x-4 text-gray-700 hover:text-indigo-600" id="profile-link">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 flex items-center justify-center">
+              <i class="fas fa-user text-indigo-600"></i>
+            </div>
+            <div>
+              <span class="font-medium">My Profile</span>
+              <p class="text-xs text-gray-500">Update personal details</p>
+            </div>
+          </a>
+        </div>
+      
+        <!-- Student Details -->
+        <div class="sidebar-item card p-4">
+          <a href="{% url 'search_students' %}" class="flex items-center space-x-4 text-gray-700 hover:text-indigo-600">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-100 to-teal-100 flex items-center justify-center">
+              <i class="fas fa-users text-teal-600"></i>
+            </div>
+            <div>
+              <span class="font-medium">Student Details</span>
+              <p class="text-xs text-gray-500">View & manage students</p>
+            </div>
+          </a>
+        </div>
+      
+        <!-- Create Exam Dropdown -->
+        <div class="sidebar-item card p-4 relative">
+          <div class="flex items-center justify-between cursor-pointer text-gray-700 hover:text-indigo-600" id="create-exam-dropdown-btn">
+            <div class="flex items-center space-x-4">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-100 to-orange-100 flex items-center justify-center">
+                <i class="fas fa-plus text-orange-600"></i>
+              </div>
+              <div>
+                <span class="font-medium">Create Exam</span>
+                <p class="text-xs text-gray-500">Create new question papers</p>
+              </div>
+            </div>
+            <i class="fas fa-chevron-down text-gray-400 transition-transform duration-300" id="dropdown-arrow"></i>
+          </div>
+          
+          <!-- Dropdown Menu -->
+          <div id="create-exam-dropdown" class="hidden mt-2 ml-14 space-y-2">
+            <a href="{% url 'question_paper_generator' %}" class="flex items-center space-x-3 p-3 rounded-lg bg-white hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-all duration-300 group">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-100 to-orange-100 flex items-center justify-center">
+                <i class="fas fa-pen text-orange-600 text-sm"></i>
+              </div>
+              <div>
+                <span class="text-sm font-medium text-gray-700 group-hover:text-indigo-600">Manual Create Exam</span>
+                <p class="text-xs text-gray-500">Create exam manually</p>
+              </div>
+            </a>
+            <a href="{% url 'auto_create_exam' %}" class="flex items-center space-x-3 p-3 rounded-lg bg-white hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-all duration-300 group">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-r from-green-100 to-teal-100 flex items-center justify-center">
+                <i class="fas fa-robot text-teal-600 text-sm"></i>
+              </div>
+              <div>
+                <span class="text-sm font-medium text-gray-700 group-hover:text-indigo-600">Auto Create Exam</span>
+                <p class="text-xs text-gray-500">Generate exam automatically</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      
+        <!-- Correction Exam Section -->
+        <div class="sidebar-item card p-4">
+          <a href="{% url 'teacher_pending_evaluations' %}" class="flex items-center space-x-4 text-gray-700 hover:text-indigo-600">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-red-100 to-orange-100 flex items-center justify-center relative">
+              <i class="fas fa-check-double text-orange-600"></i>
+              {% if pending_submissions_count and pending_submissions_count > 0 %}
+              <span class="notification-badge">{{ pending_submissions_count }}</span>
+              {% endif %}
+            </div>
+            <div>
+              <span class="font-medium">Correction Exam</span>
+              <p class="text-xs text-gray-500">Grade student submissions</p>
+            </div>
+          </a>
+        </div>
+      
+        <!-- Exam Schedule -->
+        <div class="sidebar-item card p-4">
+          <a href="#" class="flex items-center space-x-4 text-gray-700 hover:text-indigo-600" id="exam-schedule-link">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 flex items-center justify-center">
+              <i class="fas fa-calendar text-cyan-600"></i>
+            </div>
+            <div>
+              <span class="font-medium">Exam Schedule</span>
+              <p class="text-xs text-gray-500">Schedule & manage exams</p>
+            </div>
+          </a>
+        </div>
+      
+        <!-- Reviews -->
+        <div class="sidebar-item card p-4">
+          <a href="{% url 'feedback_lists' %}" class="flex items-center space-x-4 text-gray-700 hover:text-indigo-600">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-100 to-violet-100 flex items-center justify-center">
+              <i class="fas fa-comments text-violet-600"></i>
+            </div>
+            <div>
+              <span class="font-medium">Reviews</span>
+              <p class="text-xs text-gray-500">Student feedback</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- My Generated Papers -->
+        <div class="sidebar-item card p-4">
+          <a href="{% url 'teacher_generated_papers' %}" class="flex items-center space-x-4 text-gray-700 hover:text-indigo-600">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-100 to-blue-100 flex items-center justify-center relative">
+              <i class="fas fa-file-alt text-blue-600"></i>
+              {% if generated_papers_count and generated_papers_count > 0 %}
+              <span class="notification-badge">{{ generated_papers_count }}</span>
+              {% endif %}
+            </div>
+            <div>
+              <span class="font-medium">My Papers</span>
+              <p class="text-xs text-gray-500">View generated papers</p>
+            </div>
+          </a>
+        </div>
+      </nav>
+      
+      <!-- Logout Section -->
+      <div class="p-6 border-t border-blue-100 mt-auto">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
+              <span class="text-white font-semibold">{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}</span>
+            </div>
+            <div>
+              <p class="font-medium text-gray-800">{{ request.user.get_full_name }}</p>
+              <p class="text-xs text-gray-500">Teacher Account</p>
+            </div>
+          </div>
+        </div>
+        <a href="{% url 'logout' %}" class="btn-secondary w-full text-center">
+          <i class="fas fa-sign-out-alt mr-2"></i>
+          Logout
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-y-auto">
+      <!-- Top Navigation -->
+      <header class="bg-white shadow-sm p-6 flex justify-between items-center sticky top-0 z-10">
+        <div>
+          <h1 class="text-2xl font-bold welcome-header">Welcome back, {{ request.user.first_name }}!</h1>
+          <p class="text-gray-600 mt-1">Here's what's happening with your classes today</p>
+        </div>
+        <div class="flex items-center space-x-6">
+          <button class="relative p-3 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 hover:shadow-md transition">
+            <i class="fas fa-bell text-indigo-600 text-lg"></i>
+            {% if unread_messages_count and unread_messages_count > 0 %}
+            <span class="notification-badge">{{ unread_messages_count }}</span>
+            {% endif %}
+          </button>
+          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
+            <span class="text-white font-semibold">{{ request.user.first_name|first|upper }}</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dynamic Content Area -->
+      <main class="flex-1 p-8 overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
+        <!-- Dashboard Stats (Default View) -->
+        <div id="dashboard-stats" class="tab-content">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Students Card -->
+            <div class="card p-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-500 text-sm font-medium">Total Students</p>
+                  <p class="stat-number">{{ total_students }}</p>
+                  <p class="text-sm {% if growth_percentage > 0 %}text-green-600{% elif growth_percentage < 0 %}text-red-600{% else %}text-gray-600{% endif %} mt-1">
+                    <i class="fas {% if growth_percentage > 0 %}fa-arrow-up{% elif growth_percentage < 0 %}fa-arrow-down{% else %}fa-minus{% endif %} mr-1"></i>
+                    {% if growth_percentage != 0 %}
+                    {{ growth_percentage|floatformat:1 }}% {% if growth_percentage > 0 %}growth{% else %}decline{% endif %}
+                    {% else %}
+                    No change
+                    {% endif %}
+                  </p>
+                </div>
+                <div class="dashboard-icon bg-gradient-to-r from-indigo-100 to-purple-100">
+                  <i class="fas fa-user-graduate text-indigo-600"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Upcoming Exams Card -->
+            <div class="card p-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-500 text-sm font-medium">Upcoming Exams</p>
+                  <p class="stat-number">{{ upcoming_exams }}</p>
+                  <p class="text-sm text-blue-600 mt-1">
+                    <i class="fas fa-calendar mr-1"></i>
+                    {% if upcoming_exams > 0 %}
+                    Next: {{ next_exam_text }}
+                    {% else %}
+                    No upcoming exams
+                    {% endif %}
+                  </p>
+                </div>
+                <div class="dashboard-icon bg-gradient-to-r from-green-100 to-teal-100">
+                  <i class="fas fa-calendar-alt text-teal-600"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Pending Submissions Card -->
+            <div class="card p-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-500 text-sm font-medium">Pending Submissions</p>
+                  <p class="stat-number">{{ pending_submissions_count }}</p>
+                  <p class="text-sm text-orange-600 mt-1">
+                    <i class="fas fa-clock mr-1"></i>
+                    {% if pending_submissions_count > 0 %}
+                    Need grading
+                    {% else %}
+                    All caught up!
+                    {% endif %}
+                  </p>
+                </div>
+                <div class="dashboard-icon bg-gradient-to-r from-yellow-100 to-orange-100">
+                  <i class="fas fa-file-alt text-orange-600"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Messages Card -->
+            <div class="card p-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-500 text-sm font-medium">Unread Messages</p>
+                  <p class="stat-number">{{ unread_messages_count }}</p>
+                  <p class="text-sm text-pink-600 mt-1">
+                    <i class="fas fa-envelope mr-1"></i>
+                    {% if urgent_notifications > 0 %}
+                    {{ urgent_notifications }} urgent
+                    {% else %}
+                    No urgent messages
+                    {% endif %}
+                  </p>
+                </div>
+                <div class="dashboard-icon bg-gradient-to-r from-pink-100 to-rose-100">
+                  <i class="fas fa-envelope text-rose-600"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Recent Activity section -->
+          <div class="card p-6 mb-8">
+            <h2 class="section-title text-xl font-bold text-gray-800">Recent Activity</h2>
+            <div class="space-y-4">
+              {% if recent_activities %}
+                {% for activity in recent_activities %}
+                <div class="flex items-center space-x-4 p-3 {% cycle 'bg-blue-50' 'bg-green-50' 'bg-yellow-50' 'bg-purple-50' %} rounded-lg">
+                  <div class="w-10 h-10 rounded-full {% cycle 'bg-blue-100' 'bg-green-100' 'bg-yellow-100' 'bg-purple-100' %} flex items-center justify-center">
+                    <i class="fas {{ activity.icon|default:'fa-history' }} text-{{ activity.color|default:'gray' }}-600"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium">{{ activity.title|default:"Activity" }}</p>
+                    <p class="text-sm text-gray-600">{{ activity.description|default:"" }}</p>
+                    <p class="text-xs text-gray-500">{{ activity.time|default:"Just now" }}</p>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="text-center py-8">
+                  <i class="fas fa-history text-gray-300 text-4xl mb-3"></i>
+                  <p class="text-gray-500">No recent activities</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Generated Papers Summary -->
+          {% if generated_papers_count > 0 %}
+          <div class="card p-6 mb-8">
+            <h2 class="section-title text-xl font-bold text-gray-800">Your Generated Papers</h2>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-gray-600">You have created <span class="font-bold text-indigo-600">{{ generated_papers_count }}</span> question papers</p>
+                <p class="text-sm text-gray-500 mt-1">Click "My Papers" in the sidebar to view and manage them</p>
+              </div>
+              <a href="{% url 'teacher_generated_papers' %}" class="btn-primary">
+                <i class="fas fa-eye mr-2"></i>
+                View All Papers
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        
+        <!-- Profile Section (Dynamic Content) -->
+        <div id="teacher-profile-section" class="tab-content" style="display: none;">
+          <div class="card p-8">
+            <div class="flex items-center justify-between mb-8">
+              <h2 class="section-title text-2xl font-bold text-gray-800">My Profile</h2>
+              <button class="btn-primary">
+                <i class="fas fa-save mr-2"></i>
+                Save Changes
+              </button>
+            </div>
+            
+            <form action="{% url 'teacher_profile' %}" method="POST" class="space-y-6" enctype="multipart/form-data">
+              {% csrf_token %}
+              
+              <!-- Display messages -->
+              {% if messages %}
+              <div class="mb-4">
+                {% for message in messages %}
+                <div class="p-4 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                  {{ message }}
+                </div>
+                {% endfor %}
+              </div>
+              {% endif %}
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- First Name -->
+                <div>
+                  <label for="firstname" class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-user text-indigo-500 mr-2"></i>First Name
+                  </label>
+                  <input type="text" id="firstname" name="firstname" 
+                        value="{% if request.user.first_name %}{{ request.user.first_name }}{% elif staff.user.first_name %}{{ staff.user.first_name }}{% endif %}" 
+                        class="form-input w-full" required>
+                </div>
+                
+                <!-- Last Name -->
+                <div>
+                  <label for="lastname" class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-user text-indigo-500 mr-2"></i>Last Name
+                  </label>
+                  <input type="text" id="lastname" name="lastname" 
+                        value="{% if request.user.last_name %}{{ request.user.last_name }}{% elif staff.user.last_name %}{{ staff.user.last_name }}{% endif %}" 
+                        class="form-input w-full" required>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Date of Birth -->
+                <div>
+                  <label for="dob" class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-birthday-cake text-indigo-500 mr-2"></i>Date of Birth
+                  </label>
+                  <input type="date" id="dob" name="dob" 
+                        value="{% if staff.dob %}{{ staff.dob|date:'Y-m-d' }}{% endif %}" 
+                        class="form-input w-full">
+                </div>
+                
+                <!-- Email -->
+                <div>
+                  <label for="email" class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-envelope text-indigo-500 mr-2"></i>Email Address
+                  </label>
+                  <input type="email" id="email" name="email" 
+                        value="{% if request.user.email %}{{ request.user.email }}{% elif staff.user.email %}{{ staff.user.email }}{% endif %}" 
+                        class="form-input w-full" required>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Contact Number -->
+                <div>
+                  <label for="contact" class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-phone text-indigo-500 mr-2"></i>Contact Number
+                  </label>
+                  <input type="tel" id="contact" name="contact" 
+                        value="{% if staff.contact %}{{ staff.contact }}{% endif %}" 
+                        class="form-input w-full">
+                </div>
+                
+                <!-- Department -->
+                <div>
+                  <label for="subject" class="block text-gray-700 font-medium mb-2">
+                    <i class="fas fa-book text-indigo-500 mr-2"></i>Department
+                  </label>
+                  <select id="subject" name="subject" class="form-input w-full">
+                    <option value="" {% if not staff.subject %}selected{% endif %}>Select your subject</option>
+                    <option value="Mathematics" {% if staff.subject == "Mathematics" %}selected{% endif %}>Mathematics</option>
+                    <option value="Physics" {% if staff.subject == "Physics" %}selected{% endif %}>Physics</option>
+                    <option value="Chemistry" {% if staff.subject == "Chemistry" %}selected{% endif %}>Chemistry</option>
+                    <option value="Biology" {% if staff.subject == "Biology" %}selected{% endif %}>Biology</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Address -->
+              <div>
+                <label for="address" class="block text-gray-700 font-medium mb-2">
+                  <i class="fas fa-map-marker-alt text-indigo-500 mr-2"></i>Address
+                </label>
+                <textarea id="address" name="address" rows="3" 
+                          class="form-input w-full">{% if staff.address %}{{ staff.address }}{% endif %}</textarea>
+              </div>
+              
+              <!-- Profile Picture (Optional) -->
+              <div>
+                <label for="profile_picture" class="block text-gray-700 font-medium mb-2">
+                  <i class="fas fa-camera text-indigo-500 mr-2"></i>Profile Picture
+                </label>
+                <input type="file" id="profile_picture" name="profile_picture" 
+                      class="form-input w-full" accept="image/*">
+                {% if staff.profile_picture %}
+                <div class="mt-2">
+                  <p class="text-sm text-gray-600">Current:</p>
+                  <img src="{{ staff.profile_picture.url }}" alt="Profile" class="w-24 h-24 rounded-full object-cover mt-2">
+                </div>
+                {% endif %}
+              </div>
+              
+              <div class="pt-6 border-t border-gray-200">
+                <button type="submit" class="btn-primary w-full py-4 text-lg">
+                  <i class="fas fa-user-check mr-2"></i>
+                  Update Profile
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- Exam Schedule Section (Dynamic Content) -->
+        <div id="exam-schedule-section" class="tab-content" style="display: none;">
+          <div class="card p-8">
+            <h2 class="section-title text-2xl font-bold text-gray-800 mb-8">Exam Schedule Management</h2>
+            
+            <!-- Add Exam Form -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl mb-8">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Schedule New Exam</h3>
+              <form id="exam-form" method="POST" action="{% url 'Save_exam_details' %}" class="space-y-4">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <!-- Exam Date -->
+                  <div>
+                    <label for="exam-date" class="block text-gray-700 font-medium mb-2">
+                      <i class="far fa-calendar text-blue-500 mr-2"></i>Exam Date
+                    </label>
+                    <input type="date" id="exam-date" name="exam_date" 
+                           class="form-input w-full" required>
+                  </div>
+                  
+                  <!-- Exam Time -->
+                  <div>
+                    <label for="exam-time" class="block text-gray-700 font-medium mb-2">
+                      <i class="far fa-clock text-blue-500 mr-2"></i>Exam Time
+                    </label>
+                    <input type="time" id="exam-time" name="exam_time" 
+                           class="form-input w-full" required>
+                  </div>
+                  
+                  <!-- Subject -->
+                  <div>
+                    <label for="exam-subject" class="block text-gray-700 font-medium mb-2">
+                      <i class="fas fa-book-open text-blue-500 mr-2"></i>Subject
+                    </label>
+                    <select id="exam-subject" name="exam_subject" class="form-input w-full" required>
+                      <option value="" disabled selected>Select Subject</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Physics">Physics</option>
+                      <option value="Chemistry">Chemistry</option>
+                      <option value="Biology">Biology</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="flex justify-end">
+                  <button type="submit" class="btn-primary">
+                    <i class="fas fa-plus-circle mr-2"></i>
+                    Add Exam Schedule
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <!-- Exam Schedule Table -->
+            <div class="overflow-x-auto rounded-2xl shadow-sm">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">Scheduled Exams</h3>
+              <table class="w-full">
+                <thead>
+                  <tr class="bg-gradient-to-r from-gray-50 to-blue-50">
+                    <th class="px-6 py-4 text-left text-gray-700 font-semibold">Exam Date</th>
+                    <th class="px-6 py-4 text-left text-gray-700 font-semibold">Exam Time</th>
+                    <th class="px-6 py-4 text-left text-gray-700 font-semibold">Subject</th>
+                    <th class="px-6 py-4 text-left text-gray-700 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for exam in exams %}
+                  <tr class="table-row border-b border-gray-100">
+                    <td class="px-6 py-4 font-medium">
+                      <i class="far fa-calendar text-indigo-500 mr-2"></i>
+                      {{ exam.exam_date }}
+                    </td>
+                    <td class="px-6 py-4">
+                      <i class="far fa-clock text-blue-500 mr-2"></i>
+                      {{ exam.exam_time }}
+                    </td>
+                    <td class="px-6 py-4">
+                      <span class="px-3 py-1 rounded-full text-sm font-medium 
+                        {% if exam.exam_subject == 'Mathematics' %}bg-blue-100 text-blue-800
+                        {% elif exam.exam_subject == 'Physics' %}bg-purple-100 text-purple-800
+                        {% elif exam.exam_subject == 'Chemistry' %}bg-green-100 text-green-800
+                        {% else %}bg-pink-100 text-pink-800{% endif %}">
+                        {{ exam.exam_subject }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4">
+                      {% if exam.exam_date > today %}
+                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                          <i class="fas fa-clock mr-1"></i> Upcoming
+                        </span>
+                      {% else %}
+                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                          <i class="fas fa-check mr-1"></i> Completed
+                        </span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                      <i class="far fa-calendar-times text-3xl mb-3 block text-gray-300"></i>
+                      No exams scheduled yet. Add one above!
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Get DOM elements
+    const profileLink = document.getElementById("profile-link");
+    const examScheduleLink = document.getElementById("exam-schedule-link");
+    const profileSection = document.getElementById("teacher-profile-section");
+    const examScheduleSection = document.getElementById("exam-schedule-section");
+    const dashboardStats = document.getElementById("dashboard-stats");
+
+    // Get all sidebar items
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
+
+    // Function to hide all sections
+    function hideAllSections() {
+      profileSection.style.display = "none";
+      examScheduleSection.style.display = "none";
+      dashboardStats.style.display = "none";
+    }
+
+    // Function to remove active class from all sidebar items
+    function removeActiveClasses() {
+      sidebarItems.forEach(item => {
+        item.classList.remove('active');
+      });
+    }
+
+    // Show dashboard by default
+    function showDashboard() {
+      hideAllSections();
+      dashboardStats.style.display = "block";
+      removeActiveClasses();
+    }
+
+    // Show Profile section
+    profileLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      hideAllSections();
+      profileSection.style.display = "block";
+      removeActiveClasses();
+      profileLink.closest('.sidebar-item').classList.add('active');
+    });
+
+    // Show Exam Schedule section
+    examScheduleLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      hideAllSections();
+      examScheduleSection.style.display = "block";
+      removeActiveClasses();
+      examScheduleLink.closest('.sidebar-item').classList.add('active');
+    });
+
+    // Initialize with dashboard view
+    showDashboard();
+
+    // Add hover effects to table rows
+    document.addEventListener('DOMContentLoaded', function() {
+      const tableRows = document.querySelectorAll('.table-row');
+      tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateX(5px)';
+        });
+        row.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateX(0)';
+        });
+      });
+    });
+
+    // Form validation
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+          if (!field.value.trim()) {
+            field.style.borderColor = '#f56565';
+            isValid = false;
+          } else {
+            field.style.borderColor = '#e2e8f0';
+          }
+        });
+        
+        if (!isValid) {
+          e.preventDefault();
+          alert('Please fill all required fields.');
+        }
+      });
+    });
+
+    // Dropdown toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropdownBtn = document.getElementById('create-exam-dropdown-btn');
+      const dropdown = document.getElementById('create-exam-dropdown');
+      const arrow = document.getElementById('dropdown-arrow');
+      
+      if (dropdownBtn && dropdown && arrow) {
+        dropdownBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          dropdown.classList.toggle('hidden');
+          arrow.classList.toggle('rotate-180');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+          const isClickInside = dropdownBtn.contains(event.target) || dropdown.contains(event.target);
+          if (!isClickInside) {
+            dropdown.classList.add('hidden');
+            arrow.classList.remove('rotate-180');
+          }
+        });
+        
+        // Prevent closing when clicking on dropdown items
+        dropdown.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
+    });
+  </script>
+</body>
+</html>

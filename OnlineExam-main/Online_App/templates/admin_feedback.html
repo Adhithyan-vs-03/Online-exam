@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Feedback Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .delete-btn {
+            color: red;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Feedback Management</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Message</th>
+                <th>Created At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for feedback in feedback_list %}
+            <tr>
+                <td>{{ feedback.name|default:"Anonymous" }}</td>
+                <td>{{ feedback.email|default:"N/A" }}</td>
+                <td>{{ feedback.message }}</td>
+                <td>{{ feedback.created_at }}</td>
+                <td>
+                    <form action="{% url 'delete_feedback' feedback.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this feedback?');">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center;">No feedback available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

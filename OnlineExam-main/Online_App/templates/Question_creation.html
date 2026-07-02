@@ -1,0 +1,3759 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Add this in the <head> section after other script tags -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Paper Generator - Select Questions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .question-paper {
+            background: white;
+            min-height: 297mm;
+            padding: 20mm;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            font-family: 'Times New Roman', Times, serif;
+        }
+        
+       .question-number {
+    font-weight: bold;
+    min-width: 30px;
+    display: inline-block;
+    vertical-align: top; /* This ensures alignment with the question text */
+}
+        
+        .section-title {
+            border-bottom: 2px solid black;
+            padding-bottom: 5px;
+            margin: 30px 0 15px 0;
+        }
+        
+       .question-box {
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+    display: flex; /* Changed to flex for better alignment */
+    align-items: flex-start; /* Align items at the top */
+}
+
+/* Remove the inline-block width from the question content */
+.question-box > div:last-child {
+    flex: 1; /* Take remaining space */
+}
+
+        
+        .mcq-options {
+            margin-left: 30px;
+            margin-top: 10px;
+        }
+        
+        .option-letter {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        /* Print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .question-paper, .question-paper * {
+                visibility: visible;
+            }
+            .question-paper {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+                padding: 15mm;
+            }
+        }
+        
+        .filter-section {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: #f9fafb;
+        }
+        
+        .selected-questions {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: #f8f9fa;
+        }
+        
+        .question-card {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: white;
+            transition: all 0.2s;
+        }
+        
+        .question-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+        
+        .question-preview {
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.875rem;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            background: #f9fafb;
+        }
+        
+        .subject-tab {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .subject-tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .question-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-mcq { background: #dbeafe; color: #1e40af; }
+        .badge-descriptive { background: #dcfce7; color: #166534; }
+        .badge-numerical { background: #fef3c7; color: #92400e; }
+        .badge-truefalse { background: #f3e8ff; color: #6b21a8; }
+        .badge-match { background: #ffe4e6; color: #be123c; }
+        .badge-fillblank { background: #ffedd5; color: #9a3412; }
+        .badge-short { background: #bbf7d0; color: #166534; }
+        .badge-long { background: #fecaca; color: #991b1b; }
+        .badge-diagram { background: #e9d5ff; color: #7c3aed; }
+        .badge-graph { background: #fed7aa; color: #ea580c; }
+        
+        .marks-badge {
+            background: #10b981;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .selected-question-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+            background: white;
+        }
+        
+        .subject-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+        
+        /* Subject-specific colors */
+        .subject-math { background: #3b82f6; color: white; }
+        .subject-physics { background: #10b981; color: white; }
+        .subject-chemistry { background: #8b5cf6; color: white; }
+        .subject-biology { background: #ef4444; color: white; }
+        .subject-english { background: #f59e0b; color: white; }
+        .subject-history { background: #ec4899; color: white; }
+        .subject-geography { background: #14b8a6; color: white; }
+        .subject-computer { background: #6366f1; color: white; }
+        .subject-economics { background: #f97316; color: white; }
+        .subject-accountancy { background: #84cc16; color: white; }
+        .subject-business { background: #06b6d4; color: white; }
+        .subject-default { background: #6b7280; color: white; }
+        
+        .difficulty-easy { color: #10b981; }
+        .difficulty-medium { color: #f59e0b; }
+        .difficulty-hard { color: #ef4444; }
+        
+        /* Logo and Header Styles */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-preview {
+            width: 80px;
+            height: 80px;
+            border: 2px dashed #ccc;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #f9fafb;
+            margin-right: 20px;
+        }
+        
+        .logo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        
+        .logo-controls {
+            flex: 1;
+        }
+
+        .signature-preview {
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        padding: 5px;
+        background: #f9fafb;
+        display: inline-block;
+        }
+
+        .signature-preview img {
+            vertical-align: middle;
+        }
+        
+        /* Additional Activities Styles */
+        .additional-activities {
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: #f9fafb;
+        }
+        
+        .activity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .activity-item {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            background: white;
+            cursor: move;
+        }
+        
+        .activity-item:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .activity-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #3b82f6;
+        }
+        
+        .activity-section {
+            border: 1px dashed #d1d5db;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            min-height: 100px;
+            background: #fafafa;
+        }
+        
+        .activity-section.active {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .generated-activity {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: white;
+        }
+        
+        /* Paper Header Styles */
+        .paper-header {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .paper-header-with-logo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .school-logo-left, .school-logo-right {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%; /* Make container circular */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden; /* Hide any overflow */
+            border: 2px solid #e5e7eb; /* Optional border */
+        }
+        .school-logo-left img, .school-logo-right img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensure image covers the circle */
+        }
+        .school-info {
+            flex: 1;
+            padding: 0 20px;
+            text-align: center;
+        }
+        
+        .school-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1e3a8a;
+        }
+        
+        .school-address {
+            font-size: 14px;
+            color: #4b5563;
+            margin-bottom: 5px;
+        }
+        
+        .school-contact {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        /* Additional Paper Elements */
+        .paper-footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .signature-section {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px dashed #333;
+        }
+        
+        .signature-box {
+            text-align: center;
+            width: 200px;
+        }
+        
+        .signature-line {
+            width: 100%;
+            border-top: 1px solid #333;
+            margin-top: 40px;
+            margin-bottom: 5px;
+        }
+        
+        .watermark {
+            position: fixed;
+            opacity: 0.1;
+            font-size: 120px;
+            transform: rotate(-45deg);
+            z-index: -1;
+            color: #ccc;
+        }
+        
+        /* Grid System for Additional Elements */
+        .grid-2-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f9fafb;
+        }
+        @media print, (min-resolution: 120dpi) {
+    .question-paper {
+        font-size: 12pt !important;
+        line-height: 1.5 !important;
+    }
+    
+    .question-box {
+        margin-bottom: 15px !important;
+        page-break-inside: avoid !important;
+    }
+    
+    .section-title {
+        page-break-after: avoid !important;
+    }
+}
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Question Paper Generator</h1>
+            <p class="text-gray-600">Select questions from database → Format paper → Print/Save</p>
+        </div>
+        
+        <!-- Logo Management Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4 text-blue-600">
+                <i class="fas fa-image mr-2"></i>Logo & Header Setup
+            </h2>
+            
+            <div class="logo-container">
+                <div class="logo-preview" id="logoPreview">
+                    <div class="text-gray-400 text-center">
+                        <i class="fas fa-school text-3xl mb-2"></i>
+                        <p class="text-sm">No Logo</p>
+                    </div>
+                </div>
+                
+                <div class="logo-controls">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">School/Institute Name</label>
+                            <input type="text" id="schoolName" value="Your School Name" 
+                                   class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Address</label>
+                            <input type="text" id="schoolAddress" value="City, State, PIN Code" 
+                                   class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Phone/Email</label>
+                            <input type="text" id="schoolContact" value="Phone: 1234567890 | Email: school@example.com" 
+                                   class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Affiliation No.</label>
+                            <input type="text" id="affiliationNo" value="Affiliation No: 123456" 
+                                   class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm font-medium mb-2">Upload Logo (Left)</label>
+                            <div class="flex gap-2">
+                                <input type="file" id="logoUpload" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                                <button onclick="document.getElementById('logoUpload').click()" 
+                                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    <i class="fas fa-upload mr-2"></i>Upload Logo
+                                </button>
+                                <button onclick="useDefaultLogo()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                                    Use Default
+                                </button>
+                            </div>
+                        </div>
+                        
+                       <div class="flex-1">
+                            <label class="block text-sm font-medium mb-2">Logo Position</label>
+                            <select id="logoPosition" class="w-full p-2 border border-gray-300 rounded">
+                                <option value="center">Center Only</option>
+                                <option value="none">No Logo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Activities Section -->
+        <div class="additional-activities">
+            <h2 class="text-xl font-bold mb-4 text-green-600">
+                <i class="fas fa-plus-circle mr-2"></i>Additional Paper Elements
+            </h2>
+            
+            <p class="text-gray-600 mb-4">Drag and drop additional elements to include in your question paper:</p>
+            
+            <div class="activity-grid" id="activitiesPool">
+                <!-- Activity Items -->
+                <div class="activity-item" data-type="watermark" draggable="true">
+                    <div class="activity-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <h4 class="font-bold text-sm">Watermark</h4>
+                    <p class="text-xs text-gray-500">Confidential/Important notice</p>
+                </div>
+                
+                <div class="activity-item" data-type="signature" draggable="true">
+                    <div class="activity-icon">
+                        <i class="fas fa-signature"></i>
+                    </div>
+                    <h4 class="font-bold text-sm">Signature Section</h4>
+                    <p class="text-xs text-gray-500">Examiner/Principal signatures</p>
+                </div>
+                
+                <div class="activity-item" data-type="instructions" draggable="true">
+                    <div class="activity-icon">
+                        <i class="fas fa-list-ol"></i>
+                    </div>
+                    <h4 class="font-bold text-sm">Extra Instructions</h4>
+                    <p class="text-xs text-gray-500">Additional guidelines</p>
+                </div>
+                
+                <div class="activity-item" data-type="grading" draggable="true">
+                    <div class="activity-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h4 class="font-bold text-sm">Grading Scheme</h4>
+                    <p class="text-xs text-gray-500">Marks distribution details</p>
+                </div>
+                
+                <div class="activity-item" data-type="footer" draggable="true">
+                    <div class="activity-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h4 class="font-bold text-sm">Paper Footer</h4>
+                    <p class="text-xs text-gray-500">Page numbers, copyright</p>
+                </div>
+                
+                <div class="activity-item" data-type="warning" draggable="true">
+                    <div class="activity-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h4 class="font-bold text-sm">Important Warning</h4>
+                    <p class="text-xs text-gray-500">Cheating warnings</p>
+                </div>
+                
+                <div class="activity-item" data-type="answer_sheet" draggable="true">
+                    <div class="activity-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <h4 class="font-bold text-sm">Answer Sheet</h4>
+                    <p class="text-xs text-gray-500">Separate answer sheet</p>
+                </div>
+                
+                <div class="activity-item" data-type="formula" draggable="true">
+                    <div class="activity-icon">
+                        <i class="fas fa-square-root-alt"></i>
+                    </div>
+                    <h4 class="font-bold text-sm">Formula Sheet</h4>
+                    <p class="text-xs text-gray-500">Important formulas</p>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <h3 class="text-lg font-bold mb-3">Drop Additional Elements Here:</h3>
+                <div class="activity-section" id="additionalElementsDropzone" 
+     ondrop="dropActivity(event)" ondragover="allowDropActivity(event)">
+    <div id="selectedActivitiesContainer"></div>
+    <div class="text-center py-8 text-gray-400" id="emptyDropzoneMessage">
+        <i class="fas fa-arrow-down text-3xl mb-4"></i>
+        <p>Drag and drop additional elements here</p>
+        <p class="text-sm">They will appear at the end of your paper</p>
+    </div>
+</div>
+            </div>
+            
+            <!-- Configure Selected Activities -->
+            <div id="activityConfigPanel" class="hidden mt-4 p-4 border border-gray-200 rounded bg-white">
+                <h4 class="font-bold mb-3">Configure Selected Element</h4>
+                <div id="activityConfigContent"></div>
+            </div>
+        </div>
+        
+        <!-- Paper Settings -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4 text-blue-600">
+                <i class="fas fa-cog mr-2"></i>Paper Settings
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Exam Name</label>
+                    <input type="text" id="examName" value="Mid-Term Examination" 
+                           class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+           <select id="classFilter" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+    <option value="">Select Class</option>
+    {% for class in classes %}
+        <option value="{{ Class.id }}">{{ class.class_name }}</option>
+    {% empty %}
+        <option value="">No classes available</option>
+    {% endfor %}
+</select>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Course</label>
+                    <select id="courseFilter" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Courses</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Total Marks</label>
+                    <input type="number" id="totalMarks" value="100" 
+                           class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Time Duration</label>
+                    <input type="text" id="timeDuration" value="3 hours" 
+                           class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Date</label>
+                    <input type="date" id="examDate" 
+                           class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            
+            <!-- Instructions Textarea -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">General Instructions</label>
+                <textarea id="instructions" rows="3" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+All questions are compulsory.
+Read each question carefully before answering.
+Write answers in the space provided.
+Use blue/black ballpoint pen only.
+Calculators are not allowed unless specified.
+Write your roll number on every page.
+                </textarea>
+            </div>
+        </div>
+        
+        <!-- Filter Questions Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-bold mb-4 text-green-600">
+                <i class="fas fa-filter mr-2"></i>Filter Questions
+            </h2>
+            
+            <div class="filter-section">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Subject</label>
+                        <select id="filterSubject" class="w-full p-2 border border-gray-300 rounded">
+    <option value="">All Subjects</option>
+    {% for subject in subjects %}
+    <option value="{{ subject.id }}" data-class-id="{{ subject.class_name.id }}">
+        {{ subject.name }} ({{ subject.class_name.class_name }})
+    </option>
+    {% endfor %}
+</select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Question Type</label>
+                        <select id="filterType" class="w-full p-2 border border-gray-300 rounded">
+                            <option value="">All Types</option>
+                            <option value="objective">MCQ</option>
+                            <option value="descriptive">Descriptive</option>
+                            <option value="numerical">Numerical</option>
+                            <option value="true_false">True/False</option>
+                            <option value="match_following">Match Following</option>
+                            <option value="fill_in_the_blanks">Fill in Blanks</option>
+                            <option value="short_answer">Short Answer</option>
+                            <option value="long_answer">Long Answer</option>
+                            <option value="diagram_based">Diagram Based</option>
+                            <option value="graph_based">Graph Based</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Difficulty</label>
+                        <select id="filterDifficulty" class="w-full p-2 border border-gray-300 rounded">
+                            <option value="">All Levels</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Marks</label>
+                        <select id="filterMarks" class="w-full p-2 border border-gray-300 rounded">
+                            <option value="">All Marks</option>
+                            <option value="1">1 mark</option>
+                            <option value="2">2 marks</option>
+                            <option value="3">3 marks</option>
+                            <option value="4">4 marks</option>
+                            <option value="5">5 marks</option>
+                            <option value="10">10 marks</option>
+                        </select>
+                    </div>
+                    
+                    <!-- <div>
+                        <label class="block text-sm font-medium mb-2">Chapter</label>
+                        <select id="filterChapter" class="w-full p-2 border border-gray-300 rounded">
+    <option value="">All Chapters</option>
+    {% for chapter in chapters %}
+        <option value="{{ chapter.id }}">{{ chapter.name }}</option>
+    {% endfor %}
+</select>
+                    </div> -->
+                   <div>
+    <label class="block text-sm font-medium mb-2">Chapter</label>
+    <select id="filterChapter" class="w-full p-2 border border-gray-300 rounded" multiple style="height: 150px;">
+        <option value="">Select a subject first</option>
+    </select>
+    <div class="mt-2 text-xs text-gray-500">
+        <i class="fas fa-info-circle mr-1"></i> Select a subject first, then hold Ctrl/Cmd to select multiple chapters
+    </div>
+</div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Search Questions</label>
+                    <div class="relative">
+                        <input type="text" id="searchQuestions" 
+                               placeholder="Search by question text, chapter, or topic..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-search absolute left-3 top-3.5 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between">
+                    <button onclick="applyFilters()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <i class="fas fa-filter mr-2"></i>Apply Filters
+                    </button>
+                    <button onclick="clearFilters()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                        <i class="fas fa-redo mr-2"></i>Clear Filters
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Subject Tabs -->
+<div class="mb-4">
+    <h3 class="text-lg font-bold mb-3 text-gray-700">Browse by Subject</h3>
+    <div class="flex flex-wrap gap-2 mb-4" id="subjectTabsContainer">
+        <!-- Subject tabs will be loaded dynamically -->
+        <div class="text-center py-4 text-gray-500">
+            <i class="fas fa-spinner fa-spin text-lg mr-2"></i>
+            Loading subjects...
+        </div>
+    </div>
+    
+    <!-- Questions List -->
+    <div id="questionsList" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto p-4 border border-gray-200 rounded-lg">
+        <div class="col-span-2 text-center py-8 text-gray-500">
+            <i class="fas fa-search text-3xl mb-4"></i>
+            <p>Apply filters to see questions from database</p>
+            <p class="text-sm">Or select a subject tab above</p>
+        </div>
+    </div>
+</div>
+            
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="hidden text-center py-4">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p class="mt-2 text-gray-600">Loading questions...</p>
+            </div>
+            
+            <!-- Pagination -->
+            <div id="pagination" class="hidden flex justify-center items-center space-x-2 mt-4">
+                <button onclick="changePage(-1)" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <span class="text-sm text-gray-600" id="pageInfo">Page 1 of 1</span>
+                <button onclick="changePage(1)" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Selected Questions Section -->
+        <div class="selected-questions">
+            <h2 class="text-xl font-bold mb-4 text-purple-600">
+                <i class="fas fa-clipboard-list mr-2"></i>Selected Questions
+                <span id="selectedCount" class="ml-2 bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">0</span>
+                <span id="totalMarksSelected" class="ml-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">0 marks</span>
+            </h2>
+            
+            <!-- Selected Questions Container -->
+            <div id="selectedQuestionsContainer" class="mb-4 max-h-[300px] overflow-y-auto p-2 border border-gray-200 rounded-lg">
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-clipboard text-3xl mb-4"></i>
+                    <p>No questions selected yet</p>
+                    <p class="text-sm">Select questions from the list above</p>
+                </div>
+            </div>
+            
+            <!-- Arrange Sections -->
+            <div class="mb-6">
+                <h3 class="text-lg font-bold mb-3">Arrange Sections</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-3 border border-blue-200 rounded bg-blue-50">
+                        <h4 class="font-bold text-blue-700 mb-2">Section A: Objective</h4>
+                        <div id="mcqSection" class="min-h-[100px] border-2 border-dashed border-blue-300 rounded p-2 mb-2">
+                            <!-- Objective questions will be moved here -->
+                        </div>
+                        <div class="text-sm text-blue-600">
+                            <i class="fas fa-info-circle mr-1"></i> Drag objective questions here
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 border border-green-200 rounded bg-green-50">
+                        <h4 class="font-bold text-green-700 mb-2">Section B: Subjective</h4>
+                        <div id="shortSection" class="min-h-[100px] border-2 border-dashed border-green-300 rounded p-2 mb-2">
+                            <!-- Subjective questions will be moved here -->
+                        </div>
+                        <div class="text-sm text-green-600">
+                            <i class="fas fa-info-circle mr-1"></i> Drag subjective questions here
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 border border-purple-200 rounded bg-purple-50">
+                        <h4 class="font-bold text-purple-700 mb-2">Section C: Applied</h4>
+                        <div id="longSection" class="min-h-[100px] border-2 border-dashed border-purple-300 rounded p-2 mb-2">
+                            <!-- Applied questions will be moved here -->
+                        </div>
+                        <div class="text-sm text-purple-600">
+                            <i class="fas fa-info-circle mr-1"></i> Drag applied questions here
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Or organize by subject -->
+                <!-- <div class="mt-6">
+                    <h4 class="font-bold text-gray-700 mb-2">Or organize by subject:</h4>
+                    <div id="subjectSections" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                         Subject sections will be generated dynamically -->
+                    <!-- </div>
+                </div> --> 
+            </div>
+            
+            <!-- Generate Button -->
+            <div class="text-center mt-8">
+                <button onclick="generateQuestionPaper()" 
+                        class="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 text-lg font-semibold">
+                    <i class="fas fa-file-alt mr-2"></i> GENERATE FORMATTED PAPER
+                </button>
+                <p class="text-sm text-gray-500 mt-2">Paper will be formatted with selected questions</p>
+            </div>
+        </div>
+        
+        <!-- Generated Question Paper Preview -->
+        <div id="paperPreview" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Formatted Question Paper</h2>
+                <div class="space-x-2">
+                    <button onclick="printPaper()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                        <i class="fas fa-print mr-2"></i>Print
+                    </button>
+                    <button onclick="downloadPDF()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                        <i class="fas fa-file-pdf mr-2"></i>Download PDF
+                    </button>
+                    <button onclick="saveToDatabase()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                        <i class="fas fa-save mr-2"></i>publish
+                    </button>
+
+                    <!-- <button onclick="publishExam()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    <i class="fas fa-paper-plane mr-2"></i>Publish Exam
+                    </button> -->
+                    <!-- <button onclick="regeneratePaper()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
+                        <i class="fas fa-redo mr-2"></i>Regenerate
+                    </button>  -->
+                </div>
+            </div>
+            
+            <!-- Generated Paper -->
+            <div id="generatedPaper" class="question-paper">
+                <!-- Paper will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+// ================================
+// GLOBAL VARIABLES
+// ================================
+let allQuestions = [];
+let selectedQuestions = new Map();
+let currentSubjectTab = 'all';
+let currentPage = 1;
+let totalPages = 1;
+let pageSize = 10;
+let availableSubjects = [];
+let selectedActivities = [];
+let schoolLogo = null;
+let teacherSettings = null;
+let autoSaveTimeout = null;
+
+// ================================
+// GLOBAL FUNCTIONS (accessible to HTML onclick)
+// ================================
+
+// Apply Filters - GLOBAL
+function applyFilters() {
+    console.log("Applying filters...");
+    currentPage = 1;
+    loadQuestions();
+}
+
+// Clear Filters - GLOBAL
+function clearFilters() {
+    console.log("Clearing filters...");
+    
+    // Clear input fields
+    document.getElementById('filterSubject').value = '';
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterDifficulty').value = '';
+    document.getElementById('filterMarks').value = '';
+    document.getElementById('filterChapter').value = '';
+    document.getElementById('classFilter').value = '';
+    document.getElementById('courseFilter').value = '';
+    document.getElementById('searchQuestions').value = '';
+    
+    // Update Select2 dropdowns
+    $('#filterSubject').val('').trigger('change');
+    $('#filterType').val('').trigger('change');
+    $('#filterDifficulty').val('').trigger('change');
+    $('#filterMarks').val('').trigger('change');
+    $('#filterChapter').val('').trigger('change');
+    $('#courseFilter').val('').trigger('change');
+    $('#classFilter').val('').trigger('change');
+    
+    currentPage = 1;
+    currentSubjectTab = 'all';
+    loadQuestions();
+    
+    // Reset subject tabs
+    updateSubjectTabsActiveState();
+}
+
+// Change Subject Tab - GLOBAL
+function changeSubjectTab(subjectId) {
+    currentSubjectTab = subjectId;
+    currentPage = 1;
+    
+    // Update active tab
+    updateSubjectTabsActiveState();
+    
+    // Load questions for this subject
+    loadQuestions();
+}
+
+// Update active state of subject tabs
+function updateSubjectTabsActiveState() {
+    document.querySelectorAll('.subject-tab').forEach(tab => {
+        if (tab.dataset.subjectId === currentSubjectTab || 
+            (currentSubjectTab === 'all' && tab.dataset.subjectId === 'all')) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+}
+
+// Change Page - GLOBAL
+function changePage(delta) {
+    const newPage = currentPage + delta;
+    if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        loadQuestions();
+    }
+}
+
+// ================================
+// TEACHER SETTINGS MANAGEMENT
+// ================================
+
+// Load teacher's saved settings
+async function loadTeacherSettings() {
+    try {
+        const response = await fetch('/teacher/get-paper-settings/');
+        const data = await response.json();
+        
+        if (data.success) {
+            teacherSettings = data.settings;
+            applyTeacherSettings();
+            console.log("Teacher settings loaded:", teacherSettings);
+        }
+    } catch (error) {
+        console.error("Error loading teacher settings:", error);
+    }
+}
+
+// Apply teacher settings to the form
+function applyTeacherSettings() {
+    if (!teacherSettings) return;
+    
+    // Apply to form fields
+    document.getElementById('schoolName').value = teacherSettings.school_name || 'Your School Name';
+    document.getElementById('schoolAddress').value = teacherSettings.school_address || 'City, State, PIN Code';
+    document.getElementById('schoolContact').value = teacherSettings.school_contact || 'Phone: 1234567890 | Email: school@example.com';
+    document.getElementById('affiliationNo').value = teacherSettings.affiliation_number || 'Affiliation No: 123456';
+    document.getElementById('examName').value = teacherSettings.exam_name || 'Mid-Term Examination';
+    document.getElementById('totalMarks').value = teacherSettings.total_marks || 100;
+    document.getElementById('timeDuration').value = teacherSettings.time_duration || '3 hours';
+    document.getElementById('examDate').value = new Date().toISOString().split('T')[0];
+    
+    // Apply instructions
+    if (teacherSettings.instructions) {
+        document.getElementById('instructions').value = teacherSettings.instructions;
+    }
+    
+    // Apply logo position
+    if (teacherSettings.logo_position) {
+        document.getElementById('logoPosition').value = teacherSettings.logo_position;
+        $('#logoPosition').val(teacherSettings.logo_position).trigger('change');
+    }
+    
+    // Apply logo if exists
+    if (teacherSettings.logo_url) {
+        schoolLogo = teacherSettings.logo_url;
+        updateLogoPreview();
+    }
+}
+
+// Save teacher settings (auto-save on change)
+function saveTeacherSettings() {
+    if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+    }
+    
+    autoSaveTimeout = setTimeout(async () => {
+        try {
+            // Get current form data
+            const settings = {
+                school_name: document.getElementById('schoolName').value,
+                school_address: document.getElementById('schoolAddress').value,
+                school_contact: document.getElementById('schoolContact').value,
+                affiliation_number: document.getElementById('affiliationNo').value,
+                exam_name: document.getElementById('examName').value,
+                total_marks: parseInt(document.getElementById('totalMarks').value) || 100,
+                time_duration: document.getElementById('timeDuration').value,
+                instructions: document.getElementById('instructions').value,
+                logo_position: document.getElementById('logoPosition').value,
+                logo_data: schoolLogo && schoolLogo.startsWith('data:image') ? schoolLogo : null
+            };
+            
+            const response = await fetch('/teacher/save-paper-settings/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(settings)
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                console.log("Settings saved:", result.message);
+                
+                // Show success message (optional)
+                showToast('Settings saved successfully!', 'success');
+            } else {
+                console.error("Error saving settings:", result.error);
+            }
+        } catch (error) {
+            console.error("Error saving settings:", error);
+        }
+    }, 2000); // Save after 2 seconds of inactivity
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded shadow-lg text-white ${
+        type === 'success' ? 'bg-green-600' : 
+        type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+    }`;
+    toast.textContent = message;
+    toast.style.zIndex = '1000';
+    
+    document.body.appendChild(toast);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
+// Add event listeners for auto-save
+function setupAutoSaveListeners() {
+    // Elements to watch for changes
+    const autoSaveElements = [
+        'schoolName', 'schoolAddress', 'schoolContact', 'affiliationNo',
+        'examName', 'totalMarks', 'timeDuration', 'instructions', 'logoPosition'
+    ];
+    
+    autoSaveElements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', saveTeacherSettings);
+            element.addEventListener('input', saveTeacherSettings);
+        }
+    });
+    
+    // Also watch for logo upload
+    document.getElementById('logoUpload')?.addEventListener('change', function() {
+        setTimeout(saveTeacherSettings, 1000);
+    });
+}
+
+// ================================
+// INITIALIZATION
+// ================================
+
+$(document).ready(function() {
+    console.log("Initializing...");
+    
+    // Initialize Select2 dropdowns
+    $('#filterSubject, #filterType, #filterDifficulty, #filterMarks, #courseFilter, #classFilter, #logoPosition').select2({
+        width: '100%'
+    });
+    
+    // Initialize chapter select as regular select (not Select2 for better multi-select)
+    const chapterSelect = document.getElementById('filterChapter');
+    if (chapterSelect) {
+        // Style the multi-select
+        chapterSelect.style.minHeight = '120px';
+        chapterSelect.style.padding = '8px';
+        
+        // Add event listener for chapter selection changes
+        chapterSelect.addEventListener('change', function() {
+            applyFilters();
+        });
+    }
+    
+    // Set default date to today
+    document.getElementById('examDate').value = new Date().toISOString().split('T')[0];
+    
+    // Load initial questions
+    loadInitialQuestions();
+    
+    // Set up event listeners
+    $('#classFilter').on('change', function() {
+        filterSubjectsByClass(this.value);
+    });
+    
+    // When subject changes, load its chapters
+    $('#filterSubject').on('change', function() {
+        const subjectId = this.value;
+        loadChaptersForSubject(subjectId);
+    });
+    
+    // Add search input event listener
+    $('#searchQuestions').on('input', debounce(function() {
+        applyFilters();
+    }, 300));
+    
+    // Load default logo
+    useDefaultLogo();
+    
+    // Load teacher settings
+    setTimeout(() => {
+        loadTeacherSettings();
+        setupAutoSaveListeners();
+    }, 1000);
+    
+    console.log("Initialization complete!");
+    
+    // Initialize activity drag and drop AFTER the page is fully loaded
+    setTimeout(() => {
+        initializeActivityDragDrop();
+        console.log("Activity drag and drop initialized");
+    }, 500);
+});
+
+
+
+// ================================
+// CHAPTER FILTERING FUNCTIONS
+// ================================
+
+// Load chapters for selected subject
+async function loadChaptersForSubject(subjectId) {
+    try {
+        const chapterSelect = document.getElementById('filterChapter');
+        
+        if (!subjectId) {
+            // If no subject selected, show message
+            chapterSelect.innerHTML = '<option value="">Select a subject first</option>';
+            chapterSelect.disabled = true;
+            return;
+        }
+        
+        // Enable the chapter select
+        chapterSelect.disabled = false;
+        
+        // Show loading message
+        chapterSelect.innerHTML = '<option value="">Loading chapters...</option>';
+        
+        // Fetch chapters for this subject from Django backend
+        const response = await fetch(`/api/get-chapters-by-subject/?subject_id=${subjectId}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch chapters');
+        }
+        
+        const data = await response.json();
+        
+        if (data.chapters && data.chapters.length > 0) {
+            updateChapterSelect(data.chapters);
+        } else {
+            // No chapters found for this subject
+            chapterSelect.innerHTML = '<option value="">No chapters found for this subject</option>';
+        }
+        
+    } catch (error) {
+        console.error('Error loading chapters:', error);
+        const chapterSelect = document.getElementById('filterChapter');
+        chapterSelect.innerHTML = '<option value="">Error loading chapters</option>';
+    }
+}
+
+// Update chapter select with fetched chapters
+function updateChapterSelect(chapters) {
+    const chapterSelect = document.getElementById('filterChapter');
+    
+    // Clear existing options
+    chapterSelect.innerHTML = '';
+    
+    // Add "All Chapters" option
+    const allOption = document.createElement('option');
+    allOption.value = '';
+    allOption.textContent = 'All Chapters';
+    chapterSelect.appendChild(allOption);
+    
+    // Add chapter options
+    chapters.forEach(chapter => {
+        const option = document.createElement('option');
+        option.value = chapter.id;
+        option.textContent = chapter.name;
+        chapterSelect.appendChild(option);
+    });
+}
+
+// Update the loadQuestions function to handle chapter filtering
+function loadQuestions() {
+    try {
+        showLoading(true);
+        
+        // Get filter values
+        const subject = document.getElementById('filterSubject').value;
+        const type = document.getElementById('filterType').value;
+        const difficulty = document.getElementById('filterDifficulty').value;
+        const marks = document.getElementById('filterMarks').value;
+        const chapterSelect = document.getElementById('filterChapter');
+        const className = document.getElementById('classFilter').value;
+        const course = document.getElementById('courseFilter').value;
+        const search = document.getElementById('searchQuestions').value;
+        
+        // Get selected chapters (multiple)
+        const selectedChapters = [];
+        if (chapterSelect.selectedOptions) {
+            for (let option of chapterSelect.selectedOptions) {
+                if (option.value && option.value !== '') {
+                    selectedChapters.push(option.value);
+                }
+            }
+        }
+        
+        console.log("Current filters:", { 
+            subject, type, difficulty, marks, 
+            selectedChapters: selectedChapters.length > 0 ? selectedChapters : 'All',
+            className, course, search, currentSubjectTab 
+        });
+        
+        // Filter questions locally
+        let filteredQuestions = [...allQuestions];
+        
+        // Apply filters
+        if (currentSubjectTab !== 'all') {
+            filteredQuestions = filteredQuestions.filter(q => q.subject_id == currentSubjectTab);
+        }
+        
+        if (subject) {
+            filteredQuestions = filteredQuestions.filter(q => q.subject_id == subject);
+        }
+        
+        if (type && type !== 'all') {
+            filteredQuestions = filteredQuestions.filter(q => q.type === type);
+        }
+        
+        if (difficulty && difficulty !== 'all') {
+            filteredQuestions = filteredQuestions.filter(q => q.difficulty === difficulty);
+        }
+        
+        if (marks) {
+            filteredQuestions = filteredQuestions.filter(q => q.marks == marks);
+        }
+        
+        // Alternative chapter filtering if you don't have chapter_id
+if (selectedChapters.length > 0) {
+    // Get selected chapter names
+    const selectedChapterNames = [];
+    for (let option of chapterSelect.selectedOptions) {
+        if (option.value && option.value !== '') {
+            selectedChapterNames.push(option.text.toLowerCase());
+        }
+    }
+    
+    // Filter questions by chapter name
+    filteredQuestions = filteredQuestions.filter(q => {
+        if (!q.chapter) return false;
+        
+        // Check if question's chapter matches any selected chapter
+        const questionChapter = q.chapter.toLowerCase();
+        return selectedChapterNames.some(selectedChapter => 
+            questionChapter.includes(selectedChapter)
+        );
+    });
+}
+        
+        if (search) {
+            filteredQuestions = filteredQuestions.filter(q => 
+                (q.question && q.question.toLowerCase().includes(search.toLowerCase())) ||
+                (q.chapter && q.chapter.toLowerCase().includes(search.toLowerCase())) ||
+                (q.topic && q.topic.toLowerCase().includes(search.toLowerCase()))
+            );
+        }
+        
+        console.log(`Found ${filteredQuestions.length} questions after filtering`);
+        
+        if (filteredQuestions.length === 0) {
+            displayNoFilteredQuestions();
+            return;
+        }
+        
+        totalPages = Math.ceil(filteredQuestions.length / pageSize);
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedQuestions = filteredQuestions.slice(startIndex, endIndex);
+        
+        displayQuestions(paginatedQuestions);
+        updatePagination();
+        
+    } catch (error) {
+        console.error('Error loading questions:', error);
+        // Fallback to showing all questions
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        displayQuestions(allQuestions.slice(startIndex, endIndex));
+        totalPages = Math.ceil(allQuestions.length / pageSize);
+        updatePagination();
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Update clearFilters to reset chapter select
+function clearFilters() {
+    console.log("Clearing filters...");
+    
+    // Clear subject select
+    document.getElementById('filterSubject').value = '';
+    
+    // Clear other selects
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterDifficulty').value = '';
+    document.getElementById('filterMarks').value = '';
+    document.getElementById('classFilter').value = '';
+    document.getElementById('courseFilter').value = '';
+    document.getElementById('searchQuestions').value = '';
+    
+    // Clear and disable chapter select
+    const chapterSelect = document.getElementById('filterChapter');
+    chapterSelect.innerHTML = '<option value="">Select a subject first</option>';
+    chapterSelect.disabled = true;
+    
+    // Update Select2 dropdowns
+    $('#filterSubject').val('').trigger('change');
+    $('#filterType').val('').trigger('change');
+    $('#filterDifficulty').val('').trigger('change');
+    $('#filterMarks').val('').trigger('change');
+    $('#courseFilter').val('').trigger('change');
+    $('#classFilter').val('').trigger('change');
+    
+    currentPage = 1;
+    currentSubjectTab = 'all';
+    loadQuestions();
+    
+    // Reset subject tabs
+    updateSubjectTabsActiveState();
+}
+
+// Update the clearFilters function to reset multi-select:
+function clearFilters() {
+    console.log("Clearing filters...");
+    
+    // Clear input fields
+    document.getElementById('filterSubject').value = '';
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterDifficulty').value = '';
+    document.getElementById('filterMarks').value = '';
+    
+    // Clear multi-select chapters
+    const chapterSelect = document.getElementById('filterChapter');
+    chapterSelect.selectedIndex = -1;
+    
+    document.getElementById('classFilter').value = '';
+    document.getElementById('courseFilter').value = '';
+    document.getElementById('searchQuestions').value = '';
+    
+    // Update Select2 dropdowns
+    $('#filterSubject').val('').trigger('change');
+    $('#filterType').val('').trigger('change');
+    $('#filterDifficulty').val('').trigger('change');
+    $('#filterMarks').val('').trigger('change');
+    $('#courseFilter').val('').trigger('change');
+    $('#classFilter').val('').trigger('change');
+    
+    // Reset chapter select
+    resetChapterSelect();
+    
+    currentPage = 1;
+    currentSubjectTab = 'all';
+    loadQuestions();
+    
+    // Reset subject tabs
+    updateSubjectTabsActiveState();
+}
+
+
+
+// ================================
+// QUESTION MANAGEMENT FUNCTIONS
+// ================================
+
+// Load initial questions from Django context
+function loadInitialQuestions() {
+    console.log("Loading initial questions...");
+    
+    // Get questions from Django context
+    const questionsData = {% if all_questions %}[
+        {% for question in all_questions %}
+        {
+            id: {{ question.id }},
+            subject_id: {{ question.subject.id }},
+            subject_name: "{{ question.subject.name|escapejs }}",
+            question: `{{ question.question|escapejs }}`,
+            type: "{{ question.question_type|default:'objective'|escapejs }}",
+            difficulty: "{{ question.difficulty|default:'medium'|escapejs }}",
+            marks: {{ question.marks|default:1 }},
+            chapter: "{{ question.chapter|default:''|escapejs }}",
+            topic: "{{ question.topic|default:''|escapejs }}",
+            class_name: "{{ question.subject.class_name.class_name|default:''|escapejs }}",
+            answer: `{{ question.answer|default:''|escapejs }}`,
+            option1: `{{ question.option1|default:''|escapejs }}`,
+            option2: `{{ question.option2|default:''|escapejs }}`,
+            option3: `{{ question.option3|default:''|escapejs }}`,
+            option4: `{{ question.option4|default:''|escapejs }}`,
+            correct_answer: "{{ question.correct_options|default:''|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]{% else %}[]{% endif %};
+    
+    console.log(`Loaded ${questionsData.length} questions`);
+    allQuestions = questionsData;
+    
+    if (allQuestions.length === 0) {
+        console.log("No questions found in database");
+        displayNoQuestionsMessage();
+        return;
+    }
+    
+    // Display questions
+    displayQuestions(allQuestions.slice(0, pageSize));
+    
+    // Update available subjects
+    updateSubjectsFromQuestions();
+    
+    // Update total pages
+    totalPages = Math.ceil(allQuestions.length / pageSize);
+    updatePagination();
+}
+
+// Display "no questions" message
+function displayNoQuestionsMessage() {
+    const container = document.getElementById('questionsList');
+    container.innerHTML = `
+        <div class="col-span-2 text-center py-8 text-gray-500">
+            <i class="fas fa-inbox text-3xl mb-4"></i>
+            <p>No questions found in database</p>
+            <p class="text-sm">Please add questions using the "Add Questions" page</p>
+            <a href="/add-question/" class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i>Add Questions
+            </a>
+        </div>
+    `;
+}
+
+// Load questions with filtering
+function loadQuestions() {
+    try {
+        showLoading(true);
+        
+        // Get filter values
+        const subject = document.getElementById('filterSubject').value;
+        const type = document.getElementById('filterType').value;
+        const difficulty = document.getElementById('filterDifficulty').value;
+        const marks = document.getElementById('filterMarks').value;
+        const chapter = document.getElementById('filterChapter').value;
+        const className = document.getElementById('classFilter').value;
+        const course = document.getElementById('courseFilter').value;
+        const search = document.getElementById('searchQuestions').value;
+        
+        console.log("Current filters:", { 
+            subject, type, difficulty, marks, chapter, 
+            className, course, search, currentSubjectTab 
+        });
+        
+        // Filter questions locally
+        let filteredQuestions = [...allQuestions];
+        
+        // Apply filters
+        if (currentSubjectTab !== 'all') {
+            filteredQuestions = filteredQuestions.filter(q => q.subject_id == currentSubjectTab);
+        }
+        
+        if (subject) {
+            filteredQuestions = filteredQuestions.filter(q => q.subject_id == subject);
+        }
+        
+        if (type && type !== 'all') {
+            filteredQuestions = filteredQuestions.filter(q => q.type === type);
+        }
+        
+        if (difficulty && difficulty !== 'all') {
+            filteredQuestions = filteredQuestions.filter(q => q.difficulty === difficulty);
+        }
+        
+        if (marks) {
+            filteredQuestions = filteredQuestions.filter(q => q.marks == marks);
+        }
+        
+        if (chapter) {
+            filteredQuestions = filteredQuestions.filter(q => q.chapter && q.chapter.toLowerCase().includes(chapter.toLowerCase()));
+        }
+        
+        if (search) {
+            filteredQuestions = filteredQuestions.filter(q => 
+                (q.question && q.question.toLowerCase().includes(search.toLowerCase())) ||
+                (q.chapter && q.chapter.toLowerCase().includes(search.toLowerCase())) ||
+                (q.topic && q.topic.toLowerCase().includes(search.toLowerCase()))
+            );
+        }
+        
+        console.log(`Found ${filteredQuestions.length} questions after filtering`);
+        
+        if (filteredQuestions.length === 0) {
+            displayNoFilteredQuestions();
+            return;
+        }
+        
+        totalPages = Math.ceil(filteredQuestions.length / pageSize);
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedQuestions = filteredQuestions.slice(startIndex, endIndex);
+        
+        displayQuestions(paginatedQuestions);
+        updatePagination();
+        
+    } catch (error) {
+        console.error('Error loading questions:', error);
+        // Fallback to showing all questions
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        displayQuestions(allQuestions.slice(startIndex, endIndex));
+        totalPages = Math.ceil(allQuestions.length / pageSize);
+        updatePagination();
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Display "no filtered questions" message
+function displayNoFilteredQuestions() {
+    const container = document.getElementById('questionsList');
+    container.innerHTML = `
+        <div class="col-span-2 text-center py-8 text-gray-500">
+            <i class="fas fa-search text-3xl mb-4"></i>
+            <p>No questions found with current filters</p>
+            <p class="text-sm">Try changing your filter criteria</p>
+            <button onclick="clearFilters()" class="inline-block mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                <i class="fas fa-redo mr-2"></i>Clear Filters
+            </button>
+        </div>
+    `;
+    updatePagination();
+}
+
+// Display questions in the grid
+function displayQuestions(questions) {
+    const container = document.getElementById('questionsList');
+    
+    if (!questions || questions.length === 0) {
+        displayNoFilteredQuestions();
+        return;
+    }
+    
+    let html = '';
+    questions.forEach(question => {
+        const isSelected = selectedQuestions.has(question.id);
+        const typeBadge = getTypeBadge(question.type);
+        const subjectClass = getSubjectClass(question.subject_name);
+        
+        // Clean and truncate question text for display
+        const cleanQuestion = question.question ? 
+            question.question.replace(/<[^>]*>/g, '').substring(0, 150) : 
+            'No question text';
+        
+        html += `
+            <div class="question-card ${isSelected ? 'border-blue-500 bg-blue-50' : ''}" 
+                 data-id="${question.id}" 
+                 data-subject="${question.subject_id}"
+                 data-subject-name="${question.subject_name}"
+                 data-type="${question.type}"
+                 data-marks="${question.marks}"
+                 data-difficulty="${question.difficulty}"
+                 data-chapter="${question.chapter || ''}"
+                 draggable="true">
+                
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="subject-badge subject-${subjectClass}">
+                            ${question.subject_name.substring(0, 2).toUpperCase()}
+                        </span>
+                        <span class="font-medium text-gray-700 text-sm">${question.subject_name}</span>
+                        ${typeBadge}
+                        <span class="marks-badge">${question.marks} mark${question.marks > 1 ? 's' : ''}</span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="toggleQuestionSelection(${question.id})" 
+                                class="px-3 py-1 rounded text-sm ${isSelected ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}">
+                            ${isSelected ? '<i class="fas fa-minus mr-1"></i> Remove' : '<i class="fas fa-plus mr-1"></i> Select'}
+                        </button>
+                        <button onclick="viewQuestionDetails(${question.id})" 
+                                class="px-3 py-1 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-2">
+                    <div class="question-preview">
+                        ${cleanQuestion}${cleanQuestion.length < (question.question?.length || 0) ? '...' : ''}
+                    </div>
+                </div>
+                
+                <div class="flex justify-between text-xs text-gray-500">
+                    <div>
+                        <i class="fas fa-book mr-1"></i>
+                        <span class="font-medium" title="${question.chapter || 'General'}">
+                            ${question.chapter ? (question.chapter.length > 20 ? question.chapter.substring(0, 20) + '...' : question.chapter) : 'General'}
+                        </span>
+                        ${question.topic ? `<span class="mx-1">•</span><i class="fas fa-tag mr-1"></i>${question.topic.length > 15 ? question.topic.substring(0, 15) + '...' : question.topic}` : ''}
+                    </div>
+                    <div class="difficulty-${question.difficulty}">
+                        <i class="fas fa-chart-line mr-1"></i>
+                        ${question.difficulty ? question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1) : 'Medium'}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    
+    // Make questions draggable
+    makeQuestionsDraggable();
+}
+
+// ================================
+// SUBJECT MANAGEMENT
+// ================================
+
+// Update available subjects from loaded questions
+function updateSubjectsFromQuestions() {
+    const subjectMap = new Map();
+    
+    allQuestions.forEach(question => {
+        if (!subjectMap.has(question.subject_id)) {
+            subjectMap.set(question.subject_id, {
+                id: question.subject_id,
+                name: question.subject_name,
+                class_name: question.class_name || 'Unknown',
+                count: 1
+            });
+        } else {
+            subjectMap.get(question.subject_id).count++;
+        }
+    });
+    
+    availableSubjects = Array.from(subjectMap.values());
+    console.log(`Found ${availableSubjects.length} subjects from questions`);
+    generateSubjectTabs();
+}
+
+// Filter subjects by class
+function filterSubjectsByClass(classId) {
+    const subjectSelect = document.getElementById('filterSubject');
+    const chapterSelect = document.getElementById('filterChapter');
+    
+    if (!classId) {
+        // Show all subjects
+        Array.from(subjectSelect.options).forEach(option => {
+            option.style.display = '';
+        });
+        subjectSelect.value = '';
+        chapterSelect.value = '';
+        return;
+    }
+    
+    // Show only subjects for the selected class
+    Array.from(subjectSelect.options).forEach(option => {
+        if (option.value === '') {
+            option.style.display = '';
+        } else {
+            const subjectClassId = option.getAttribute('data-class-id');
+            if (subjectClassId === classId) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+            }
+        }
+    });
+    
+    // Reset subject and chapter selections
+    subjectSelect.value = '';
+    chapterSelect.value = '';
+}
+
+// Generate subject tabs
+function generateSubjectTabs() {
+    const container = document.getElementById('subjectTabsContainer');
+    
+    if (availableSubjects.length === 0) {
+        container.innerHTML = `
+            <div class="subject-tab active" onclick="changeSubjectTab('all')" data-subject-id="all">
+                <i class="fas fa-th-list mr-2"></i>All Subjects
+                <span class="ml-2 bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                    ${allQuestions.length}
+                </span>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `
+        <div class="subject-tab active" onclick="changeSubjectTab('all')" data-subject-id="all">
+            <i class="fas fa-th-list mr-2"></i>All Subjects
+            <span class="ml-2 bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                ${allQuestions.length}
+            </span>
+        </div>
+    `;
+    
+    // Group subjects by class
+    const subjectsByClass = {};
+    availableSubjects.forEach(subject => {
+        if (!subjectsByClass[subject.class_name]) {
+            subjectsByClass[subject.class_name] = [];
+        }
+        subjectsByClass[subject.class_name].push(subject);
+    });
+    
+    // Generate tabs for each class
+    for (const [className, classSubjects] of Object.entries(subjectsByClass)) {
+        html += `<div class="text-sm text-gray-500 mt-2 mb-1 w-full">${className}</div>`;
+        
+        classSubjects.forEach(subject => {
+            // Count questions for this subject
+            const questionCount = allQuestions.filter(q => q.subject_id == subject.id).length;
+            
+            html += `
+                <div class="subject-tab" onclick="changeSubjectTab('${subject.id}')" data-subject-id="${subject.id}">
+                    <span class="subject-badge subject-${getSubjectClass(subject.name)}">
+                        ${subject.name.substring(0, 2).toUpperCase()}
+                    </span>
+                    ${subject.name}
+                    <span class="ml-2 bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                        ${questionCount}
+                    </span>
+                </div>
+            `;
+        });
+    }
+    
+    container.innerHTML = html;
+}
+
+// ================================
+// QUESTION SELECTION & MANAGEMENT
+// ================================
+
+// Toggle question selection
+function toggleQuestionSelection(questionId) {
+    const question = allQuestions.find(q => q.id === questionId);
+    if (!question) return;
+    
+    if (selectedQuestions.has(questionId)) {
+        selectedQuestions.delete(questionId);
+        removeFromSelectedContainer(questionId);
+        removeFromAllSections(questionId);
+    } else {
+        selectedQuestions.set(questionId, question);
+        addToSelectedContainer(question);
+    }
+    
+    updateSelectionCount();
+    updateQuestionCardStyle(questionId);
+}
+
+// Add question to selected container
+function addToSelectedContainer(question) {
+    const container = document.getElementById('selectedQuestionsContainer');
+    
+    // If container has the empty state message, clear it
+    if (container.querySelector('.text-center')) {
+        container.innerHTML = '';
+    }
+    
+    const typeBadge = getTypeBadge(question.type);
+    const subjectClass = getSubjectClass(question.subject_name);
+    
+    const item = document.createElement('div');
+    item.className = 'selected-question-item';
+    item.id = `selected-${question.id}`;
+    item.setAttribute('draggable', 'true');
+    item.setAttribute('data-id', question.id);
+    item.setAttribute('data-type', question.type);
+    item.setAttribute('data-marks', question.marks);
+    item.setAttribute('data-subject-id', question.subject_id);
+    item.setAttribute('data-subject-name', question.subject_name);
+    
+    item.innerHTML = `
+        <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="subject-badge subject-${subjectClass}">
+                    ${question.subject_name.substring(0, 2).toUpperCase()}
+                </span>
+                <span class="font-medium text-sm">${question.subject_name}</span>
+                ${typeBadge}
+                <span class="marks-badge">${question.marks}m</span>
+            </div>
+            <div class="text-sm text-gray-600 truncate">
+                ${question.question ? question.question.substring(0, 80).replace(/<[^>]*>/g, '') : 'No question text'}${question.question && question.question.length > 80 ? '...' : ''}
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="moveQuestionToSection(${question.id}, 'mcq')" 
+                    class="p-1 text-blue-600 hover:text-blue-800" title="Move to Section A">
+                A
+            </button>
+            <button onclick="moveQuestionToSection(${question.id}, 'short')" 
+                    class="p-1 text-green-600 hover:text-green-800" title="Move to Section B">
+                B
+            </button>
+            <button onclick="moveQuestionToSection(${question.id}, 'long')" 
+                    class="p-1 text-purple-600 hover:text-purple-800" title="Move to Section C">
+                C
+            </button>
+            <button onclick="toggleQuestionSelection(${question.id})" 
+                    class="p-1 text-red-600 hover:text-red-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(item);
+    makeSelectedQuestionsDraggable();
+}
+
+// Remove question from selected container
+function removeFromSelectedContainer(questionId) {
+    const item = document.getElementById(`selected-${questionId}`);
+    if (item) {
+        item.remove();
+    }
+    
+    // If no items left, show empty message
+    const container = document.getElementById('selectedQuestionsContainer');
+    if (container.children.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 text-gray-400">
+                <i class="fas fa-clipboard text-3xl mb-4"></i>
+                <p>No questions selected yet</p>
+                <p class="text-sm">Select questions from the list above</p>
+            </div>
+        `;
+    }
+}
+
+// Remove question from all sections
+function removeFromAllSections(questionId) {
+    ['mcqSection', 'shortSection', 'longSection'].forEach(section => {
+        const sectionItem = document.querySelector(`#${section} [data-id="${questionId}"]`);
+        if (sectionItem) sectionItem.remove();
+    });
+}
+
+// Update selection count
+function updateSelectionCount() {
+    const count = selectedQuestions.size;
+    const totalMarks = Array.from(selectedQuestions.values())
+        .reduce((sum, q) => sum + (parseInt(q.marks) || 0), 0);
+    
+    document.getElementById('selectedCount').textContent = count;
+    document.getElementById('totalMarksSelected').textContent = `${totalMarks} marks`;
+}
+
+// Update question card style
+function updateQuestionCardStyle(questionId) {
+    const card = document.querySelector(`.question-card[data-id="${questionId}"]`);
+    if (!card) return;
+    
+    const isSelected = selectedQuestions.has(questionId);
+    if (isSelected) {
+        card.classList.add('border-blue-500', 'bg-blue-50');
+    } else {
+        card.classList.remove('border-blue-500', 'bg-blue-50');
+    }
+}
+
+// ================================
+// VIEW QUESTION DETAILS
+// ================================
+
+function viewQuestionDetails(questionId) {
+    const question = allQuestions.find(q => q.id === questionId);
+    if (!question) return;
+    
+    let details = `
+        <div class="p-4">
+            <h3 class="font-bold text-lg mb-2">Question Details</h3>
+            
+            <div class="mb-3">
+                <strong>Subject:</strong>
+                <span class="ml-2 subject-badge subject-${getSubjectClass(question.subject_name)}">
+                    ${question.subject_name}
+                </span>
+            </div>
+            
+            <div class="mb-3">
+                <strong>Question:</strong>
+                <p class="mt-1 p-2 bg-gray-50 rounded">${question.question || 'No question text'}</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div><strong>Type:</strong> ${question.type || 'N/A'}</div>
+                <div><strong>Chapter:</strong> ${question.chapter || 'N/A'}</div>
+                <div><strong>Topic:</strong> ${question.topic || 'N/A'}</div>
+                <div><strong>Difficulty:</strong> ${question.difficulty || 'Medium'}</div>
+                <div><strong>Marks:</strong> ${question.marks || 'N/A'}</div>
+                <div><strong>Class:</strong> ${question.class_name || 'N/A'}</div>
+            </div>
+    `;
+    
+    if (question.type === 'objective' && question.option1) {
+        details += `
+            <div class="mb-3">
+                <strong>Options:</strong>
+                <div class="mt-1 space-y-1">
+                    ${question.option1 ? `<div class="p-2 bg-gray-50 rounded"><span class="font-bold">A.</span> ${question.option1}</div>` : ''}
+                    ${question.option2 ? `<div class="p-2 bg-gray-50 rounded"><span class="font-bold">B.</span> ${question.option2}</div>` : ''}
+                    ${question.option3 ? `<div class="p-2 bg-gray-50 rounded"><span class="font-bold">C.</span> ${question.option3}</div>` : ''}
+                    ${question.option4 ? `<div class="p-2 bg-gray-50 rounded"><span class="font-bold">D.</span> ${question.option4}</div>` : ''}
+                    ${question.correct_answer ? `<div class="mt-2 p-2 bg-green-50 rounded border border-green-200"><strong>Correct Answer:</strong> ${question.correct_answer}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    if (question.answer) {
+        details += `
+            <div class="mb-3">
+                <strong>Answer:</strong>
+                <p class="mt-1 p-2 bg-green-50 rounded">${question.answer}</p>
+            </div>
+        `;
+    }
+    
+    details += '</div>';
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            ${details}
+            <div class="p-4 border-t border-gray-200 text-right">
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// ================================
+// PAGINATION
+// ================================
+
+function updatePagination() {
+    const pagination = document.getElementById('pagination');
+    const pageInfo = document.getElementById('pageInfo');
+    
+    if (totalPages > 1) {
+        pagination.classList.remove('hidden');
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    } else {
+        pagination.classList.add('hidden');
+    }
+}
+
+// ================================
+// DRAG & DROP FUNCTIONS
+// ================================
+
+function makeQuestionsDraggable() {
+    const cards = document.querySelectorAll('.question-card');
+    cards.forEach(card => {
+        card.setAttribute('draggable', 'true');
+        card.addEventListener('dragstart', handleDragStart);
+    });
+}
+
+function makeSelectedQuestionsDraggable() {
+    const items = document.querySelectorAll('.selected-question-item');
+    items.forEach(item => {
+        item.setAttribute('draggable', 'true');
+        item.addEventListener('dragstart', handleDragStart);
+    });
+}
+
+function handleDragStart(e) {
+    e.dataTransfer.setData('text/plain', e.target.dataset.id);
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function allowDrop(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('border-blue-400', 'bg-blue-100');
+}
+
+// Set up drop zones for sections
+['mcqSection', 'shortSection', 'longSection'].forEach(sectionId => {
+    const section = document.getElementById(sectionId);
+    section.addEventListener('dragover', allowDrop);
+    section.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const questionId = e.dataTransfer.getData('text/plain');
+        const sectionName = e.currentTarget.id.replace('Section', '');
+        
+        // Find the question
+        const question = selectedQuestions.get(parseInt(questionId));
+        if (question) {
+            moveQuestionToSection(parseInt(questionId), sectionName);
+        }
+        
+        e.currentTarget.classList.remove('border-blue-400', 'bg-blue-100');
+    });
+});
+
+// Move question to section
+function moveQuestionToSection(questionId, section) {
+    const question = selectedQuestions.get(questionId);
+    if (!question) return;
+    
+    const sectionDiv = document.getElementById(`${section}Section`);
+    const existingItem = document.querySelector(`#${section}Section [data-id="${questionId}"]`);
+    
+    if (existingItem) {
+        existingItem.remove();
+    }
+    
+    const typeBadge = getTypeBadge(question.type);
+    const subjectClass = getSubjectClass(question.subject_name);
+    
+    const item = document.createElement('div');
+    item.className = 'selected-question-item mb-2';
+    item.setAttribute('draggable', 'true');
+    item.setAttribute('data-id', questionId);
+    item.setAttribute('data-type', question.type);
+    item.setAttribute('data-marks', question.marks);
+    item.setAttribute('data-subject-id', question.subject_id);
+    item.setAttribute('data-subject-name', question.subject_name);
+    
+    item.innerHTML = `
+        <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="subject-badge subject-${subjectClass}">
+                    ${question.subject_name.substring(0, 2).toUpperCase()}
+                </span>
+                ${typeBadge}
+                <span class="marks-badge">${question.marks}m</span>
+            </div>
+            <div class="text-sm text-gray-600 truncate">
+                ${question.question ? question.question.substring(0, 60).replace(/<[^>]*>/g, '') : 'No question text'}${question.question && question.question.length > 60 ? '...' : ''}
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="removeFromSection(${questionId}, '${section}')" 
+                    class="p-1 text-red-600 hover:text-red-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    sectionDiv.appendChild(item);
+}
+
+// ================================
+// UTILITY FUNCTIONS
+// ================================
+
+function getTypeBadge(type) {
+    const badges = {
+        'objective': '<span class="question-type-badge badge-mcq">MCQ</span>',
+        'descriptive': '<span class="question-type-badge badge-descriptive">Descriptive</span>',
+        'numerical': '<span class="question-type-badge badge-numerical">Numerical</span>',
+        'true_false': '<span class="question-type-badge badge-truefalse">T/F</span>',
+        'match_following': '<span class="question-type-badge badge-match">Match</span>',
+        'fill_in_the_blanks': '<span class="question-type-badge badge-fillblank">Fill</span>',
+        'short_answer': '<span class="question-type-badge badge-short">Short</span>',
+        'long_answer': '<span class="question-type-badge badge-long">Long</span>',
+        'diagram_based': '<span class="question-type-badge badge-diagram">Diagram</span>',
+        'graph_based': '<span class="question-type-badge badge-graph">Graph</span>'
+    };
+    return badges[type] || '<span class="question-type-badge">' + (type || 'Unknown') + '</span>';
+}
+
+function getSubjectClass(subjectName) {
+    if (!subjectName) return 'default';
+    
+    const lowerName = subjectName.toLowerCase();
+    if (lowerName.includes('math') || lowerName.includes('calculus') || lowerName.includes('algebra')) return 'math';
+    if (lowerName.includes('physic')) return 'physics';
+    if (lowerName.includes('chem')) return 'chemistry';
+    if (lowerName.includes('bio') || lowerName.includes('zoology') || lowerName.includes('botany')) return 'biology';
+    if (lowerName.includes('english') || lowerName.includes('language')) return 'english';
+    if (lowerName.includes('history') || lowerName.includes('civics')) return 'history';
+    if (lowerName.includes('geography')) return 'geography';
+    if (lowerName.includes('computer') || lowerName.includes('it')) return 'computer';
+    if (lowerName.includes('economic')) return 'economics';
+    if (lowerName.includes('account')) return 'accountancy';
+    if (lowerName.includes('business') || lowerName.includes('commerce')) return 'business';
+    return 'default';
+}
+
+function showLoading(show) {
+    const loader = document.getElementById('loadingIndicator');
+    const list = document.getElementById('questionsList');
+    
+    if (show) {
+        loader.classList.remove('hidden');
+        list.classList.add('opacity-50');
+    } else {
+        loader.classList.add('hidden');
+        list.classList.remove('opacity-50');
+    }
+}
+
+// Debounce utility function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// ================================
+// ACTIVITY MANAGEMENT FUNCTIONS - FIXED VERSION
+// ================================
+
+function initializeActivityDragDrop() {
+    console.log("Initializing activity drag and drop...");
+    
+    const activityItems = document.querySelectorAll('.activity-item');
+    console.log(`Found ${activityItems.length} activity items`);
+    
+    activityItems.forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            console.log("Drag started for:", this.getAttribute('data-type'));
+            e.dataTransfer.setData('text/plain', this.getAttribute('data-type'));
+            e.dataTransfer.effectAllowed = 'copy';
+            this.classList.add('dragging');
+        });
+        
+        item.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+        });
+    });
+    
+    const dropzone = document.getElementById('additionalElementsDropzone');
+    if (dropzone) {
+        console.log("Dropzone found, setting up event listeners");
+        
+        dropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            this.classList.add('drag-over');
+        });
+        
+        dropzone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+        });
+        
+        dropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            console.log("Drop event triggered");
+            
+            const activityType = e.dataTransfer.getData('text/plain');
+            console.log("Dropped activity type:", activityType);
+            
+            if (!activityType) {
+                console.log("No activity type found in data transfer");
+                return;
+            }
+            
+            // Get activity info
+            const activityElement = document.querySelector(`.activity-item[data-type="${activityType}"]`);
+            if (!activityElement) {
+                console.log("Activity element not found for type:", activityType);
+                return;
+            }
+            
+            const activityName = activityElement.querySelector('h4').textContent;
+            const activityIcon = activityElement.querySelector('.activity-icon i').className;
+            
+            // Create activity object
+            const activityId = Date.now() + Math.random();
+            const activity = {
+                id: activityId,
+                type: activityType,
+                name: activityName,
+                icon: activityIcon,
+                content: '',
+                config: getDefaultConfig(activityType)
+            };
+            
+            // Add to selected activities
+            selectedActivities.push(activity);
+            
+            // Update UI
+            updateSelectedActivitiesUI();
+            
+            // Show configuration panel
+            const newActivityIndex = selectedActivities.length - 1;
+            showActivityConfig(newActivityIndex);
+            
+            // Hide empty message
+            const emptyMessage = document.getElementById('emptyDropzoneMessage');
+            if (emptyMessage) {
+                emptyMessage.style.display = 'none';
+            }
+            
+            // Remove drag-over class
+            this.classList.remove('drag-over');
+            
+            console.log("Activity added:", activity);
+        });
+    } else {
+        console.error("Dropzone not found!");
+    }
+}
+
+function updateSelectedActivitiesUI() {
+    const container = document.getElementById('selectedActivitiesContainer');
+    const emptyMessage = document.getElementById('emptyDropzoneMessage');
+    
+    if (!container) {
+        console.error("Selected activities container not found!");
+        return;
+    }
+    
+    if (selectedActivities.length === 0) {
+        if (emptyMessage) emptyMessage.style.display = 'block';
+        container.innerHTML = '';
+        return;
+    }
+    
+    if (emptyMessage) emptyMessage.style.display = 'none';
+    
+    container.innerHTML = '';
+    
+    selectedActivities.forEach((activity, index) => {
+        const activityDiv = document.createElement('div');
+        activityDiv.className = 'generated-activity';
+        activityDiv.innerHTML = `
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="mr-3 ${activity.icon}" style="color: #3b82f6;"></div>
+                    <div>
+                        <strong>${activity.name || getActivityName(activity.type)}</strong>
+                        ${activity.content ? `<div class="text-sm text-gray-600 mt-1">${activity.content.substring(0, 50)}...</div>` : ''}
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="showActivityConfig(${index})" class="text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="removeActivity(${index})" class="text-red-600 hover:text-red-800">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(activityDiv);
+    });
+}
+
+function getActivityName(type) {
+    const names = {
+        'watermark': 'Watermark',
+        'signature': 'Signature Section',
+        'instructions': 'Extra Instructions',
+        'grading': 'Grading Scheme',
+        'footer': 'Paper Footer',
+        'warning': 'Important Warning',
+        'answer_sheet': 'Answer Sheet',
+        'formula': 'Formula Sheet'
+    };
+    return names[type] || type;
+}
+
+function getDefaultConfig(type) {
+    const configs = {
+        'watermark': { text: 'CONFIDENTIAL', opacity: 0.1, size: '120px' },
+        'signature': { 
+            principal: true, 
+            invigilator: true,
+            principalImg: null,
+            invigilatorImg: null
+        },
+        'instructions': { content: 'Follow all additional guidelines provided by the examiner.' },
+        'grading': { content: 'Marks will be awarded based on accuracy and completeness of answers.' },
+        'footer': { pageNumbers: true, copyright: true },
+        'warning': { content: 'Any attempt to use unfair means will result in immediate disqualification.' },
+        'answer_sheet': { content: 'Write your answers in the separate answer sheet provided. Write your roll number on every page.' },
+        'formula': { content: 'Important formulas and constants will be provided separately.' }
+    };
+    return configs[type] || {};
+}
+
+function showActivityConfig(activityIndex) {
+    if (typeof activityIndex !== 'number' || activityIndex < 0 || activityIndex >= selectedActivities.length) {
+        console.error('Invalid activity index:', activityIndex);
+        return;
+    }
+    
+    const activity = selectedActivities[activityIndex];
+    if (!activity) {
+        console.error('Activity not found at index:', activityIndex);
+        return;
+    }
+    
+    const configPanel = document.getElementById('activityConfigPanel');
+    const configContent = document.getElementById('activityConfigContent');
+    
+    if (!configPanel || !configContent) {
+        console.error('Config panel elements not found');
+        return;
+    }
+    
+    let configHTML = `
+        <input type="hidden" id="configActivityIndex" value="${activityIndex}">
+        <h5 class="font-bold mb-2">Configure ${activity.name || getActivityName(activity.type)}</h5>
+    `;
+    
+    switch(activity.type) {
+        case 'watermark':
+            configHTML += `
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">Watermark Text</label>
+                    <input type="text" id="watermarkText" value="${activity.config?.text || 'CONFIDENTIAL'}" 
+                           class="w-full p-2 border border-gray-300 rounded">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">Opacity</label>
+                    <input type="range" id="watermarkOpacity" min="0.05" max="0.3" step="0.05" 
+                           value="${activity.config?.opacity || 0.1}" class="w-full">
+                    <div class="text-sm text-gray-500" id="opacityValue">${activity.config?.opacity || 0.1}</div>
+                </div>
+            `;
+            break;
+            
+        case 'instructions':
+        case 'grading':
+        case 'warning':
+        case 'answer_sheet':
+        case 'formula':
+            const currentContent = activity.content || activity.config?.content || '';
+            configHTML += `
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">Content</label>
+                    <textarea id="activityContent" rows="6" 
+                              class="w-full p-2 border border-gray-300 rounded">${currentContent}</textarea>
+                    <p class="text-sm text-gray-500 mt-1">Enter the content for this section</p>
+                </div>
+            `;
+            break;
+            
+       case 'signature':
+    configHTML += `
+        <div class="mb-3">
+            <label class="flex items-center">
+                <input type="checkbox" id="principalSignature" ${activity.config?.principal ? 'checked' : ''} class="mr-2">
+                Include Principal Signature
+            </label>
+        </div>
+        <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Principal Signature Image</label>
+            <input type="file" id="principalSigImage" accept="image/*" class="w-full p-1 border border-gray-300 rounded" onchange="previewSignatureImage(this, 'principal')">
+            ${activity.config?.principalImg ? `
+                <div class="mt-2 signature-preview" id="principalSigPreview">
+                    <img src="${activity.config.principalImg}" alt="Principal Signature" style="max-width: 150px; max-height: 50px;">
+                    <button type="button" onclick="removeSignatureImage('principal')" class="text-red-600 ml-2">Remove</button>
+                </div>
+            ` : ''}
+        </div>
+        
+        <div class="mb-3">
+            <label class="flex items-center">
+                <input type="checkbox" id="invigilatorSignature" ${activity.config?.invigilator ? 'checked' : ''} class="mr-2">
+                Include Invigilator Signature
+            </label>
+        </div>
+        <div class="mb-3">
+            <label class="block text-sm font-medium mb-1">Invigilator Signature Image</label>
+            <input type="file" id="invigilatorSigImage" accept="image/*" class="w-full p-1 border border-gray-300 rounded" onchange="previewSignatureImage(this, 'invigilator')">
+            ${activity.config?.invigilatorImg ? `
+                <div class="mt-2 signature-preview" id="invigilatorSigPreview">
+                    <img src="${activity.config.invigilatorImg}" alt="Invigilator Signature" style="max-width: 150px; max-height: 50px;">
+                    <button type="button" onclick="removeSignatureImage('invigilator')" class="text-red-600 ml-2">Remove</button>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    break;
+    }
+    
+    configHTML += `
+        <div class="flex gap-2 mt-4">
+            <button onclick="saveActivityConfig()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Save
+            </button>
+            <button onclick="hideActivityConfig()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                Cancel
+            </button>
+        </div>
+    `;
+    
+    configContent.innerHTML = configHTML;
+    configPanel.classList.remove('hidden');
+    
+    // Add event listeners for dynamic updates
+    if (activity.type === 'watermark') {
+        const opacitySlider = document.getElementById('watermarkOpacity');
+        if (opacitySlider) {
+            opacitySlider.addEventListener('input', function(e) {
+                const opacityValue = document.getElementById('opacityValue');
+                if (opacityValue) {
+                    opacityValue.textContent = e.target.value;
+                }
+            });
+        }
+    }
+}
+
+// Function to preview signature image
+function previewSignatureImage(input, type) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Update the activity config with the image
+            const activityIndexInput = document.getElementById('configActivityIndex');
+            if (!activityIndexInput) return;
+            
+            const activityIndex = parseInt(activityIndexInput.value);
+            const activity = selectedActivities[activityIndex];
+            
+            if (!activity) return;
+            
+            // Store image in config
+            activity.config[`${type}Img`] = e.target.result;
+            
+            // Create preview
+            const previewId = `${type}SigPreview`;
+            let previewDiv = document.getElementById(previewId);
+            
+            if (!previewDiv) {
+                previewDiv = document.createElement('div');
+                previewDiv.id = previewId;
+                previewDiv.className = 'mt-2 signature-preview';
+                input.parentNode.appendChild(previewDiv);
+            }
+            
+            previewDiv.innerHTML = `
+                <img src="${e.target.result}" alt="${type.charAt(0).toUpperCase() + type.slice(1)} Signature" 
+                     style="max-width: 150px; max-height: 50px; border: 1px solid #ccc; padding: 2px;">
+                <button type="button" onclick="removeSignatureImage('${type}')" class="text-red-600 ml-2 text-sm">Remove</button>
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Function to remove signature image
+function removeSignatureImage(type) {
+    const activityIndexInput = document.getElementById('configActivityIndex');
+    if (!activityIndexInput) return;
+    
+    const activityIndex = parseInt(activityIndexInput.value);
+    const activity = selectedActivities[activityIndex];
+    
+    if (!activity) return;
+    
+    // Remove image from config
+    delete activity.config[`${type}Img`];
+    
+    // Remove preview
+    const previewDiv = document.getElementById(`${type}SigPreview`);
+    if (previewDiv) {
+        previewDiv.remove();
+    }
+    
+    // Clear file input
+    const fileInput = document.getElementById(`${type}SigImage`);
+    if (fileInput) {
+        fileInput.value = '';
+    }
+}
+
+function saveActivityConfig() {
+    const activityIndexInput = document.getElementById('configActivityIndex');
+    if (!activityIndexInput) {
+        console.error('Activity index input not found');
+        return;
+    }
+    
+    const activityIndex = parseInt(activityIndexInput.value);
+    const activity = selectedActivities[activityIndex];
+    
+    if (!activity) {
+        console.error('Activity not found at index:', activityIndex);
+        return;
+    }
+    
+    switch(activity.type) {
+        case 'watermark':
+            activity.config.text = document.getElementById('watermarkText').value;
+            activity.config.opacity = parseFloat(document.getElementById('watermarkOpacity').value);
+            break;
+            
+        case 'instructions':
+        case 'grading':
+        case 'warning':
+        case 'answer_sheet':
+        case 'formula':
+            const contentTextarea = document.getElementById('activityContent');
+            if (contentTextarea) {
+                activity.content = contentTextarea.value;
+            }
+            break;
+            
+        case 'signature':
+            const examinerCheck = document.getElementById('examinerSignature');
+            const principalCheck = document.getElementById('principalSignature');
+            const invigilatorCheck = document.getElementById('invigilatorSignature');
+            
+            if (examinerCheck) activity.config.examiner = examinerCheck.checked;
+            if (principalCheck) activity.config.principal = principalCheck.checked;
+            if (invigilatorCheck) activity.config.invigilator = invigilatorCheck.checked;
+            break;
+    }
+    
+    // Update UI
+    updateSelectedActivitiesUI();
+    hideActivityConfig();
+    
+    // Regenerate paper if it's already generated
+    if (!document.getElementById('paperPreview').classList.contains('hidden')) {
+        generateQuestionPaper();
+    }
+}
+
+function hideActivityConfig() {
+    const configPanel = document.getElementById('activityConfigPanel');
+    if (configPanel) {
+        configPanel.classList.add('hidden');
+    }
+}
+
+function removeActivity(index) {
+    if (index >= 0 && index < selectedActivities.length) {
+        selectedActivities.splice(index, 1);
+        updateSelectedActivitiesUI();
+        
+        // Regenerate paper if it's already generated
+        if (!document.getElementById('paperPreview').classList.contains('hidden')) {
+            generateQuestionPaper();
+        }
+    }
+}
+
+// ================================
+// PAPER GENERATION FUNCTIONS
+// ================================
+
+/// Generate the question paper
+function generateQuestionPaper() {
+    if (selectedQuestions.size === 0) {
+        alert("Please select at least one question before generating the paper.");
+        return;
+    }
+    
+    // Show the paper preview section
+    document.getElementById('paperPreview').classList.remove('hidden');
+    
+    // Generate the paper HTML
+    const paperHTML = generatePaperHTML();
+    
+    // Insert into the generated paper container
+    document.getElementById('generatedPaper').innerHTML = paperHTML;
+    
+    // Scroll to the generated paper
+    document.getElementById('paperPreview').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Generate paper HTML
+function generatePaperHTML() {
+    // Get paper settings
+    const schoolName = document.getElementById('schoolName').value;
+    const schoolAddress = document.getElementById('schoolAddress').value;
+    const schoolContact = document.getElementById('schoolContact').value;
+    const affiliationNo = document.getElementById('affiliationNo').value;
+    const examName = document.getElementById('examName').value;
+    const classFilter = document.getElementById('classFilter').value;
+    const className = document.getElementById('classFilter').options[document.getElementById('classFilter').selectedIndex]?.text || '';
+    const courseFilter = document.getElementById('courseFilter').value;
+    const courseName = document.getElementById('courseFilter').options[document.getElementById('courseFilter').selectedIndex]?.text || '';
+    const totalMarks = document.getElementById('totalMarks').value;
+    const timeDuration = document.getElementById('timeDuration').value;
+    const examDate = document.getElementById('examDate').value;
+    const instructions = document.getElementById('instructions').value;
+    const logoPosition = document.getElementById('logoPosition').value;
+    
+    // Format date
+    const formattedDate = examDate ? new Date(examDate).toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    }) : '';
+    
+    let html = '';
+    
+    // Add watermark if selected
+    if (selectedActivities.some(activity => activity.type === 'watermark')) {
+        const watermarkActivity = selectedActivities.find(a => a.type === 'watermark');
+        html += `
+            <div class="watermark" style="top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); opacity: ${watermarkActivity?.config?.opacity || 0.1}; font-size: ${watermarkActivity?.config?.size || '120px'};">
+                ${watermarkActivity?.config?.text || 'CONFIDENTIAL'}
+            </div>
+        `;
+    }
+    
+    // SIMPLIFIED LOGO POSITION HANDLING - ONLY CENTER OR NONE
+    if (logoPosition === 'center' && schoolLogo) {
+        html += `
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="display: inline-block; margin-bottom: 10px;">
+                    <img src="${schoolLogo}" alt="School Logo" 
+                         style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;">
+                </div>
+                <div class="school-info" style="text-align: center;">
+                    <div class="school-name">${schoolName}</div>
+                    <div class="school-address">${schoolAddress}</div>
+                    <div class="school-contact">${schoolContact}</div>
+                    <div class="school-contact">${affiliationNo}</div>
+                </div>
+            </div>
+        `;
+    } else { // 'none' or no logo
+        html += `
+            <div class="paper-header">
+                <div class="school-name">${schoolName}</div>
+                <div class="school-address">${schoolAddress}</div>
+                <div class="school-contact">${schoolContact}</div>
+                <div class="school-contact">${affiliationNo}</div>
+            </div>
+        `;
+    }
+    
+    // Exam details
+    html += `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 18px; font-weight: bold; margin-bottom: 15px; text-decoration: underline;">${examName}</div>
+            <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 25%; text-align: right; padding-right: 10px; font-weight: bold;">Class:</td>
+                    <td style="width: 25%; text-align: left; padding-left: 10px;">${className || 'Not specified'}</td>
+                    <td style="width: 25%; text-align: right; padding-right: 10px; font-weight: bold;">Course:</td>
+                    <td style="width: 25%; text-align: left; padding-left: 10px;">${courseName || 'All Courses'}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right; padding-right: 10px; font-weight: bold;">Total Marks:</td>
+                    <td style="text-align: left; padding-left: 10px;">${totalMarks}</td>
+                    <td style="text-align: right; padding-right: 10px; font-weight: bold;">Time:</td>
+                    <td style="text-align: left; padding-left: 10px;">${timeDuration}</td>
+                </tr>
+            </table>
+            <div style="font-weight: bold; font-size: 15px;">Date: ${formattedDate}</div>
+        </div>
+    `;
+    
+    // Instructions
+    html += `
+        <div class="section-title">General Instructions</div>
+        <div style="margin-bottom: 30px; white-space: pre-line;">${instructions}</div>
+    `;
+    
+    // Get questions from sections or organize by subject
+    const mcqQuestions = getQuestionsFromSection('mcqSection');
+    const shortQuestions = getQuestionsFromSection('shortSection');
+    const longQuestions = getQuestionsFromSection('longSection');
+    
+    // If no sections organized, get all selected questions
+    let allSelectedQuestions = [...selectedQuestions.values()];
+    
+    // Generate paper sections
+    let questionNumber = 1;
+    
+    // Section A: Objective Questions
+    if (mcqQuestions.length > 0) {
+        html += `
+            <div class="section-title">Section A: Objective Questions</div>
+            <div style="margin-bottom: 10px;"><em>Choose the correct option.</em></div>
+        `;
+        
+        mcqQuestions.forEach((question, index) => {
+            html += generateQuestionHTML(question, questionNumber++);
+        });
+        allSelectedQuestions = allSelectedQuestions.filter(q => !mcqQuestions.includes(q));
+    }
+    
+    // Section B: Subjective Questions
+    if (shortQuestions.length > 0) {
+        html += `
+            <div class="section-title">Section B: Subjective Questions</div>
+            <div style="margin-bottom: 10px;"><em>Answer the following questions briefly.</em></div>
+        `;
+        
+        shortQuestions.forEach((question, index) => {
+            html += generateQuestionHTML(question, questionNumber++);
+        });
+        allSelectedQuestions = allSelectedQuestions.filter(q => !shortQuestions.includes(q));
+    }
+    
+    // Section C: Applied Questions
+    if (longQuestions.length > 0) {
+        html += `
+            <div class="section-title">Section C: Applied Questions</div>
+            <div style="margin-bottom: 10px;"><em>Answer the following questions in detail.</em></div>
+        `;
+        
+        longQuestions.forEach((question, index) => {
+            html += generateQuestionHTML(question, questionNumber++);
+        });
+        allSelectedQuestions = allSelectedQuestions.filter(q => !longQuestions.includes(q));
+    }
+    
+    // Any remaining questions (not organized into sections)
+    if (allSelectedQuestions.length > 0) {
+        html += `
+            <div class="section-title">Questions</div>
+        `;
+        
+        allSelectedQuestions.forEach((question, index) => {
+            html += generateQuestionHTML(question, questionNumber++);
+        });
+    }
+    
+    // Add additional activities
+    html += generateAdditionalActivitiesHTML();
+    
+    // Add footer if selected
+    if (selectedActivities.some(activity => activity.type === 'footer')) {
+        html += `
+            <div class="paper-footer">
+                <div style="text-align: center;">
+                    Page 1 of 1 • Generated by Question Paper Generator
+                </div>
+            </div>
+        `;
+    }
+    
+    // Add signature section if selected
+    const signatureActivity = selectedActivities.find(a => a.type === 'signature');
+    if (signatureActivity) {
+        html += `
+            <div class="signature-section" style="margin-top: 50px; padding-top: 20px; border-top: 1px dashed #333;">
+                <div style="display: flex; justify-content: space-between;">
+                    ${signatureActivity.config.principal ? `
+                        <div class="signature-box" style="text-align: center; width: 250px;">
+                            <div style="font-weight: bold; margin-bottom: 10px;">Principal</div>
+                            ${signatureActivity.config.principalImg ? 
+                                `<img src="${signatureActivity.config.principalImg}" alt="Principal Signature" style="max-width: 200px; max-height: 60px; margin-bottom: 10px;">` : 
+                                `<div class="signature-line" style="width: 100%; border-top: 1px solid #333; margin-bottom: 10px;"></div>`
+                            }
+                            <div>________________________</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${signatureActivity.config.invigilator ? `
+                        <div class="signature-box" style="text-align: center; width: 250px;">
+                            <div style="font-weight: bold; margin-bottom: 10px;">Invigilator</div>
+                            ${signatureActivity.config.invigilatorImg ? 
+                                `<img src="${signatureActivity.config.invigilatorImg}" alt="Invigilator Signature" style="max-width: 200px; max-height: 60px; margin-bottom: 10px;">` : 
+                                `<div class="signature-line" style="width: 100%; border-top: 1px solid #333; margin-bottom: 10px;"></div>`
+                            }
+                            <div>________________________</div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Empty div for spacing when only one signature -->
+                    <div style="width: 250px;"></div>
+                </div>
+            </div>
+        `;
+    }
+    
+    return html;
+}
+
+// Get questions from a section
+function getQuestionsFromSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const questionItems = section.querySelectorAll('.selected-question-item');
+    const questions = [];
+    
+    questionItems.forEach(item => {
+        const questionId = parseInt(item.getAttribute('data-id'));
+        const question = selectedQuestions.get(questionId);
+        if (question) {
+            questions.push(question);
+        }
+    });
+    
+    return questions;
+}
+
+// Generate HTML for a single question
+function generateQuestionHTML(question, number) {
+    let html = `
+        <div class="question-box">
+            <div class="question-number">${number}.</div>
+            <div style="margin-left: 10px; flex: 1;">
+                <div style="margin-bottom: 5px;">${question.question || 'Question text not available'}</div>
+    `;
+    
+    // Add options for MCQ questions
+    if (question.type === 'objective' && question.option1) {
+        html += `
+            <div class="mcq-options">
+                <div><span class="option-letter">(a)</span> ${question.option1 || ''}</div>
+                <div><span class="option-letter">(b)</span> ${question.option2 || ''}</div>
+                <div><span class="option-letter">(c)</span> ${question.option3 || ''}</div>
+                <div><span class="option-letter">(d)</span> ${question.option4 || ''}</div>
+            </div>
+        `;
+    }
+    
+    // Add marks
+    html += `
+                <div style="text-align: right; margin-top: 10px; font-weight: bold;">
+                    [${question.marks || 1} Mark${question.marks > 1 ? 's' : ''}]
+                </div>
+            </div>
+        </div>
+    `;
+    
+    return html;
+}
+
+// Generate additional activities HTML
+function generateAdditionalActivitiesHTML() {
+    let html = '';
+    
+    selectedActivities.forEach(activity => {
+        if (activity.type === 'watermark' || activity.type === 'signature' || activity.type === 'footer') {
+            // These are handled elsewhere
+            return;
+        }
+        
+        html += `
+            <div style="margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                <div class="section-title">${activity.name || getActivityName(activity.type)}</div>
+                <div>${activity.content || activity.config.content || 'No content specified.'}</div>
+            </div>
+        `;
+    });
+    
+    return html;
+}
+
+// ================================
+// OTHER PAPER FUNCTIONS
+// ================================
+
+function printPaper() {
+    window.print();
+}
+
+function downloadPDF() {
+    // Show loading message
+    const originalButtonText = event.target.innerHTML;
+    event.target.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating PDF...';
+    event.target.disabled = true;
+    
+    // Get the paper content
+    const paperElement = document.getElementById('generatedPaper');
+    
+    // Use html2canvas to capture the paper as an image
+    html2canvas(paperElement, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+    }).then(canvas => {
+        // Calculate PDF dimensions (A4 size: 210mm x 297mm)
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // Create PDF
+        const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+        
+        // Add image to PDF
+        const imgData = canvas.toDataURL('image/png');
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        
+        // Get paper settings for filename
+        const schoolName = document.getElementById('schoolName').value || 'School';
+        const examName = document.getElementById('examName').value || 'Exam';
+        const className = document.getElementById('classFilter').options[document.getElementById('classFilter').selectedIndex]?.text || 'Class';
+        const date = document.getElementById('examDate').value || new Date().toISOString().split('T')[0];
+        
+        // Create filename
+        const fileName = `${schoolName.replace(/\s+/g, '_')}_${examName.replace(/\s+/g, '_')}_${className.replace(/\s+/g, '_')}_${date}.pdf`;
+        
+        // Save PDF
+        pdf.save(fileName);
+        
+        // Reset button
+        event.target.innerHTML = originalButtonText;
+        event.target.disabled = false;
+        
+    }).catch(error => {
+        console.error('Error generating PDF:', error);
+        alert('Error generating PDF. Please try again.');
+        
+        // Reset button
+        event.target.innerHTML = originalButtonText;
+        event.target.disabled = false;
+    });
+}
+
+async function downloadPDFWithText() {
+    try {
+        // Show loading
+        const originalButtonText = event.target.innerHTML;
+        event.target.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating PDF...';
+        event.target.disabled = true;
+        
+        // Create PDF
+        const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+        
+        // Get paper settings for header
+        const schoolName = document.getElementById('schoolName').value || 'School';
+        const examName = document.getElementById('examName').value || 'Exam';
+        const className = document.getElementById('classFilter').options[document.getElementById('classFilter').selectedIndex]?.text || 'Class';
+        const totalMarks = document.getElementById('totalMarks').value || '100';
+        const timeDuration = document.getElementById('timeDuration').value || '3 hours';
+        
+        // Add header
+        pdf.setFontSize(16);
+        pdf.setTextColor(0, 0, 128); // Blue color
+        pdf.text(schoolName, 105, 20, { align: 'center' });
+        
+        pdf.setFontSize(12);
+        pdf.setTextColor(0, 0, 0); // Black color
+        
+        // Add exam details
+        pdf.setFontSize(14);
+        pdf.text(examName, 105, 30, { align: 'center' });
+        
+        pdf.setFontSize(10);
+        pdf.text(`Class: ${className}`, 20, 40);
+        pdf.text(`Total Marks: ${totalMarks}`, 105, 40, { align: 'center' });
+        pdf.text(`Time: ${timeDuration}`, 190, 40, { align: 'right' });
+        
+        // Get the paper HTML content
+        const paperElement = document.getElementById('generatedPaper');
+        
+        // Convert HTML to canvas for complex content (images, formatting)
+        const canvas = await html2canvas(paperElement, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+        });
+        
+        // Add the canvas as image starting after header
+        const imgWidth = 190; // mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const imgData = canvas.toDataURL('image/png');
+        
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+        
+        // Create filename
+        const date = document.getElementById('examDate').value || new Date().toISOString().split('T')[0];
+        const fileName = `${schoolName.replace(/\s+/g, '_')}_${examName.replace(/\s+/g, '_')}_${className.replace(/\s+/g, '_')}_${date}.pdf`;
+        
+        // Save PDF
+        pdf.save(fileName);
+        
+        // Reset button
+        event.target.innerHTML = originalButtonText;
+        event.target.disabled = false;
+        
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('Error generating PDF. Please try again.');
+        
+        // Reset button
+        if (event.target) {
+            event.target.innerHTML = originalButtonText;
+            event.target.disabled = false;
+        }
+    }
+}
+
+async function saveToDatabase() {
+    try {
+        // Show loading
+        const originalButtonText = event.target.innerHTML;
+        event.target.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+        event.target.disabled = true;
+        
+        // Check if we have selected questions
+        if (selectedQuestions.size === 0) {
+            alert("Please select at least one question before saving.");
+            event.target.innerHTML = originalButtonText;
+            event.target.disabled = false;
+            return;
+        }
+        
+        // Ask if teacher wants to publish immediately
+        const shouldPublish = confirm("Publish this exam for students?\n\n✅ Yes - Students will see it immediately\n❌ No - Save as draft only");
+        
+        // Get all paper data
+        const paperData = {
+            // Paper metadata
+            title: document.getElementById('examName').value || 'Generated Question Paper',
+            description: 'Automatically generated question paper',
+            
+            // School information
+            school_name: document.getElementById('schoolName').value,
+            school_address: document.getElementById('schoolAddress').value,
+            school_contact: document.getElementById('schoolContact').value,
+            affiliation_number: document.getElementById('affiliationNo').value,
+            
+            // Exam details
+            exam_name: document.getElementById('examName').value,
+            class_name: document.getElementById('classFilter').options[document.getElementById('classFilter').selectedIndex]?.text || '',
+            course_name: document.getElementById('courseFilter').options[document.getElementById('courseFilter').selectedIndex]?.text || '',
+            total_marks: parseInt(document.getElementById('totalMarks').value) || 100,
+            time_duration: document.getElementById('timeDuration').value,
+            exam_date: document.getElementById('examDate').value,
+            instructions: document.getElementById('instructions').value,
+            
+            // Logo settings
+            logo_position: document.getElementById('logoPosition').value,
+            
+            // Selected questions (FIXED: Include full question data for students)
+            selected_questions: Array.from(selectedQuestions.values()).map(q => ({
+                id: q.id,
+                subject_id: q.subject_id,
+                subject_name: q.subject_name,
+                question: q.question,
+                question_type: q.type,
+                marks: q.marks,
+                difficulty: q.difficulty,
+                chapter: q.chapter || '',
+                topic: q.topic || '',
+                // ADD THESE CRITICAL FIELDS FOR STUDENT EXAMS:
+                option1: q.option1 || '',
+                option2: q.option2 || '',
+                option3: q.option3 || '',
+                option4: q.option4 || '',
+                correct_answer: q.correct_answer || '',
+                answer: q.answer || ''
+            })),
+            
+            // Section organization
+            sections: {
+                section_a: getQuestionsFromSection('mcqSection').map(q => q.id),
+                section_b: getQuestionsFromSection('shortSection').map(q => q.id),
+                section_c: getQuestionsFromSection('longSection').map(q => q.id)
+            },
+            
+            // Additional activities
+            additional_elements: selectedActivities.map(activity => ({
+                type: activity.type,
+                name: activity.name,
+                content: activity.content || '',
+                config: activity.config || {}
+            })),
+            
+            // Paper HTML content
+            paper_html: document.getElementById('generatedPaper').innerHTML,
+            
+            // Statistics
+            total_questions: selectedQuestions.size,
+            subjects_included: Array.from(new Set(Array.from(selectedQuestions.values()).map(q => q.subject_name))),
+            
+            // CRITICAL: Add publishing flags
+            is_published: shouldPublish,  // This makes it visible to students
+            status: shouldPublish ? 'published' : 'draft'
+        };
+        
+        // Send data to Django backend
+        const response = await fetch('/api/save-question-paper/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(paperData)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            if (shouldPublish) {
+                alert(`✅ Exam published successfully!\n\nPaper ID: ${result.paper_id}\n\nStudents can now access this exam from their "Available Exams" page.\n\nDirect link: /student/start-exam/${result.paper_id}/`);
+                
+                // Offer to view as student
+                // if (confirm("Would you like to preview how students will see this exam?")) {
+                //     window.open(`/student/start-exam/${result.paper_id}/`, '_blank');
+                // }
+            } else {
+                alert(`✅ Exam saved as draft.\n\nPaper ID: ${result.paper_id}\n\nNote: Students cannot see this exam yet. You can publish it later.`);
+            }
+            
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to save question paper');
+        }
+        
+    } catch (error) {
+        console.error('Error saving to database:', error);
+        alert(`❌ Error saving question paper: ${error.message}`);
+    } finally {
+        // Reset button
+        if (event.target) {
+            event.target.innerHTML = originalButtonText;
+            event.target.disabled = false;
+        }
+    }
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function regeneratePaper() {
+    // Check if we have a generated paper already
+    const paperPreview = document.getElementById('paperPreview');
+    const generatedPaper = document.getElementById('generatedPaper');
+    
+    if (!paperPreview || !generatedPaper) {
+        // If no paper is generated yet, generate it normally
+        generateQuestionPaper();
+        return;
+    }
+    
+    if (selectedQuestions.size === 0) {
+        alert("Please select at least one question before regenerating the paper.");
+        return;
+    }
+    
+    // Show loading indicator
+    const originalHTML = generatedPaper.innerHTML;
+    generatedPaper.innerHTML = `
+        <div style="text-align: center; padding: 50px;">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p class="mt-2 text-gray-600">Regenerating paper...</p>
+        </div>
+    `;
+    
+    // Ensure paper preview is visible
+    paperPreview.classList.remove('hidden');
+    
+    // Regenerate the paper HTML
+    setTimeout(() => {
+        const paperHTML = generatePaperHTML();
+        generatedPaper.innerHTML = paperHTML;
+        
+        // Scroll to the generated paper
+        paperPreview.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
+
+// ================================
+// LOGO MANAGEMENT
+// ================================
+
+// Handle logo upload
+function handleLogoUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            schoolLogo = e.target.result;
+            updateLogoPreview();
+            // Trigger settings save after logo upload
+            saveTeacherSettings();
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Use default logo
+function useDefaultLogo() {
+    // Create an SVG logo as a data URL
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <rect width="100" height="100" fill="#3b82f6" rx="10"/>
+        <circle cx="50" cy="40" r="20" fill="white"/>
+        <text x="50" y="40" text-anchor="middle" fill="#3b82f6" font-size="24" font-family="Arial, sans-serif" font-weight="bold" dy=".3em">S</text>
+        <text x="50" y="70" text-anchor="middle" fill="white" font-size="10" font-family="Arial, sans-serif">SCHOOL</text>
+    </svg>`;
+    
+    // Create proper data URL
+    schoolLogo = 'data:image/svg+xml;base64,' + btoa(svgString);
+    updateLogoPreview();
+    // Trigger settings save
+    saveTeacherSettings();
+}
+
+// Update logo preview
+function updateLogoPreview() {
+    const preview = document.getElementById('logoPreview');
+    if (schoolLogo) {
+        preview.innerHTML = `<img src="${schoolLogo}" alt="School Logo" style="width: 100%; height: 100%; object-fit: contain;">`;
+    } else {
+        preview.innerHTML = `<div class="text-gray-400 text-center">
+            <i class="fas fa-school text-3xl mb-2"></i>
+            <p class="text-sm">No Logo</p>
+        </div>`;
+    }
+}
+
+// Add this function to your JavaScript
+async function publishExam() {
+    // First save, then publish
+    if (selectedQuestions.size === 0) {
+        alert("Please select at least one question before publishing.");
+        return;
+    }
+    
+    // Confirm with teacher
+    if (!confirm("Publish this exam for all students?\n\nOnce published, students will see it immediately.")) {
+        return;
+    }
+    
+    // Use the same save function but force publish
+    event.target.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Publishing...';
+    event.target.disabled = true;
+    
+    try {
+        // Prepare data with publish flag
+        const paperData = {
+            // ... (same as saveToDatabase) ...
+            is_published: true,
+            status: 'published',
+            publish_immediately: true
+        };
+        
+        const response = await fetch('/api/save-and-publish-paper/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(paperData)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert(`✅ Exam published successfully!\n\nPaper ID: ${result.paper_id}\n\nStudents can now access this exam.`);
+            
+            // Show preview link
+            if (confirm("Would you like to see how students will view this exam?")) {
+                window.open(`/student/start-exam/${result.paper_id}/`, '_blank');
+            }
+        }
+    } catch (error) {
+        console.error('Error publishing exam:', error);
+        alert('Error publishing exam. Please try again.');
+    } finally {
+        event.target.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Publish Exam';
+        event.target.disabled = false;
+    }
+}
+// ================================
+// EDIT MODE FUNCTIONALITY
+// ================================
+
+// Check if we're in edit mode
+{% if edit_mode and paper %}
+$(document).ready(function() {
+    console.log("Edit mode detected for paper:", {{ paper.id }});
+    
+    // Load existing paper data
+    const paperData = {
+        school_name: "{{ paper.school_name|escapejs }}",
+        school_address: "{{ paper.school_address|escapejs }}",
+        school_contact: "{{ paper.school_contact|escapejs }}",
+        affiliation_no: "{{ paper.affiliation_number|escapejs }}",
+        exam_name: "{{ paper.exam_name|escapejs }}",
+        class_filter: "{{ paper.class_name|escapejs }}",
+        course_filter: "{{ paper.course_name|escapejs }}",
+        total_marks: {{ paper.total_marks }},
+        time_duration: "{{ paper.time_duration|escapejs }}",
+        exam_date: "{% if paper.exam_date %}{{ paper.exam_date|date:'Y-m-d' }}{% endif %}",
+        instructions: `{{ paper.instructions|escapejs }}`,
+        logo_position: "{{ paper.logo_position|escapejs }}",
+        question_data: {{ paper.question_data|safe|default:'{}' }},
+        additional_elements: {{ paper.additional_elements|safe|default:'[]' }},
+        logo_image: "{% if paper.logo_image %}{{ paper.logo_image.url }}{% endif %}"
+    };
+    
+    console.log("Paper data loaded:", paperData);
+    
+    // Wait for everything to load, then populate form
+    setTimeout(function() {
+        populateFormWithPaperData(paperData);
+        loadSelectedQuestions(paperData.question_data);
+        loadAdditionalElements(paperData.additional_elements);
+    }, 1500);
+});
+
+function populateFormWithPaperData(data) {
+    console.log("Populating form with paper data...");
+    
+    // Populate basic fields
+    document.getElementById('schoolName').value = data.school_name || '';
+    document.getElementById('schoolAddress').value = data.school_address || '';
+    document.getElementById('schoolContact').value = data.school_contact || '';
+    document.getElementById('affiliationNo').value = data.affiliation_no || '';
+    document.getElementById('examName').value = data.exam_name || '';
+    document.getElementById('totalMarks').value = data.total_marks || 100;
+    document.getElementById('timeDuration').value = data.time_duration || '3 hours';
+    document.getElementById('instructions').value = data.instructions || '';
+    
+    // Set date
+    if (data.exam_date) {
+        document.getElementById('examDate').value = data.exam_date;
+    }
+    
+    // Set select values
+    if (data.logo_position) {
+        $('#logoPosition').val(data.logo_position).trigger('change');
+    }
+    
+    // Set class and course filters if they exist
+    if (data.class_filter) {
+        $('#classFilter').val(data.class_filter).trigger('change');
+    }
+    
+    if (data.course_filter) {
+        $('#courseFilter').val(data.course_filter).trigger('change');
+    }
+    
+    // Load logo if exists
+    if (data.logo_image) {
+        schoolLogo = data.logo_image;
+        updateLogoPreview();
+    }
+    
+    // Show edit mode message
+    showToast('Editing existing paper. Changes will be saved to this version.', 'info');
+    
+    // Update page title
+    document.title = `Editing: ${data.exam_name || 'Question Paper'} - Question Paper Generator`;
+}
+
+function loadSelectedQuestions(questionData) {
+    if (!questionData || !questionData.selected_questions) {
+        console.log("No questions data to load");
+        return;
+    }
+    
+    console.log("Loading selected questions:", questionData.selected_questions.length);
+    
+    // Clear any existing selections
+    selectedQuestions.clear();
+    document.getElementById('selectedQuestionsContainer').innerHTML = '';
+    
+    // Add each question to selected questions
+    questionData.selected_questions.forEach(q => {
+        const question = {
+            id: q.id,
+            subject_id: q.subject_id,
+            subject_name: q.subject_name,
+            question: q.question,
+            type: q.type,
+            difficulty: q.difficulty,
+            marks: q.marks,
+            chapter: q.chapter || '',
+            topic: q.topic || '',
+            option1: q.option1 || '',
+            option2: q.option2 || '',
+            option3: q.option3 || '',
+            option4: q.option4 || '',
+            correct_answer: q.correct_answer || '',
+            answer: q.answer || ''
+        };
+        
+        // Add to selected questions
+        selectedQuestions.set(question.id, question);
+        
+        // Add to selected container
+        addToSelectedContainer(question);
+    });
+    
+    // Update selection count
+    updateSelectionCount();
+    
+    // Load questions into sections if organized
+    if (questionData.sections) {
+        loadQuestionsIntoSections(questionData.sections);
+    }
+}
+
+function loadQuestionsIntoSections(sections) {
+    // Clear existing sections
+    ['mcqSection', 'shortSection', 'longSection'].forEach(sectionId => {
+        document.getElementById(sectionId).innerHTML = '';
+    });
+    
+    // Load into sections
+    if (sections.section_a && sections.section_a.length > 0) {
+        sections.section_a.forEach(qId => {
+            const question = selectedQuestions.get(qId);
+            if (question) {
+                moveQuestionToSection(qId, 'mcq');
+            }
+        });
+    }
+    
+    if (sections.section_b && sections.section_b.length > 0) {
+        sections.section_b.forEach(qId => {
+            const question = selectedQuestions.get(qId);
+            if (question) {
+                moveQuestionToSection(qId, 'short');
+            }
+        });
+    }
+    
+    if (sections.section_c && sections.section_c.length > 0) {
+        sections.section_c.forEach(qId => {
+            const question = selectedQuestions.get(qId);
+            if (question) {
+                moveQuestionToSection(qId, 'long');
+            }
+        });
+    }
+}
+
+function loadAdditionalElements(elements) {
+    if (!elements || !Array.isArray(elements) || elements.length === 0) {
+        console.log("No additional elements to load");
+        return;
+    }
+    
+    console.log("Loading additional elements:", elements.length);
+    
+    // Clear existing activities
+    selectedActivities = [];
+    updateSelectedActivitiesUI();
+    
+    // Add each element
+    elements.forEach(element => {
+        selectedActivities.push({
+            id: element.id || Date.now() + Math.random(),
+            type: element.type,
+            name: element.name || getActivityName(element.type),
+            icon: element.icon || getActivityIcon(element.type),
+            content: element.content || '',
+            config: element.config || getDefaultConfig(element.type)
+        });
+    });
+    
+    // Update UI
+    updateSelectedActivitiesUI();
+    
+    // Hide empty message
+    const emptyMessage = document.getElementById('emptyDropzoneMessage');
+    if (emptyMessage) {
+        emptyMessage.style.display = 'none';
+    }
+}
+
+function getActivityIcon(type) {
+    const icons = {
+        'watermark': 'fas fa-tint',
+        'signature': 'fas fa-signature',
+        'instructions': 'fas fa-list-ol',
+        'grading': 'fas fa-star',
+        'footer': 'fas fa-file-alt',
+        'warning': 'fas fa-exclamation-triangle',
+        'answer_sheet': 'fas fa-file-invoice',
+        'formula': 'fas fa-square-root-alt'
+    };
+    return icons[type] || 'fas fa-plus-circle';
+}
+
+// Modify the saveToDatabase function to handle updates
+function saveToDatabase() {
+    try {
+        // Show loading
+        const originalButtonText = event.target.innerHTML;
+        event.target.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+        event.target.disabled = true;
+        
+        // Check if we have selected questions
+        if (selectedQuestions.size === 0) {
+            alert("Please select at least one question before saving.");
+            event.target.innerHTML = originalButtonText;
+            event.target.disabled = false;
+            return;
+        }
+        
+        // Ask if teacher wants to publish
+        const shouldPublish = confirm("Publish this exam for students?\n\n✅ Yes - Students will see it immediately\n❌ No - Save as draft only");
+        
+        // Get all paper data
+        const paperData = {
+            // Paper metadata
+            title: document.getElementById('examName').value || 'Generated Question Paper',
+            description: 'Automatically generated question paper',
+            
+            // School information
+            school_name: document.getElementById('schoolName').value,
+            school_address: document.getElementById('schoolAddress').value,
+            school_contact: document.getElementById('schoolContact').value,
+            affiliation_number: document.getElementById('affiliationNo').value,
+            
+            // Exam details
+            exam_name: document.getElementById('examName').value,
+            class_name: document.getElementById('classFilter').options[document.getElementById('classFilter').selectedIndex]?.text || '',
+            course_name: document.getElementById('courseFilter').options[document.getElementById('courseFilter').selectedIndex]?.text || '',
+            total_marks: parseInt(document.getElementById('totalMarks').value) || 100,
+            time_duration: document.getElementById('timeDuration').value,
+            exam_date: document.getElementById('examDate').value,
+            instructions: document.getElementById('instructions').value,
+            
+            // Logo settings
+            logo_position: document.getElementById('logoPosition').value,
+            
+            // Selected questions
+            selected_questions: Array.from(selectedQuestions.values()).map(q => ({
+                id: q.id,
+                subject_id: q.subject_id,
+                subject_name: q.subject_name,
+                question: q.question,
+                question_type: q.type,
+                marks: q.marks,
+                difficulty: q.difficulty,
+                chapter: q.chapter || '',
+                topic: q.topic || '',
+                option1: q.option1 || '',
+                option2: q.option2 || '',
+                option3: q.option3 || '',
+                option4: q.option4 || '',
+                correct_answer: q.correct_answer || '',
+                answer: q.answer || ''
+            })),
+            
+            // Section organization
+            sections: {
+                section_a: getQuestionsFromSection('mcqSection').map(q => q.id),
+                section_b: getQuestionsFromSection('shortSection').map(q => q.id),
+                section_c: getQuestionsFromSection('longSection').map(q => q.id)
+            },
+            
+            // Additional activities
+            additional_elements: selectedActivities.map(activity => ({
+                type: activity.type,
+                name: activity.name,
+                content: activity.content || '',
+                config: activity.config || {}
+            })),
+            
+            // Paper HTML content
+            paper_html: document.getElementById('generatedPaper').innerHTML,
+            
+            // Statistics
+            total_questions: selectedQuestions.size,
+            subjects_included: Array.from(new Set(Array.from(selectedQuestions.values()).map(q => q.subject_name))),
+            
+            // Publishing flags
+            is_published: shouldPublish,
+            status: shouldPublish ? 'published' : 'draft',
+            
+            // If editing existing paper, include its ID
+            paper_id: {% if edit_mode and paper %}{{ paper.id }}{% else %}null{% endif %}
+        };
+        
+        // Determine endpoint based on edit mode
+        const endpoint = {% if edit_mode and paper %}'/api/update-question-paper/'{% else %}'/api/save-question-paper/'{% endif %};
+        
+        // Send data to Django backend
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(paperData)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                if (shouldPublish) {
+                    alert(`✅ Exam published successfully!\n\nPaper ID: ${result.paper_id}\n\nStudents can now access this exam.`);
+                } else {
+                    alert(`✅ Exam saved as draft.\n\nPaper ID: ${result.paper_id}`);
+                }
+                
+                // Redirect to teacher's papers list
+                window.location.href = "{% url 'teacher_generated_papers' %}";
+            } else {
+                throw new Error(result.error || 'Failed to save question paper');
+            }
+        })
+        .catch(error => {
+            console.error('Error saving to database:', error);
+            alert(`❌ Error saving question paper: ${error.message}`);
+        })
+        .finally(() => {
+            // Reset button
+            if (event.target) {
+                event.target.innerHTML = originalButtonText;
+                event.target.disabled = false;
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error in saveToDatabase:', error);
+        alert(`❌ Error: ${error.message}`);
+        
+        // Reset button
+        if (event.target) {
+            event.target.innerHTML = originalButtonText;
+            event.target.disabled = false;
+        }
+    }
+}
+
+{% else %}
+// Not in edit mode - regular initialization
+$(document).ready(function() {
+    console.log("Creating new question paper");
+    // Regular initialization code here
+});
+{% endif %}
+
+// Helper function to get questions from a section
+function getQuestionsFromSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    const questionItems = section.querySelectorAll('.selected-question-item');
+    const questions = [];
+    
+    questionItems.forEach(item => {
+        const questionId = parseInt(item.getAttribute('data-id'));
+        const question = selectedQuestions.get(questionId);
+        if (question) {
+            questions.push(question);
+        }
+    });
+    
+    return questions;
+}
+// ================================
+// DEBUGGING
+// ================================
+console.log("Question filtering system loaded.");
+console.log("Teacher settings system initialized.");
+
+// Test that applyFilters is accessible
+console.log("applyFilters function available:", typeof applyFilters !== 'undefined');
+console.log("clearFilters function available:", typeof clearFilters !== 'undefined');
+console.log("Total questions loaded:", allQuestions.length);
+
+</script>
+</body>
+</html>

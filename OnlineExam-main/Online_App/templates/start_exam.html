@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Exam - {{ paper.exam_name|default:"Question Paper" }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        .exam-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .timer-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+    <!-- Exam Header -->
+    <header class="exam-header text-white">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex justify-between items-start">
+                <div>
+                   <h1 class="text-3xl font-bold mb-2">{{ paper_title|default:"Question Paper" }}</h1>
+                    <p class="text-blue-100 mb-1">
+                        <i class="fas fa-user-graduate mr-2"></i>
+                        Student: {{ username }}
+                    </p>
+                    <p class="text-blue-100">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        Started: {% now "F d, Y h:i A" %}
+                    </p>
+                </div>
+                <div class="text-right">
+                    <div class="text-4xl font-bold mb-2 timer-pulse" id="totalTime">
+                        {{ exam_time }}:00
+                    </div>
+                    <p class="text-blue-100">Total Time</p>
+                </div>
+            </div>
+            
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                    <div class="text-2xl font-bold">{{ total_questions }}</div>
+                    <p class="text-sm">Total Questions</p>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                    <div class="text-2xl font-bold">{{ paper.total_marks|default:"100" }}</div>
+                    <p class="text-sm">Total Marks</p>
+                </div>
+               <div class="text-2xl font-bold">
+    {% if exam_time %}
+        {{ exam_time }} minutes
+    {% else %}
+        180 minutes
+    {% endif %}
+</div>
+                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                    <div class="text-2xl font-bold">Auto Submit</div>
+                    <p class="text-sm">When timer ends</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <!-- Instructions -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                    Important Instructions
+                </h2>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>Warning:</strong> Once you start the exam, you cannot pause, refresh, or navigate away from the page. Doing so may result in automatic submission.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-bold text-gray-700 mb-3">Before you begin:</h3>
+                        <ul class="space-y-2 text-gray-600">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Ensure you are in a quiet environment</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Close all other applications and browser tabs</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Keep your ID ready for verification if required</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="font-bold text-gray-700 mb-3">During the exam:</h3>
+                        <ul class="space-y-2 text-gray-600">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Answer all questions before time runs out</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>You can navigate between questions using Next/Previous</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                                <span>Review your answers before final submission</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Agreement -->
+            <div class="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="flex items-start">
+                    <input type="checkbox" id="agreeTerms" class="mt-1 mr-3 h-5 w-5 text-blue-600 rounded">
+                    <div>
+                        <label for="agreeTerms" class="font-medium text-gray-700">
+                            I have read and understood all the instructions
+                        </label>
+                        <p class="text-sm text-gray-600 mt-1">
+                            By checking this box, I confirm that I am ready to begin the exam and agree to all the rules and regulations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Start Button -->
+            <div class="text-center">
+                <button id="startExamBtn" 
+                        onclick="startExam()"
+                        disabled
+                        class="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-xl font-bold rounded-xl hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                    <i class="fas fa-play-circle mr-3"></i> START EXAM NOW
+                </button>
+                <p class="text-gray-500 mt-4 text-sm">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Your exam will be monitored for academic integrity
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Enable start button when terms are agreed
+        document.getElementById('agreeTerms').addEventListener('change', function() {
+            document.getElementById('startExamBtn').disabled = !this.checked;
+        });
+        
+        function startExam() {
+            if (!document.getElementById('agreeTerms').checked) {
+                alert('Please agree to the terms and conditions first.');
+                return;
+            }
+            
+            // Disable back button
+            window.history.pushState(null, null, window.location.href);
+            window.onpopstate = function () {
+                window.history.go(1);
+            };
+            
+            // Start the exam
+            window.location.href = "{% url 'student_take_exam' 0 %}";
+        }
+        
+        // Prevent accidental refresh/navigation
+        window.addEventListener('beforeunload', function (e) {
+            e.preventDefault();
+            e.returnValue = '';
+        });
+    </script>
+</body>
+</html>

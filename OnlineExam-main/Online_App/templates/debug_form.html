@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Form</title>
+</head>
+<body>
+    <form method="POST" action="/debug-exam-submit/">
+        {% csrf_token %}
+        <input type="hidden" name="paper_id" value="1">
+        <input type="hidden" name="answer_1" value="A">
+        <input type="hidden" name="time_taken" value="120">
+        <button type="submit">Test Submit</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff List</title>
+    <link rel="stylesheet" href="{% static 'file/admin-dashboard.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Staff Members</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for staff in staff_members %}
+                <tr>
+                    <td>{{ staff.id }}</td>
+                    <td>{{ staff.name }}</td>
+                    <td>{{ staff.email }}</td>
+                    <td>{{ staff.role }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+    </div>
+</body>
+</html> -->

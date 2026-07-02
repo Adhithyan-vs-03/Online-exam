@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Result</title>
+    <link rel="stylesheet" href="/static/file/result.css">
+</head>
+<body>
+    <div class="result-container">
+        <h2>Exam Result</h2>
+        
+        <div class="result-card">
+            <p><strong>Student:</strong> {{ result.student.username }}</p>
+            <p><strong>Total Marks:</strong> {{ result.total_marks }}</p>
+            <p><strong>Obtained Marks:</strong> {{ result.obtained_marks }}</p>
+            <p><strong>Time Taken:</strong> {{ result.exam_time }} minutes</p>
+            <p><strong>Submission Time:</strong> {{ result.submitted_at }}</p>
+
+            <div class="score">
+                <p>Your Score: <span>{{ result.obtained_marks }}/{{ result.total_marks }}</span></p>
+            </div>
+            
+            <a href="{% url 'Student' %}" class="back-btn">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

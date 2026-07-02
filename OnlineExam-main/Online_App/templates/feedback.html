@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Scheduled - Feedback</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/file/feedback.css">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <div class="header-top8">
+        <img src="/static/images/nassonline.jpg" alt="Logo" class="logo8">
+        <div class="header-info8">
+            <h3 class="welcome8">Welcome, {{ data.username }}</h3>
+            <a href="{% url 'login' %}">
+                <button class="reg8">
+                    LogOut <i class="fa fa-sign-out" style="font-size:16px;"></i>
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <!-- Feedback Form Section -->
+    <div class="container">
+        <h2>📝 Student Feedback</h2>
+        <form action="{% url 'submit_feedback' %}" method="post">
+            {% csrf_token %}
+            
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Your name (optional)">
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Your email (optional)">
+            
+            <label for="message">Feedback:</label>
+            <textarea id="message" name="message" rows="5" placeholder="Write your feedback here..." required></textarea>
+            
+            <button type="submit">📩 Submit Feedback</button>
+        </form>
+    </div>
+
+</body>
+</html>

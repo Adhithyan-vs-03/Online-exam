@@ -1,0 +1,288 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Main Staff Profile</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+/* ---------- ROOT COLORS ---------- */
+:root {
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --muted: #6b7280;
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --radius: 20px;
+    --shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    --border: rgba(255, 255, 255, 0.25);
+}
+
+/* ---------- GLOBAL ---------- */
+body {
+    margin: 0;
+    padding: 32px;
+    font-family: "Inter", "Segoe UI", Roboto, Arial;
+    background: linear-gradient(135deg, #dbeafe, #ffffff);
+    backdrop-filter: blur(20px);
+}
+
+/* ---------- CARD ---------- */
+.card {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 32px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    animation: fadein .5s ease-out;
+    backdrop-filter: blur(30px);
+}
+
+@keyframes fadein {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- PROFILE PHOTO ---------- */
+.profile-photo {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    margin: 22px auto;
+    overflow: hidden;
+    border: 5px solid rgba(255,255,255,0.8);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+    cursor: pointer;
+    position: relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    transition: transform .2s ease;
+}
+
+.profile-photo:hover {
+    transform: scale(1.04);
+}
+
+.profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Camera Icon */
+.profile-photo::after {
+    content: "\f030";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: white;
+    padding: 8px;
+    font-size: 15px;
+    border-radius: 50%;
+    color: var(--primary);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+/* ---------- TOP SECTION ---------- */
+.top-section {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.top-section h2 {
+    margin: 8px 0 2px;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.top-section p {
+    color: var(--muted);
+    margin: 0;
+}
+
+/* ---------- SECTION TITLE ---------- */
+.section-title {
+    margin: 28px 0 12px;
+}
+
+.section-title h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* ---------- DETAILS ---------- */
+.details {
+    padding: 22px;
+    background: rgba(255,255,255,0.9);
+    border-radius: var(--radius);
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.data-table td {
+    padding: 12px 10px;
+}
+
+.label {
+    width: 200px;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* ---------- BUTTONS ---------- */
+.btn {
+    background: var(--primary);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: .2s;
+}
+
+.btn:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.btn.outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.btn.outline:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.bottom-actions {
+    text-align: center;
+    margin-top: 25px;
+}
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+}
+
+.left-btn { margin-right: auto; }
+.right-btn { margin-left: auto; }
+
+
+input[type="file"] { display: none; }
+
+</style>
+</head>
+
+
+<body>
+
+<div class="card">
+
+    <!-- IMAGE -->
+    <form method="POST" action="{% url 'mainstaff_update_photo' %}" enctype="multipart/form-data" id="photoForm">
+        {% csrf_token %}
+
+        <label for="photoInput" class="profile-photo" id="photoPreview">
+            {% if mainstaff.profile_photo %}
+                <img src="{{ mainstaff.profile_photo.url }}">
+            {% else %}
+                <img src="{% static 'images/default-avatar.png' %}">
+            {% endif %}
+        </label>
+
+        <input type="file" id="photoInput" name="profile_photo" accept="image/*">
+    </form>
+
+    <!-- NAME + EMAIL -->
+    <div class="top-section">
+        <h2>{{ mainstaff.name|default:user.get_full_name }}</h2>
+        <p>{{ mainstaff.email|default:user.email }}</p>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="section-title">
+        <h3>Personal Details</h3>
+    </div>
+
+    <div class="details">
+        <table class="data-table">
+            <tr>
+                <td class="label"><i class="fa fa-user"></i> Full Name</td>
+                <td>{{ mainstaff.name|default:user.get_full_name }}</td>
+            </tr>
+            <tr>
+                <td class="label"><i class="fa fa-envelope"></i> Email</td>
+                <td>{{ mainstaff.email|default:user.email }}</td>
+            </tr>
+            <tr>
+                <td class="label"><i class="fa fa-phone"></i> Phone</td>
+                <td>{{ mainstaff.phone|default:"—" }}</td>
+            </tr>
+            <tr>
+                <td class="label"><i class="fa fa-calendar"></i> Joined On</td>
+                <td>{{ mainstaff.joined_date|date:"F j, Y" }}</td>
+            </tr>
+            <tr>
+                <td class="label"><i class="fa fa-clock"></i> Last Login</td>
+                <td>{{ user.last_login|date:"F j, Y, g:i a" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- BUTTONS -->
+    <!-- BUTTON ROW -->
+    <div class="button-row">
+        <a href="{% url 'mainstaff_dashboard' %}" class="btn outline left-btn">
+            <i class="fa fa-arrow-left"></i> Back
+        </a>
+
+        <a href="{% url 'mainstaff_edit_profile' %}" class="btn outline right-btn">
+            <i class="fa fa-pen"></i> Edit Profile
+        </a>
+    </div>
+
+
+</div>
+
+<script>
+const input = document.getElementById("photoInput");
+const preview = document.getElementById("photoPreview");
+const form = document.getElementById("photoForm");
+
+input.addEventListener("change", function(){
+    const file = this.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      preview.innerHTML = `<img src="${e.target.result}">`;
+    };
+    reader.readAsDataURL(file);
+
+    form.submit();
+});
+</script>
+
+</body>
+</html>

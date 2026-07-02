@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Questions</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: #eef3ff;
+        }
+
+        .container {
+            width: 60%;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1a73e8;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+            color: #444;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        textarea {
+            height: 120px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            margin-top: 20px;
+            border-radius: 10px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #155fc1;
+        }
+
+        .msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Add Questions</h2>
+
+    {% if message %}
+        <p class="msg">{{ message }}</p>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+       <label>Class</label>
+        <select name="class_name" required>
+            <option value="">Select Class</option>
+            {% for i in class_list %}
+            <option value="{{ i }}">Class {{ i }}</option>
+            {% endfor %}
+        </select>
+
+
+        <label>Subject</label>
+        <input type="text" name="subject_name" placeholder="Enter Subject" required>
+
+        <label>Chapter</label>
+        <input type="text" name="chapter" placeholder="Enter Chapter Name" required>
+
+        <label>Topic</label>
+        <input type="text" name="topic" placeholder="Enter Topic Name" required>
+
+        <label>Sub Topic</label>
+        <input type="text" name="sub_topic" placeholder="(Optional)">
+
+        <label>Marks</label>
+        <input type="number" name="marks" required>
+
+        <label>Question Type</label>
+        <select name="question_type" required>
+            <option value="Short Answer">Short Answer</option>
+            <option value="Long Answer">Long Answer</option>
+            <option value="MCQ">MCQ</option>
+        </select>
+
+        <label>Question</label>
+        <textarea name="question_text" required></textarea>
+
+        <label>Answer</label>
+        <textarea name="answer_text" required></textarea>
+
+        <button class="btn">Add Question</button>
+    </form>
+
+</div>
+
+</body>
+</html>

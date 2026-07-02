@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Physics Question - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- Global Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* --- Header Section --- */
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header h1 i {
+            font-size: 2.2rem;
+        }
+
+        /* --- Main Content --- */
+        .content {
+            padding: 30px;
+        }
+
+        /* --- Form Styles --- */
+        .edit-form {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #e1e7ef;
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff6b6b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            color: #ff6b6b;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e7ef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        /* --- Error Messages --- */
+        .error {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 5px;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+            font-size: 0.875em;
+        }
+
+        input.error, textarea.error, select.error {
+            border-color: #dc3545 !important;
+        }
+
+        /* --- Options Section --- */
+        .options-container {
+            background: #fff;
+            border: 1px solid #e1e7ef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #ddd;
+        }
+
+        .option-row.correct {
+            background: #fef9e7;
+            border-left-color: #f39c12;
+        }
+
+        .option-checkbox {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
+        .option-label {
+            font-weight: 600;
+            min-width: 40px;
+            color: #2c3e50;
+        }
+
+        /* --- File Upload --- */
+        .file-upload {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .file-preview {
+            max-width: 200px;
+            border-radius: 8px;
+            border: 2px solid #e1e7ef;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .current-file {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        /* --- Physics Formula Editor --- */
+        .formula-editor {
+            background: #fff;
+            border: 2px solid #e1e7ef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .formula-toolbar {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e1e7ef;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .formula-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .formula-btn:hover {
+            background: #f0f0f0;
+        }
+
+        /* --- Alert Messages --- */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* --- Button Styles --- */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e1e7ef;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* --- Dynamic Fields --- */
+        .dynamic-field {
+            display: none;
+        }
+
+        .dynamic-field.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Physics Specific Styling --- */
+        .graph-section, .diagram-section {
+            background: #fff;
+            border: 1px solid #e1e7ef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .graph-upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .graph-image-preview {
+            max-width: 250px;
+            border-radius: 8px;
+            border: 2px solid #e1e7ef;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .option-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .file-upload {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .file-preview {
+                max-width: 100%;
+            }
+            
+            .graph-upload-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .form-section {
+                padding: 15px;
+            }
+        }
+        
+        /* Hint styling */
+        .hint {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header Section -->
+    <div class="header">
+        <h1><i class="fas fa-atom"></i> Edit Physics Question</h1>
+        <p>Question ID: {{ question.id }} | Last Updated: {{ question.updated_at|date:"F j, Y, g:i a" }}</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Messages display -->
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="edit-form" id="editForm">
+            {% csrf_token %}
+            
+            <!-- Basic Information Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="chapter"><i class="fas fa-book"></i> Chapter</label>
+                        <input type="text" id="chapter" name="chapter" class="form-control" 
+                               value="{{ question.chapter|default:'' }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="topic"><i class="fas fa-tag"></i> Topic</label>
+                        <input type="text" id="topic" name="topic" class="form-control" 
+                               value="{{ question.topic|default:'' }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="question_type"><i class="fas fa-question-circle"></i> Question Type</label>
+                        <select id="question_type" name="question_type" class="form-control" onchange="toggleQuestionType()" required>
+                            <option value="objective" {% if question.question_type == 'objective' %}selected{% endif %}>Objective (MCQ)</option>
+                            <option value="descriptive" {% if question.question_type == 'descriptive' %}selected{% endif %}>Descriptive</option>
+                            <option value="numerical" {% if question.question_type == 'numerical' %}selected{% endif %}>Numerical</option>
+                            <option value="graph_based" {% if question.question_type == 'graph_based' %}selected{% endif %}>Graph Based</option>
+                            <option value="diagram_based" {% if question.question_type == 'diagram_based' %}selected{% endif %}>Diagram Based</option>
+                            <option value="match_following" {% if question.question_type == 'match_following' %}selected{% endif %}>Match the Following</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-question"></i> Question</h3>
+                <div class="form-group full-width">
+                    <label for="question"><i class="fas fa-pen"></i> Question Text</label>
+                    <div class="formula-editor">
+                        <div class="formula-toolbar">
+                            <button type="button" class="formula-btn" onclick="insertMathSymbol('question', 'Δ')">
+                                <i class="fas fa-delta"></i> Δ
+                            </button>
+                            <button type="button" class="formula-btn" onclick="insertMathSymbol('question', 'θ')">
+                                <i class="fas fa-angle-left"></i> θ
+                            </button>
+                            <button type="button" class="formula-btn" onclick="insertMathSymbol('question', 'π')">
+                                <i class="fas fa-pi"></i> π
+                            </button>
+                            <button type="button" class="formula-btn" onclick="insertMathSymbol('question', 'μ')">
+                                <i class="fas fa-mu"></i> μ
+                            </button>
+                            <button type="button" class="formula-btn" onclick="insertMathSymbol('question', '²')">
+                                <i class="fas fa-superscript"></i> ²
+                            </button>
+                            <button type="button" class="formula-btn" onclick="insertMathSymbol('question', '³')">
+                                <i class="fas fa-superscript"></i> ³
+                            </button>
+                        </div>
+                        <textarea id="question" name="question" class="form-control" 
+                                  rows="4" required>{{ question.question|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Type Specific Fields -->
+            <div class="form-section" id="question-type-fields">
+                <!-- Objective (MCQ) Fields -->
+                <div id="objective-fields" class="dynamic-field {% if question.question_type == 'objective' %}active{% endif %}">
+                    <h3><i class="fas fa-list-ol"></i> Multiple Choice Options</h3>
+                    <div class="options-container">
+                        <div class="form-group">
+                            <label><i class="fas fa-check-double"></i> Select Correct Options:</label>
+                        </div>
+                        
+                        {% for option_num in "1234" %}
+                        <div class="option-row {% if option_num in correct_options %}correct{% endif %}" id="option_row_{{ option_num }}">
+                            <input type="checkbox" name="correct_options[]" value="{{ option_num }}" class="option-checkbox"
+                                   id="correct_option_{{ option_num }}" {% if option_num in correct_options %}checked{% endif %}
+                                   onchange="updateOptionRow(this)">
+                            <span class="option-label">{{ option_num|make_list|first|upper }}:</span>
+                            {% if option_num == '1' %}
+                            <input type="text" name="option1" id="option1" class="form-control" 
+                                   value="{{ question.option1|default:'' }}" placeholder="Enter option A" required>
+                            {% elif option_num == '2' %}
+                            <input type="text" name="option2" id="option2" class="form-control" 
+                                   value="{{ question.option2|default:'' }}" placeholder="Enter option B" required>
+                            {% elif option_num == '3' %}
+                            <input type="text" name="option3" id="option3" class="form-control" 
+                                   value="{{ question.option3|default:'' }}" placeholder="Enter option C" required>
+                            {% elif option_num == '4' %}
+                            <input type="text" name="option4" id="option4" class="form-control" 
+                                   value="{{ question.option4|default:'' }}" placeholder="Enter option D" required>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Numerical Fields -->
+                <div id="numerical-fields" class="dynamic-field {% if question.question_type == 'numerical' %}active{% endif %}">
+                    <h3><i class="fas fa-calculator"></i> Numerical Details</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="formula"><i class="fas fa-square-root-alt"></i> Physics Formula</label>
+                            <input type="text" id="formula" name="formula" class="form-control" 
+                                   value="{{ question.formula|default:'' }}" placeholder="e.g., F = ma">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="units"><i class="fas fa-ruler"></i> Units</label>
+                            <input type="text" id="units" name="units" class="form-control" 
+                                   value="{{ question.units|default:'' }}" placeholder="e.g., m/s²">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="given_values"><i class="fas fa-list"></i> Given Values</label>
+                            <input type="text" id="given_values" name="given_values" class="form-control" 
+                                   value="{{ question.given_values|default:'' }}" placeholder="e.g., m=5kg, a=2m/s²">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="solution_steps"><i class="fas fa-stairs"></i> Solution Steps</label>
+                            <textarea id="solution_steps" name="solution_steps" class="form-control" 
+                                      rows="3" placeholder="Show step-by-step calculation...">{{ question.solution_steps|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graph Based Fields -->
+                <div id="graph-fields" class="dynamic-field {% if question.question_type == 'graph_based' %}active{% endif %}">
+                    <h3><i class="fas fa-chart-line"></i> Graph Details</h3>
+                    <div class="graph-section">
+                        <!-- <div class="form-grid">
+                            <div class="form-group">
+                                <label for="graph_type"><i class="fas fa-chart-bar"></i> Graph Type</label>
+                                <select id="graph_type" name="graph_type" class="form-control" required>
+                                    <option value="">Select Graph Type</option>
+                                    <option value="line" {% if question.graph_type == 'line' %}selected{% endif %}>Line Graph</option>
+                                    <option value="bar" {% if question.graph_type == 'bar' %}selected{% endif %}>Bar Graph</option>
+                                    <option value="scatter" {% if question.graph_type == 'scatter' %}selected{% endif %}>Scatter Plot</option>
+                                    <option value="histogram" {% if question.graph_type == 'histogram' %}selected{% endif %}>Histogram</option>
+                                    <option value="velocity_time" {% if question.graph_type == 'velocity_time' %}selected{% endif %}>Velocity-Time Graph</option>
+                                    <option value="displacement_time" {% if question.graph_type == 'displacement_time' %}selected{% endif %}>Displacement-Time Graph</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="graph_xlabel"><i class="fas fa-horizontal-rule"></i> X-axis Label</label>
+                                <input type="text" id="graph_xlabel" name="graph_xlabel" class="form-control" 
+                                       value="{{ question.graph_xlabel|default:'' }}" placeholder="e.g., Time (s)">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="graph_ylabel"><i class="fas fa-vertical-rule"></i> Y-axis Label</label>
+                                <input type="text" id="graph_ylabel" name="graph_ylabel" class="form-control" 
+                                       value="{{ question.graph_ylabel|default:'' }}" placeholder="e.g., Velocity (m/s)">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="graph_data"><i class="fas fa-table"></i> Graph Data Points (Optional)</label>
+                            <textarea id="graph_data" name="graph_data" class="form-control" 
+                                      placeholder="e.g., (0,0), (1,2), (2,4), (3,6)">{{ question.graph_data|default:'' }}</textarea>
+                            <div class="hint">Enter data points as (x,y) coordinates, separated by commas</div>
+                        </div> -->
+                        
+                        <div class="graph-upload-grid">
+                            <div class="form-group">
+                                <label for="question_graph_image"><i class="fas fa-upload"></i> Question Graph Image</label>
+                                
+                                {% if question.question_graph_image %}
+                                <div class="current-file">
+                                    <i class="fas fa-image" style="color: #ff6b6b;"></i>
+                                    <span>Current: {{ question.question_graph_image.name|default:"No image" }}</span>
+                                    {% if question.question_graph_image.url %}
+                                    <a href="{{ question.question_graph_image.url }}" target="_blank" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <input type="file" id="question_graph_image" name="question_graph_image" class="form-control" 
+                                       accept="image/*" onchange="previewImage(this, 'question_graph_preview')">
+                                
+                                <div class="image-preview-container" id="question_graph_preview_container" style="display: none; margin-top: 10px;">
+                                    <p>New Preview:</p>
+                                    <img id="question_graph_preview" class="graph-image-preview">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diagram Based Fields -->
+                <div id="diagram-fields" class="dynamic-field {% if question.question_type == 'diagram_based' %}active{% endif %}">
+                    <h3><i class="fas fa-drafting-compass"></i> Diagram Details</h3>
+                    <div class="diagram-section">
+                        <div class="graph-upload-grid">
+                            <div class="form-group">
+                                <label for="diagram_image"><i class="fas fa-upload"></i> Diagram Image</label>
+                                
+                                {% if question.diagram_image %}
+                                <div class="current-file">
+                                    <i class="fas fa-image" style="color: #ff6b6b;"></i>
+                                    <span>Current: {{ question.diagram_image.name|default:"No image" }}</span>
+                                    {% if question.diagram_image.url %}
+                                    <a href="{{ question.diagram_image.url }}" target="_blank" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <input type="file" id="diagram_image" name="diagram_image" class="form-control" 
+                                       accept="image/*" onchange="previewImage(this, 'diagram_preview')">
+                                
+                                <div class="image-preview-container" id="diagram_preview_container" style="display: none; margin-top: 10px;">
+                                    <p>New Preview:</p>
+                                    <img id="diagram_preview" class="graph-image-preview">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="diagram_description"><i class="fas fa-align-left"></i> Diagram Description</label>
+                                <textarea id="diagram_description" name="diagram_description" class="form-control" 
+                                          placeholder="Describe what the diagram shows...">{{ question.diagram_description|default:'' }}</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="diagram_labels"><i class="fas fa-tags"></i> Diagram Labels (comma separated)</label>
+                                <input type="text" id="diagram_labels" name="diagram_labels" class="form-control" 
+                                       value="{{ question.diagram_labels|default:'' }}" placeholder="e.g., force, mass, acceleration">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Match the Following Fields -->
+                <div id="match-following-fields" class="dynamic-field {% if question.question_type == 'match_following' %}active{% endif %}">
+                    <h3><i class="fas fa-exchange-alt"></i> Match the Following Items</h3>
+                    <div class="form-group">
+                        <label for="match_items"><i class="fas fa-list"></i> Match Items (One per line)</label>
+                        <textarea id="match_items" name="match_items" class="form-control" rows="6" 
+                                  placeholder="e.g.,&#10;Force - Newton&#10;Energy - Joule&#10;Power - Watt&#10;Pressure - Pascal">{{ question.match_items|default:'' }}</textarea>
+                        <div class="hint">Enter items to be matched, one per line. Use dash (-) to separate Column A and Column B items</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="match_count"><i class="fas fa-hashtag"></i> Number of Items</label>
+                        <input type="number" id="match_count" name="match_count" class="form-control" 
+                               min="2" max="10" value="{{ question.match_count|default:'4' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Answer Section -->
+            <div class="form-section">
+                <h3><i class="fas fa-check-circle"></i> Answer</h3>
+                
+                <!-- Objective/Descriptive Answer -->
+                <div id="descriptive-answer" class="dynamic-field {% if question.question_type == 'descriptive' or question.question_type == 'objective' %}active{% endif %}">
+                    <div class="form-group full-width">
+                        <label for="answer"><i class="fas fa-check-circle"></i> Answer</label>
+                        <textarea id="answer" name="answer" class="form-control" 
+                                  rows="4" required>{{ question.answer|default:'' }}</textarea>
+                    </div>
+                </div>
+                
+                <!-- Numerical Answer -->
+                <div id="numerical-answer" class="dynamic-field {% if question.question_type == 'numerical' %}active{% endif %}">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="numerical_solution"><i class="fas fa-stairs"></i> Numerical Solution</label>
+                            <textarea id="numerical_solution" name="numerical_solution" class="form-control" rows="4">{{ question.numerical_solution|default:'' }}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="final_answer"><i class="fas fa-check-double"></i> Final Answer (with units)</label>
+                            <input type="text" id="final_answer" name="final_answer" class="form-control" 
+                                   value="{{ question.final_answer|default:'' }}" placeholder="e.g., 10 N">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graph Based Answer -->
+                <div id="graph-answer" class="dynamic-field {% if question.question_type == 'graph_based' %}active{% endif %}">
+                    <div class="graph-section">
+                        <div class="graph-upload-grid">
+                            <div class="form-group">
+                                <label for="answer_graph_image"><i class="fas fa-upload"></i> Answer Graph Image</label>
+                                
+                                {% if question.answer_graph_image %}
+                                <div class="current-file">
+                                    <i class="fas fa-image" style="color: #ff6b6b;"></i>
+                                    <span>Current: {{ question.answer_graph_image.name|default:"No image" }}</span>
+                                    {% if question.answer_graph_image.url %}
+                                    <a href="{{ question.answer_graph_image.url }}" target="_blank" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <input type="file" id="answer_graph_image" name="answer_graph_image" class="form-control" 
+                                       accept="image/*" onchange="previewImage(this, 'answer_graph_preview')">
+                                
+                                <div class="image-preview-container" id="answer_graph_preview_container" style="display: none; margin-top: 10px;">
+                                    <p>New Preview:</p>
+                                    <img id="answer_graph_preview" class="graph-image-preview">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="graph_interpretation"><i class="fas fa-chart-line"></i> Graph Interpretation</label>
+                                <textarea id="graph_interpretation" name="graph_interpretation" class="form-control" 
+                                          placeholder="Interpret the graph and explain...">{{ question.graph_interpretation|default:'' }}</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="graph_calculations"><i class="fas fa-calculator"></i> Graph Calculations</label>
+                                <textarea id="graph_calculations" name="graph_calculations" class="form-control" 
+                                          placeholder="Show calculations based on graph...">{{ question.graph_calculations|default:'' }}</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="graph_observations"><i class="fas fa-binoculars"></i> Key Observations from Graph</label>
+                                <textarea id="graph_observations" name="graph_observations" class="form-control" 
+                                          placeholder="What can you observe from the graph?">{{ question.graph_observations|default:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Diagram Based Answer -->
+                <div id="diagram-answer" class="dynamic-field {% if question.question_type == 'diagram_based' %}active{% endif %}">
+                    <div class="diagram-section">
+                        <div class="form-group">
+                            <label for="diagram_analysis"><i class="fas fa-drafting-compass"></i> Diagram Analysis</label>
+                            <textarea id="diagram_analysis" name="diagram_analysis" class="form-control" 
+                                      placeholder="Analyze the diagram and explain...">{{ question.diagram_analysis|default:'' }}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="labeled_diagram"><i class="fas fa-upload"></i> Labeled Diagram (Optional)</label>
+                            
+                            {% if question.labeled_diagram %}
+                            <div class="current-file">
+                                <i class="fas fa-image" style="color: #ff6b6b;"></i>
+                                <span>Current: {{ question.labeled_diagram.name|default:"No image" }}</span>
+                                {% if question.labeled_diagram.url %}
+                                <a href="{{ question.labeled_diagram.url }}" target="_blank" class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            <input type="file" id="labeled_diagram" name="labeled_diagram" class="form-control" 
+                                   accept="image/*" onchange="previewImage(this, 'labeled_diagram_preview')">
+                            
+                            <div class="image-preview-container" id="labeled_diagram_preview_container" style="display: none; margin-top: 10px;">
+                                <p>New Preview:</p>
+                                <img id="labeled_diagram_preview" class="graph-image-preview">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Match the Following Answer -->
+                <div id="match-following-answer" class="dynamic-field {% if question.question_type == 'match_following' %}active{% endif %}">
+                    <div class="form-group">
+                        <label for="match_answers"><i class="fas fa-check-double"></i> Correct Matches</label>
+                        <textarea id="match_answers" name="match_answers" class="form-control" rows="4">{{ question.match_answers|default:'' }}</textarea>
+                        <div class="hint">Enter correct matches as: ColumnAItemNumber-ColumnBItemNumber, separated by commas</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Button Group -->
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Physics Question
+                </button>
+                <a href="{% url 'view_physics_questions' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+                <a href="" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this question?')">
+                    <i class="fas fa-trash"></i> Delete Question
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Physics Question Editor &copy; {% now "Y" %}</p>
+        <p>Created: {{ question.created_at|date:"F j, Y" }} | Last Updated: {{ question.updated_at|date:"F j, Y, g:i a" }}</p>
+    </div>
+</div>
+
+<script>
+    // Initialize field visibility based on current question type
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleQuestionType();
+        
+        // Listen for changes to question type
+        document.getElementById('question_type').addEventListener('change', toggleQuestionType);
+        
+        // Auto-expand textareas
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            // Trigger initially
+            if (textarea.value) {
+                setTimeout(() => {
+                    textarea.dispatchEvent(new Event('input'));
+                }, 100);
+            }
+        });
+        
+        // Initialize correct options for objective questions
+        updateAllOptionRows();
+    });
+
+    function toggleQuestionType() {
+        const questionType = document.getElementById('question_type').value;
+        
+        // Hide all dynamic fields
+        const allFields = document.querySelectorAll('.dynamic-field');
+        allFields.forEach(field => {
+            field.classList.remove('active');
+        });
+        
+        // Show appropriate fields based on question type
+        let questionFieldsId = '';
+        let answerFieldsId = '';
+        
+        switch(questionType) {
+            case 'objective':
+                questionFieldsId = 'objective-fields';
+                answerFieldsId = 'descriptive-answer';
+                break;
+            case 'descriptive':
+                questionFieldsId = '';
+                answerFieldsId = 'descriptive-answer';
+                break;
+            case 'numerical':
+                questionFieldsId = 'numerical-fields';
+                answerFieldsId = 'numerical-answer';
+                break;
+            case 'graph_based':
+                questionFieldsId = 'graph-fields';
+                answerFieldsId = 'graph-answer';
+                break;
+            case 'diagram_based':
+                questionFieldsId = 'diagram-fields';
+                answerFieldsId = 'diagram-answer';
+                break;
+            case 'match_following':
+                questionFieldsId = 'match-following-fields';
+                answerFieldsId = 'match-following-answer';
+                break;
+        }
+        
+        // Show question type fields if they exist
+        if (questionFieldsId) {
+            const questionFields = document.getElementById(questionFieldsId);
+            if (questionFields) questionFields.classList.add('active');
+        }
+        
+        // Show answer fields
+        const answerFields = document.getElementById(answerFieldsId);
+        if (answerFields) answerFields.classList.add('active');
+        
+        // Update required attributes for objective options
+        if (questionType === 'objective') {
+            for (let i = 1; i <= 4; i++) {
+                const optionField = document.getElementById(`option${i}`);
+                if (optionField) {
+                    optionField.required = true;
+                }
+            }
+            // Require answer text for objective
+            document.getElementById('answer').required = true;
+        } else {
+            // Remove required from options for other question types
+            for (let i = 1; i <= 4; i++) {
+                const optionField = document.getElementById(`option${i}`);
+                if (optionField) {
+                    optionField.required = false;
+                }
+            }
+        }
+        
+        // Handle graph based requirements
+        if (questionType === 'graph_based') {
+            document.getElementById('graph_type').required = true;
+            document.getElementById('graph_xlabel').required = true;
+            document.getElementById('graph_ylabel').required = true;
+            document.getElementById('graph_interpretation').required = true;
+        }
+    }
+
+    function updateOptionRow(checkbox) {
+        const optionNum = checkbox.value;
+        const row = document.getElementById('option_row_' + optionNum);
+        if (checkbox.checked) {
+            row.classList.add('correct');
+        } else {
+            row.classList.remove('correct');
+        }
+    }
+
+    function updateAllOptionRows() {
+        // Update all option rows based on current checkboxes
+        for (let i = 1; i <= 4; i++) {
+            const checkbox = document.getElementById('correct_option_' + i);
+            if (checkbox) {
+                updateOptionRow(checkbox);
+            }
+        }
+    }
+
+    function previewImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        const container = document.getElementById(previewId + '_container');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                container.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            container.style.display = 'none';
+            preview.src = '';
+        }
+    }
+
+    // Physics formatting functions
+    function insertMathSymbol(fieldId, symbol) {
+        const textarea = document.getElementById(fieldId);
+        if (textarea) {
+            insertAtCursor(textarea, symbol);
+        }
+    }
+
+    function insertAtCursor(textarea, text) {
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        textarea.value = textarea.value.substring(0, start) + text + textarea.value.substring(end);
+        textarea.focus();
+        textarea.setSelectionRange(start + text.length, start + text.length);
+    }
+
+    // Form validation
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+        const questionType = document.getElementById('question_type').value;
+        const questionText = document.getElementById('question').value.trim();
+        
+        // Basic validation
+        if (!questionText) {
+            alert('Please enter a question.');
+            e.preventDefault();
+            return false;
+        }
+        
+        // Type-specific validation
+        if (questionType === 'objective') {
+            const checkboxes = document.querySelectorAll('input[name="correct_options[]"]:checked');
+            if (checkboxes.length === 0) {
+                alert('Please select at least one correct option for objective questions.');
+                e.preventDefault();
+                return false;
+            }
+            
+            // Check that all options have values
+            const option1 = document.getElementById('option1').value.trim();
+            const option2 = document.getElementById('option2').value.trim();
+            const option3 = document.getElementById('option3').value.trim();
+            const option4 = document.getElementById('option4').value.trim();
+            
+            if (!option1 || !option2 || !option3 || !option4) {
+                alert('Please fill all four options for objective questions.');
+                e.preventDefault();
+                return false;
+            }
+            
+            // For objective questions, answer field is required
+            const answerText = document.getElementById('answer').value.trim();
+            if (!answerText) {
+                alert('Please enter an answer.');
+                e.preventDefault();
+                return false;
+            }
+        }
+        else if (questionType === 'descriptive') {
+            const answerText = document.getElementById('answer').value.trim();
+            if (!answerText) {
+                alert('Please enter an answer.');
+                e.preventDefault();
+                return false;
+            }
+        }
+        else if (questionType === 'numerical') {
+            const finalAnswer = document.getElementById('final_answer').value.trim();
+            if (!finalAnswer) {
+                alert('Please enter a final answer for numerical questions.');
+                e.preventDefault();
+                return false;
+            }
+        }
+        else if (questionType === 'graph_based') {
+            const graphInterpretation = document.getElementById('graph_interpretation').value.trim();
+            if (!graphInterpretation) {
+                alert('Please enter graph interpretation.');
+                e.preventDefault();
+                return false;
+            }
+            
+            const graphType = document.getElementById('graph_type').value;
+            if (!graphType) {
+                alert('Please select a graph type.');
+                e.preventDefault();
+                return false;
+            }
+        }
+        else if (questionType === 'diagram_based') {
+            const diagramAnalysis = document.getElementById('diagram_analysis').value.trim();
+            if (!diagramAnalysis) {
+                alert('Please enter diagram analysis.');
+                e.preventDefault();
+                return false;
+            }
+        }
+        else if (questionType === 'match_following') {
+            const matchAnswers = document.getElementById('match_answers').value.trim();
+            if (!matchAnswers) {
+                alert('Please enter the correct matches.');
+                e.preventDefault();
+                return false;
+            }
+        }
+        
+        return true;
+    });
+</script>
+
+</body>
+</html>

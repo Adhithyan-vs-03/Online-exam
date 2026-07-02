@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Main Staff Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #e8f0ff, #fefefe);
+        }
+
+        /* ---------- TOP NAVBAR ---------- */
+        .navbar {
+            width: 96%;
+            background: #1a73e8;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .navbar h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .logout-btn-top {
+            background: #e53935;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .logout-btn-top:hover {
+            background: #c62828;
+        }
+
+        /* ---------- SIDEBAR ---------- */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #ffffff;
+            position: fixed;
+            top: 68px;  /* below navbar */
+            left: 0;
+            padding-top: 10px;
+            border-right: 1px solid #ddd;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-logo {
+            text-align: center;
+            padding: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #1a73e8;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 14px 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 16px;
+            border-bottom: 1px solid #f1f1f1;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background: #e8f0fe;
+            color: #1a73e8;
+            padding-left: 28px;
+        }
+
+        /* ---------- CONTENT AREA ---------- */
+        .content {
+            margin-left: 260px;
+            margin-top: 100px;
+            padding: 30px;
+        }
+
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 35px;
+            border-radius: 15px;
+            width: 60%;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .stats-box {
+            background:white; 
+            padding:20px; 
+            width:220px; 
+            border-radius:12px; 
+            box-shadow:0 4px 12px rgba(0,0,0,0.15);
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- TOP NAVBAR -->
+<div class="navbar">
+    <h2>Welcome, {{ request.user.first_name }} 👋</h2>
+
+    <form method="POST" action="{% url 'logout' %}" style="margin:0;" >
+        {% csrf_token %}
+        <button class="logout-btn-top">Logout</button>
+    </form>
+</div>
+
+<!-- LEFT SIDEBAR -->
+<div class="sidebar">
+
+    <!-- LOGO ONLY -->
+    <div class="sidebar-logo">
+        DASHBORED
+    </div>
+
+    <div class="dropdown">
+        <a href="javascript:void(0)" onclick="toggleDropdown()" style="display:flex; justify-content:space-between; align-items:center;">
+            📘 Content Manager ▼
+        </a>
+
+        <div id="submenu" style="display:none; margin-left:20px;">
+            <a href="{% url 'addd_biology_question' %}">➕ Add Questions</a>
+            <a href="{% url 'manage_subjects' %}"> 📘 Content</a>
+        </div>
+    </div>
+    <a href="{% url 'mainstaff_profile' %}">👤 Profile</a>
+    <a href="{% url 'notifications_page' %}">🔔 Notifications</a>
+
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+    <div class="welcome-card">
+        <h1>Welcome, {{ request.user.first_name }} 👋</h1>
+        <p>Select any option from the left sidebar to proceed.</p>
+    </div>
+
+    <!-- Stats Section -->
+    <div style="margin-top:30px; display:flex; gap:20px; flex-wrap:wrap;">
+
+        <div class="stats-box">
+            <h3 style="color:#1a73e8;">Total Subjects</h3>
+            <p style="font-size:26px; font-weight:bold;">{{ total_subjects }}</p>
+        </div>
+
+        <div class="stats-box">
+            <h3 style="color:#1a73e8;">Total Chapters</h3>
+            <p style="font-size:26px; font-weight:bold;">{{ total_chapters }}</p>
+        </div>
+
+        <div class="stats-box">
+            <h3 style="color:#1a73e8;">Total Topics</h3>
+            <p style="font-size:26px; font-weight:bold;">{{ total_topics }}</p>
+        </div>
+
+        <div class="stats-box">
+            <h3 style="color:#1a73e8;">Total Subtopics</h3>
+            <p style="font-size:26px; font-weight:bold;">{{ total_subtopics }}</p>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function toggleDropdown() {
+        let menu = document.getElementById("submenu");
+        menu.style.display = (menu.style.display === "block") ? "none" : "block";
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!-- {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Subjects | Main Staff</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: #eef2f7;
+        }
+
+        .container {
+            width: 600px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #0d9488;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+            color: #333;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 8px;
+            border: 1px solid #bbb;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            background: #0d9488;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s ease;
+        }
+
+        button:hover {
+            background: #0f766e;
+        }
+
+        .section-box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            background: #fafafa;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Manage Subjects / Chapters / Topics</h2>
+
+    <!-- ADD SUBJECT -->
+   <!-- <div class="section-box">
+    <h3>Add Subject</h3>
+    <form method="POST" action="{% url 'add_subject' %}">
+        {% csrf_token %}
+        <label>Subject Name</label>
+        <input type="text" name="subject_name" placeholder="Enter Subject Name" required>
+
+        <label style="margin-top:15px;">All Subjects</label>
+        <select>
+            {% for s in subjects %}
+                <option>{{ s.name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Save Subject</button>
+    </form>
+</div>
+
+
+    <!-- ADD CHAPTER -->
+  <!-- <div class="section-box">
+    <h3>Add Chapter</h3>
+    <form method="POST" action="{% url 'add_chapter' %}">
+        {% csrf_token %}
+
+        <label>Select Subject</label>
+        <select name="subject_id" required>
+            <option value="">-- Select Subject --</option>
+            {% for s in subjects %}
+                <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Chapter Name</label>
+        <input type="text" name="chapter_name" placeholder="Enter Chapter Name" required>
+
+        <label style="margin-top:15px;">All Chapters</label>
+        <select>
+            {% for c in chapters %}
+                <option>{{ c.name }} ({{ c.subject.name }})</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Save Chapter</button>
+    </form>
+</div>
+
+
+    <!-- ADD TOPIC -->
+    <!-- <div class="section-box">
+    <h3>Add Topic</h3>
+    <form method="POST" action="{% url 'add_topic' %}">
+        {% csrf_token %}
+
+        <label>Select Chapter</label>
+        <select name="chapter_id" required>
+            <option value="">-- Select Chapter --</option>
+            {% for c in chapters %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Topic Name</label>
+        <input type="text" name="topic_name" placeholder="Enter Topic Name" required>
+
+        <label style="margin-top:15px;">All Topics</label>
+        <select>
+            {% for t in topics %}
+                <option>{{ t.name }} ({{ t.chapter.name }})</option>
+            {% endfor %}
+        </select> -->
+
+        <button type="submit">Save Topic</button>
+    </form>
+</div>
+
+
+    <!-- ADD SUB TOPIC -->
+    <!-- <div class="section-box">
+    <h3>Add Sub Topic</h3>
+    <form method="POST" action="{% url 'add_subtopic' %}">
+        {% csrf_token %}
+
+        <label>Select Topic</label>
+        <select name="topic_id" required>
+            <option value="">-- Select Topic --</option>
+            {% for t in topics %}
+                <option value="{{ t.id }}">{{ t.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Sub Topic Name</label>
+        <input type="text" name="subtopic_name" placeholder="Enter Sub Topic Name" required>
+
+        <label style="margin-top:15px;">All Subtopics</label>
+        <select>
+            {% for st in subtopics %}
+                <option>{{ st.name }} ({{ st.topic.name }})</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Save Subtopic</button>
+    </form>
+</div>
+
+
+</div> -->
+<!-- 
+</body>
+</html>  -->

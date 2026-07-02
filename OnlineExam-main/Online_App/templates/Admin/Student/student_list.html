@@ -1,0 +1,596 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management | Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --accent: #4cc9f0;
+            --dark: #212529;
+            --light: #f8f9fa;
+            --light-gray: #e9ecef;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --error: #ef233c;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f7ff;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .student-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .student-card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .card-title i {
+            margin-right: 0.75rem;
+            font-size: 1.3rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .add-student-btn {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
+            border: none;
+            border-radius: 50px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-student-btn:hover {
+            background-color: white;
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            text-decoration: none;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none !important;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+            text-decoration: none !important;
+        }
+
+        .search-container {
+            padding: 1.25rem 2rem;
+            background-color: white;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 50px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.15);
+            outline: none;
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--accent), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(76, 201, 240, 0.4);
+        }
+
+        .search-results-info {
+            padding: 0.75rem 2rem;
+            background-color: var(--light);
+            border-bottom: 1px solid var(--light-gray);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .clear-search {
+            color: var(--primary);
+            text-decoration: none;
+            margin-left: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .clear-search:hover {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            padding: 0 0.5rem;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.75rem;
+            margin: 0;
+        }
+
+        .student-table thead th {
+            background-color: white;
+            color: var(--text-light);
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .student-table tbody tr {
+            transition: var(--transition);
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .student-table tbody tr:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-table td {
+            padding: 1.25rem 1.5rem;
+            vertical-align: middle;
+            border-top: 1px solid var(--light-gray);
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .student-table td:first-child {
+            border-left: 1px solid var(--light-gray);
+            border-top-left-radius: var(--border-radius);
+            border-bottom-left-radius: var(--border-radius);
+        }
+
+        .student-table td:last-child {
+            border-right: 1px solid var(--light-gray);
+            border-top-right-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .btn-edit {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+            border: none;
+        }
+
+        .btn-edit:hover {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: rgba(239, 35, 60, 0.1);
+            color: var(--error);
+            border: none;
+        }
+
+        .btn-delete:hover {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            color: var(--primary-light);
+            margin-bottom: 1.5rem;
+            opacity: 0.7;
+        }
+
+        .empty-state h4 {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .empty-state p {
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .badge-danger-light {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .badge-info-light {
+            background-color: rgba(13, 202, 240, 0.1);
+            color: #0dcaf0;
+        }
+
+        @media (max-width: 768px) {
+            .student-table thead {
+                display: none;
+            }
+
+            .student-table tr {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 1.5rem;
+                border-radius: var(--border-radius);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                position: relative;
+                border: 1px solid var(--light-gray);
+            }
+
+            .student-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                border: none;
+                border-radius: 0 !important;
+            }
+
+            .student-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--primary);
+                margin-right: 1rem;
+                font-size: 0.85rem;
+            }
+
+            .student-table td:first-child {
+                border-top-left-radius: var(--border-radius) !important;
+                border-top-right-radius: var(--border-radius) !important;
+                background-color: var(--light);
+                font-weight: 600;
+            }
+
+            .student-table td:last-child {
+                border-bottom-left-radius: var(--border-radius) !important;
+                border-bottom-right-radius: var(--border-radius) !important;
+            }
+
+            .action-btns {
+                justify-content: flex-end;
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="student-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-user-graduate"></i>
+                    Student Management
+                </h2>
+                <div class="header-actions">
+                    <a href="{% url 'add_student' %}" class="add-student-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Student
+                    </a>
+                    <button class="close-btn" onclick="window.location.href='{% url "admin_dashboard" %}'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <form method="GET" action="{% url 'student_list' %}" class="search-form">
+                    <input type="text" name="q" class="search-input" placeholder="Search students by name, email, package..." value="{{ search_query|default:'' }}">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </form>
+            </div>
+
+            {% if search_query %}
+            <div class="search-results-info">
+                <i class="fas fa-filter text-primary me-2"></i>
+                Showing results for: <strong>"{{ search_query }}"</strong>
+                <a href="{% url 'student_list' %}" class="clear-search">
+                    <i class="fas fa-times"></i> Clear filters
+                </a>
+            </div>
+            {% endif %}
+
+            {% if messages %}
+            <div class="container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="fas 
+                            {% if message.tags == 'success' %}fa-check-circle{% endif %}
+                            {% if message.tags == 'error' %}fa-exclamation-circle{% endif %}
+                            {% if message.tags == 'warning' %}fa-exclamation-triangle{% endif %}
+                            {% if message.tags == 'info' %}fa-info-circle{% endif %}
+                            me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="table-responsive">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <!-- <th>Guardian</th> -->
+                            <th>Package</th>
+                            <th>Created Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% if students %}
+                            {% for student in students %}
+                            <tr>
+                                <td data-label="ID">#{{ student.id }}</td>
+                                <td data-label="Name">{{ student.name }}</td>
+                                <td data-label="Email">{{ student.email }}</td>
+                                <td data-label="Phone">{{ student.phone_number|default:"N/A" }}</td>
+
+                                <!-- ⭐ MERGED COLUMN HERE
+                                <td data-label="Guardian">
+                                    {{ student.guardian_name|default:"N/A" }} - {{ student.guardian_number|default:"N/A" }}
+                                </td> -->
+
+                                <td data-label="Package">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">
+                                        {{ student.package_selected }}
+                                    </span>
+                                </td>
+
+                                <td data-label="Created Type">
+                                    {% if student.created_type == "admin" %}
+                                        <span class="badge badge-danger-light">Admin Added</span>
+                                    {% else %}
+                                        <span class="badge badge-info-light">Self Registered</span>
+                                    {% endif %}
+                                </td>
+
+                                <td data-label="Actions">
+                                    <div class="action-btns">
+                                        <a href="{% url 'view_student' 'admin' student.id %}" class="btn-action btn-edit" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <button class="btn-action btn-delete delete-btn"
+                                            data-student-id="{{ student.id }}"
+                                            data-student-name="{{ student.name }}"
+                                            title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8">
+                                    <div class="empty-state">
+                                        <i class="fas fa-user-graduate empty-state-icon"></i>
+                                        <h4>No Students Found</h4>
+                                        <p>Get started by adding your first student to the system.</p>
+                                        <a href="{% url 'add_student' %}" class="btn btn-primary">
+                                            <i class="fas fa-plus me-2"></i>Add Student
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                        <h5>Are you sure you want to delete <strong id="studentName"></strong>?</h5>
+                        <p class="text-muted">This action cannot be undone. All associated data will be permanently removed.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i> Cancel
+                    </button>
+                    <form id="deleteForm" method="POST" action="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt me-2"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const headers = document.querySelectorAll('.student-table th');
+            headers.forEach((header, index) => {
+                const label = header.textContent;
+                document.querySelectorAll(`.student-table td:nth-child(${index + 1})`).forEach(cell => {
+                    cell.setAttribute('data-label', label);
+                });
+            });
+
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            const studentName = document.getElementById('studentName');
+            const deleteForm = document.getElementById('deleteForm');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-student-id');
+                    const name = this.getAttribute('data-student-name');
+
+                    studentName.textContent = name;
+                    deleteForm.action = `/student/delete/${studentId}/`;
+                    deleteModal.show();
+                });
+            });
+
+            var searchInput = document.querySelector('input[name="q"]');
+            if (searchInput && searchInput.value.trim() !== "") {
+                searchInput.focus();
+            }
+        });
+    </script>
+</body>
+</html>

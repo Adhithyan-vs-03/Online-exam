@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Plans Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ------------------ PROFESSIONAL STYLING ------------------ */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --box-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .exam-plans-page {
+            padding: 30px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        .page-header {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-top: 10px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            text-align: center;
+            flex: 1;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: var(--box-shadow);
+        }
+
+        .back-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .back-button i {
+            margin-right: 8px;
+        }
+
+        /* Action Button */
+        .btn-create {
+            display: inline-flex;
+            align-items: center;
+            padding: 14px 28px;
+            background: var(--success);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .btn-create:hover {
+            background: #3ab0d9;
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .btn-create i {
+            margin-right: 10px;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 8px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 25px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .nav-tab i {
+            font-size: 1.2rem;
+        }
+
+        .nav-tab:hover {
+            background: var(--light-gray);
+        }
+
+        .nav-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .nav-tab.neet.active {
+            background: var(--primary);
+        }
+
+        .nav-tab.jee.active {
+            background: var(--secondary);
+        }
+
+        .nav-tab.combined.active {
+            background: var(--success);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Plans Container */
+        .plans-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        /* Plan Card */
+        .plan-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--light-gray);
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow-hover);
+        }
+
+        .plan-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        .neet-plan::before {
+            background: linear-gradient(90deg, var(--primary) 0%, #3a56d4 100%);
+        }
+
+        .jee-plan::before {
+            background: linear-gradient(90deg, var(--secondary) 0%, #5a0a9c 100%);
+        }
+
+        .combined-plan::before {
+            background: linear-gradient(90deg, var(--success) 0%, #3ab0d9 100%);
+        }
+
+        .plan-header {
+            text-align: center;
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .neet-plan .plan-price {
+            color: var(--primary);
+        }
+
+        .jee-plan .plan-price {
+            color: var(--secondary);
+        }
+
+        .combined-plan .plan-price {
+            color: var(--success);
+        }
+
+        .plan-duration {
+            font-size: 0.9rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+
+        .plan-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-name {
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-name i {
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+
+        .neet-plan .feature-name i {
+            color: var(--primary);
+        }
+
+        .jee-plan .feature-name i {
+            color: var(--secondary);
+        }
+
+        .combined-plan .feature-name i {
+            color: var(--success);
+        }
+
+        .feature-value {
+            font-weight: 600;
+        }
+
+        .plan-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 18px;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-edit {
+            background: var(--info);
+        }
+
+        .btn-edit:hover {
+            background: #3a7bd9;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #d91a6a;
+            transform: translateY(-2px);
+        }
+
+        .btn i {
+            margin-right: 6px;
+        }
+
+        /* No Plans Message */
+        .no-plans {
+            text-align: center;
+            padding: 50px 30px;
+            background: white;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            box-shadow: var(--box-shadow);
+            grid-column: 1 / -1;
+        }
+
+        .no-plans i {
+            font-size: 3rem;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+
+        .no-plans p {
+            font-size: 1.2rem;
+            color: var(--gray);
+        }
+
+        /* Message Alert Styles */
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .alert {
+            padding: 18px 20px;
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            color: white;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--box-shadow);
+            animation: slideIn 0.5s ease-out, fadeOut 0.5s ease-in 29.5s forwards;
+            transform: translateX(100%);
+            opacity: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            border-left: 4px solid #2E7D32;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            border-left: 4px solid #b71c1c;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            border-left: 4px solid #e65100;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            border-left: 4px solid #0D47A1;
+        }
+
+        .alert-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .alert-content {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+
+        .alert-close:hover {
+            opacity: 1;
+        }
+
+        .alert-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            overflow: hidden;
+        }
+
+        .alert-progress-bar {
+            height: 100%;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: progressBar 30s linear forwards;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        @keyframes progressBar {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .exam-plans-page {
+                padding: 20px 15px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .plans-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .plan-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                justify-content: center;
+            }
+        }
+
+        /* Plan Popular Badge */
+        .popular-badge {
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background: var(--warning);
+            color: white;
+            padding: 5px 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transform: rotate(45deg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+<div class="exam-plans-page">
+
+    <!-- Message Alert Container -->
+    <div class="alert-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <div class="alert-icon">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="alert-content">{{ message }}</div>
+                    <button class="alert-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="alert-progress">
+                        <div class="alert-progress-bar"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <!-- Page Header with Back Button -->
+        <div class="page-header">
+            <h1 class="page-title">Exam Preparation Plans</h1>
+            <a href="{% url 'admin_dashboard' %}" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <a href="{% url 'create_plan' %}" class="btn-create">
+            <i class="fas fa-plus-circle"></i> Create New Plan
+        </a>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab neet active" data-tab="neet">
+                <i class="fas fa-stethoscope"></i>
+                <span>NEET Preparation Plans</span>
+            </div>
+            <div class="nav-tab jee" data-tab="jee">
+                <i class="fas fa-calculator"></i>
+                <span>JEE Preparation Plans</span>
+            </div>
+            <div class="nav-tab combined" data-tab="combined">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Combined NEET + JEE Plans</span>
+            </div>
+        </div>
+
+        <!-- NEET Plans Tab Content -->
+        <div class="tab-content active" id="neet-tab">
+            <div class="plans-container">
+                {% if neet_plans %}
+                    {% for plan in neet_plans %}
+                        <div class="plan-card neet-plan">
+                            {% if forloop.counter == 2 %}
+                                <div class="popular-badge">Most Popular</div>
+                            {% endif %}
+                            <div class="plan-header">
+                                <h3 class="plan-name">{{ plan.name }}</h3>
+                                <div class="plan-price">₹{{ plan.price }}</div>
+                                <div class="plan-duration">/ {{ plan.duration }}</div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-user-graduate"></i>
+                                        <span>Student Accounts</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.users }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-clipboard-check"></i>
+                                        <span>Practice Tests</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.practice_tests }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-tasks"></i>
+                                        <span>Full Mock Tests</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.full_length_mocks }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-comments"></i>
+                                        <span>Doubt Sessions</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.doubt_sessions }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-book"></i>
+                                        <span>Study Materials</span>
+                                    </div>
+                                    <div class="feature-value">
+                                        {% if plan.study_materials %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-times"></i>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-video"></i>
+                                        <span>Video Lectures</span>
+                                    </div>
+                                    <div class="feature-value">
+                                        {% if plan.video_lectures %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-times"></i>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Performance Analytics</span>
+                                    </div>
+                                    <div class="feature-value">
+                                        {% if plan.performance_analytics %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-times"></i>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-database"></i>
+                                        <span>Storage</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.storage }}</div>
+                                </li>
+                            </ul>
+                            <div class="plan-actions">
+                                <a href="{% url 'edit_plan' plan.id %}" class="btn btn-edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{% url 'delete_plan' plan.id %}" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-plans">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No NEET plans available. Create your first plan!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- JEE Plans Tab Content -->
+        <div class="tab-content" id="jee-tab">
+            <div class="plans-container">
+                {% if jee_plans %}
+                    {% for plan in jee_plans %}
+                        <div class="plan-card jee-plan">
+                            {% if forloop.counter == 2 %}
+                                <div class="popular-badge">Most Popular</div>
+                            {% endif %}
+                            <div class="plan-header">
+                                <h3 class="plan-name">{{ plan.name }}</h3>
+                                <div class="plan-price">₹{{ plan.price }}</div>
+                                <div class="plan-duration">/ {{ plan.duration }}</div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-user-graduate"></i>
+                                        <span>Student Accounts</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.users }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-clipboard-check"></i>
+                                        <span>Practice Tests</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.practice_tests }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-tasks"></i>
+                                        <span>Full Mock Tests</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.full_length_mocks }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-comments"></i>
+                                        <span>Doubt Sessions</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.doubt_sessions }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-book"></i>
+                                        <span>Study Materials</span>
+                                    </div>
+                                    <div class="feature-value">
+                                        {% if plan.study_materials %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-times"></i>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-video"></i>
+                                        <span>Video Lectures</span>
+                                    </div>
+                                    <div class="feature-value">
+                                        {% if plan.video_lectures %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-times"></i>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Performance Analytics</span>
+                                    </div>
+                                    <div class="feature-value">
+                                        {% if plan.performance_analytics %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-times"></i>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-database"></i>
+                                        <span>Storage</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.storage }}</div>
+                                </li>
+                            </ul>
+                            <div class="plan-actions">
+                                <a href="{% url 'edit_plan' plan.id %}" class="btn btn-edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{% url 'delete_plan' plan.id %}" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-plans">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No JEE plans available. Create your first plan!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Combined Plans Tab Content -->
+        <div class="tab-content" id="combined-tab">
+            <div class="plans-container">
+                {% if combined_plans %}
+                    {% for plan in combined_plans %}
+                        <div class="plan-card combined-plan">
+                            {% if forloop.counter == 2 %}
+                                <div class="popular-badge">Most Popular</div>
+                            {% endif %}
+                            <div class="plan-header">
+                                <h3 class="plan-name">{{ plan.name }}</h3>
+                                <div class="plan-price">₹{{ plan.price }}</div>
+                                <div class="plan-duration">/ {{ plan.duration }}</div>
+                            </div>
+                            <ul class="plan-features">
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-user-graduate"></i>
+                                        <span>Student Accounts</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.users }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-clipboard-check"></i>
+                                        <span>Practice Tests</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.practice_tests }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-tasks"></i>
+                                        <span>Full Mock Tests</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.full_length_mocks }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-comments"></i>
+                                        <span>Doubt Sessions</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.doubt_sessions }}</div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-book"></i>
+                                        <span>Study Materials</span>
+                                    </div>
+                                    <div class="feature-value">
+                                        {% if plan.study_materials %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-times"></i>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-video"></i>
+                                        <span>Video Lectures</span>
+                                    </div>
+                                    <div class="feature-value">
+                                        {% if plan.video_lectures %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-times"></i>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Performance Analytics</span>
+                                    </div>
+                                    <div class="feature-value">
+                                        {% if plan.performance_analytics %}
+                                            <i class="fas fa-check"></i>
+                                        {% else %}
+                                            <i class="fas fa-times"></i>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="feature-name">
+                                        <i class="fas fa-database"></i>
+                                        <span>Storage</span>
+                                    </div>
+                                    <div class="feature-value">{{ plan.storage }}</div>
+                                </li>
+                            </ul>
+                            <div class="plan-actions">
+                                <a href="{% url 'edit_plan' plan.id %}" class="btn btn-edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{% url 'delete_plan' plan.id %}" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-plans">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No Combined plans available. Create your first plan!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.nav-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                this.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+
+        // Function to remove alert
+        function removeAlert(alert) {
+            alert.style.animation = 'fadeOut 0.5s ease-in forwards';
+            setTimeout(() => {
+                if (alert.parentElement) {
+                    alert.remove();
+                }
+            }, 500);
+        }
+
+        // Auto-remove existing messages after 30 seconds
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                if (alert.parentElement) {
+                    removeAlert(alert);
+                }
+            }, 30000);
+        });
+
+        // Close alert on button click
+        document.querySelectorAll('.alert-close').forEach(button => {
+            button.addEventListener('click', function() {
+                const alert = this.closest('.alert');
+                removeAlert(alert);
+            });
+        });
+    });
+</script>
+</body>
+</html>

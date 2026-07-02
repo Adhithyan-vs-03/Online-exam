@@ -1,0 +1,1352 @@
+{% comment %} edit_question.html {% endcomment %}
+{% block content %}
+
+<div class="container-fluid px-4 py-4">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{% url 'view_question_detail' question.id %}" class="btn-back">
+            <i class="fas fa-arrow-left me-2"></i>Back to Question Details
+        </a>
+    </div>
+    
+    <!-- Edit Form Card -->
+    <div class="edit-form-card">
+        <!-- Header -->
+        <div class="edit-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="d-flex align-items-center">
+                        <div class="header-icon me-3">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div>
+                            <h1 class="display-6 fw-bold text-dark mb-1">Edit Question</h1>
+                            <p class="text-muted fs-5">Update question details and content</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="question-status">
+                    <span class="status-badge status-active">
+                        <i class="fas fa-check-circle me-2"></i>Active
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Form -->
+        <div class="edit-form-content">
+            <form method="POST" enctype="multipart/form-data" id="editQuestionForm">
+                {% csrf_token %}
+                
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <h3>Basic Information</h3>
+                    </div>
+                    <div class="section-body">
+                        <div class="row">
+                            <!-- Subject Field -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-book me-2"></i>
+                                    Subject *
+                                </label>
+                                <select name="subject" class="form-select" required>
+                                    <option value="">Select Subject</option>
+                                    {% for subject in subjects %}
+                                    <option value="{{ subject.id }}" 
+                                            {% if question.subject.id == subject.id %}selected{% endif %}>
+                                        {{ subject.name }} ({{ subject.class_name.class_name }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Question Type -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-tag me-2"></i>
+                                    Question Type *
+                                </label>
+                                <select name="question_type" class="form-select" id="questionType" required>
+                                    <option value="objective" {% if question.question_type == 'objective' %}selected{% endif %}>
+                                        Multiple Choice (MCQ)
+                                    </option>
+                                    <option value="descriptive" {% if question.question_type == 'descriptive' %}selected{% endif %}>
+                                        Descriptive
+                                    </option>
+                                    <option value="true_false" {% if question.question_type == 'true_false' %}selected{% endif %}>
+                                        True/False
+                                    </option>
+                                    <option value="fill_in_the_blanks" {% if question.question_type == 'fill_in_the_blanks' %}selected{% endif %}>
+                                        Fill in the Blanks
+                                    </option>
+                                    <option value="match_following" {% if question.question_type == 'match_following' %}selected{% endif %}>
+                                        Match Following
+                                    </option>
+                                    <option value="numerical" {% if question.question_type == 'numerical' %}selected{% endif %}>
+                                        Numerical
+                                    </option>
+                                    <option value="short_answer" {% if question.question_type == 'short_answer' %}selected{% endif %}>
+                                        Short Answer
+                                    </option>
+                                    <option value="long_answer" {% if question.question_type == 'long_answer' %}selected{% endif %}>
+                                        Long Answer
+                                    </option>
+                                    <option value="diagram_based" {% if question.question_type == 'diagram_based' %}selected{% endif %}>
+                                        Diagram Based
+                                    </option>
+                                    <option value="graph_based" {% if question.question_type == 'graph_based' %}selected{% endif %}>
+                                        Graph Based
+                                    </option>
+                                    <option value="theorem" {% if question.question_type == 'theorem' %}selected{% endif %}>
+                                        Theorem
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <!-- Chapter -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-bookmark me-2"></i>
+                                    Chapter
+                                </label>
+                                <input type="text" name="chapter" class="form-input" 
+                                       value="{{ question.chapter|default:'' }}" 
+                                       placeholder="e.g., Introduction to Algebra">
+                            </div>
+                            
+                            <!-- Topic -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-hashtag me-2"></i>
+                                    Topic
+                                </label>
+                                <input type="text" name="topic" class="form-input" 
+                                       value="{{ question.topic|default:'' }}" 
+                                       placeholder="e.g., Linear Equations">
+                            </div>
+                            
+                            <!-- Difficulty -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-signal me-2"></i>
+                                    Difficulty *
+                                </label>
+                                <select name="difficulty" class="form-select" required>
+                                    <option value="easy" {% if question.difficulty == 'easy' %}selected{% endif %}>
+                                        <span class="difficulty-dot easy"></span> Easy
+                                    </option>
+                                    <option value="medium" {% if question.difficulty == 'medium' %}selected{% endif %}>
+                                        <span class="difficulty-dot medium"></span> Medium
+                                    </option>
+                                    <option value="hard" {% if question.difficulty == 'hard' %}selected{% endif %}>
+                                        <span class="difficulty-dot hard"></span> Hard
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <!-- Marks -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-star me-2"></i>
+                                    Marks *
+                                </label>
+                                <input type="number" name="marks" class="form-input" 
+                                       value="{{ question.marks|default:'1' }}" min="1" max="100" required>
+                            </div>
+                            
+                            <!-- Reference -->
+                            <div class="col-12 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-link me-2"></i>
+                                    Reference/Source
+                                </label>
+                                <input type="text" name="reference" class="form-input" 
+                                       value="{{ question.reference|default:'' }}" 
+                                       placeholder="e.g., Textbook page 45, Question Bank 2023">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Question Text Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-question-circle me-2"></i>
+                        <h3>Question Text</h3>
+                    </div>
+                    <div class="section-body">
+                        <label class="form-label">
+                            <i class="fas fa-pen me-2"></i>
+                            Question Text *
+                        </label>
+                        <textarea name="question" class="form-textarea" id="questionText" 
+                                  rows="4" placeholder="Enter your question here..." required>{{ question.question|safe|striptags }}</textarea>
+                        <div class="form-hint">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Use HTML tags for formatting (bold, italics, lists, etc.)
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MCQ Options Section (Conditional) -->
+                <div class="form-section mcq-options-section" id="mcqOptionsSection" 
+                     {% if question.question_type != 'objective' %}style="display: none;"{% endif %}>
+                    <div class="section-header">
+                        <i class="fas fa-list-ul me-2"></i>
+                        <h3>Multiple Choice Options</h3>
+                    </div>
+                    <div class="section-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <span class="option-letter">A</span> Option 1 *
+                                </label>
+                                <input type="text" name="option1" class="form-input" 
+                                       value="{{ question.option1|default:'' }}" 
+                                       placeholder="Enter option A">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <span class="option-letter">B</span> Option 2 *
+                                </label>
+                                <input type="text" name="option2" class="form-input" 
+                                       value="{{ question.option2|default:'' }}" 
+                                       placeholder="Enter option B">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <span class="option-letter">C</span> Option 3
+                                </label>
+                                <input type="text" name="option3" class="form-input" 
+                                       value="{{ question.option3|default:'' }}" 
+                                       placeholder="Enter option C (optional)">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <span class="option-letter">D</span> Option 4
+                                </label>
+                                <input type="text" name="option4" class="form-input" 
+                                       value="{{ question.option4|default:'' }}" 
+                                       placeholder="Enter option D (optional)">
+                            </div>
+                            
+                            <!-- Correct Options -->
+                            <div class="col-12 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Correct Answer(s) *
+                                </label>
+                                <div class="correct-options-grid">
+                                    {% for option_num in '1234' %}
+                                    <div class="correct-option-checkbox">
+                                        <input type="checkbox" name="correct_options" 
+                                               value="{{ option_num }}" 
+                                               id="correct_{{ option_num }}"
+                                               {% if option_num in question.correct_options %}checked{% endif %}>
+                                        <label for="correct_{{ option_num }}">
+                                            Option {{ option_num|upper }}
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-hint">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Select one or more correct options. Multiple correct answers are allowed.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- True/False Section -->
+                <div class="form-section tf-section" id="tfSection" 
+                     {% if question.question_type != 'true_false' %}style="display: none;"{% endif %}>
+                    <div class="section-header">
+                        <i class="fas fa-check-double me-2"></i>
+                        <h3>True/False Answer</h3>
+                    </div>
+                    <div class="section-body">
+                        <div class="tf-options">
+                            <div class="tf-option">
+                                <input type="radio" name="answer" value="true" 
+                                       id="answer_true" {% if question.answer == 'true' %}checked{% endif %}>
+                                <label for="answer_true" class="tf-label tf-true">
+                                    <i class="fas fa-check-circle me-2"></i>True
+                                </label>
+                            </div>
+                            <div class="tf-option">
+                                <input type="radio" name="answer" value="false" 
+                                       id="answer_false" {% if question.answer == 'false' %}checked{% endif %}>
+                                <label for="answer_false" class="tf-label tf-false">
+                                    <i class="fas fa-times-circle me-2"></i>False
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image Fields Section -->
+                <div class="form-section image-fields-section">
+                    <div class="section-header">
+                        <i class="fas fa-images me-2"></i>
+                        <h3>Images & Diagrams</h3>
+                    </div>
+                    <div class="section-body">
+                        <div class="row">
+                            <!-- Graph Based Image -->
+                            <div class="col-md-6 mb-4">
+                                <div class="image-field-card">
+                                    <div class="image-field-header">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        <h5>Graph Image</h5>
+                                        <span class="image-field-badge">For Graph Based Questions</span>
+                                    </div>
+                                    <div class="image-field-body">
+                                        <input type="file" name="question_graph_image" class="form-file" 
+                                               accept="image/*" id="graphImageInput">
+                                        
+                                        {% if question.question_graph_image %}
+                                        <div class="current-image-preview mt-3">
+                                            <div class="image-preview-label">Current Image:</div>
+                                            <div class="image-thumbnail-preview" 
+                                                 onclick="viewQuestionImage('{{ question.question_graph_image.url }}', 'Graph Image - Question #{{ question.id }}')">
+                                                <img src="{{ question.question_graph_image.url }}" 
+                                                     class="preview-image" 
+                                                     alt="Graph Image">
+                                                <div class="image-preview-overlay">
+                                                    <i class="fas fa-expand-alt"></i>
+                                                </div>
+                                            </div>
+                                            <div class="image-info">
+                                                <small class="text-muted">{{ question.question_graph_image.name }}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="form-hint mt-2">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Upload graph images (charts, plots, etc.)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Diagram Image -->
+                            <div class="col-md-6 mb-4">
+                                <div class="image-field-card">
+                                    <div class="image-field-header">
+                                        <i class="fas fa-draw-polygon me-2"></i>
+                                        <h5>Diagram Image</h5>
+                                        <span class="image-field-badge">For Diagram Based Questions</span>
+                                    </div>
+                                    <div class="image-field-body">
+                                        <input type="file" name="diagram_image" class="form-file" 
+                                               accept="image/*" id="diagramImageInput">
+                                        
+                                        {% if question.diagram_image %}
+                                        <div class="current-image-preview mt-3">
+                                            <div class="image-preview-label">Current Image:</div>
+                                            <div class="image-thumbnail-preview" 
+                                                 onclick="viewQuestionImage('{{ question.diagram_image.url }}', 'Diagram Image - Question #{{ question.id }}')">
+                                                <img src="{{ question.diagram_image.url }}" 
+                                                     class="preview-image" 
+                                                     alt="Diagram Image">
+                                                <div class="image-preview-overlay">
+                                                    <i class="fas fa-expand-alt"></i>
+                                                </div>
+                                            </div>
+                                            <div class="image-info">
+                                                <small class="text-muted">{{ question.diagram_image.name }}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="form-hint mt-2">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Upload diagram/figure images
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Theorem Diagram -->
+                            <div class="col-md-6 mb-4">
+                                <div class="image-field-card">
+                                    <div class="image-field-header">
+                                        <i class="fas fa-square-root-alt me-2"></i>
+                                        <h5>Theorem Diagram</h5>
+                                        <span class="image-field-badge">For Theorem Questions</span>
+                                    </div>
+                                    <div class="image-field-body">
+                                        <input type="file" name="theorem_diagram" class="form-file" 
+                                               accept="image/*" id="theoremImageInput">
+                                        
+                                        {% if question.theorem_diagram %}
+                                        <div class="current-image-preview mt-3">
+                                            <div class="image-preview-label">Current Image:</div>
+                                            <div class="image-thumbnail-preview" 
+                                                 onclick="viewQuestionImage('{{ question.theorem_diagram.url }}', 'Theorem Diagram - Question #{{ question.id }}')">
+                                                <img src="{{ question.theorem_diagram.url }}" 
+                                                     class="preview-image" 
+                                                     alt="Theorem Diagram">
+                                                <div class="image-preview-overlay">
+                                                    <i class="fas fa-expand-alt"></i>
+                                                </div>
+                                            </div>
+                                            <div class="image-info">
+                                                <small class="text-muted">{{ question.theorem_diagram.name }}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="form-hint mt-2">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Upload theorem proof diagrams
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Regular Question Image (for backward compatibility) -->
+                            <div class="col-md-6 mb-4">
+                                <div class="image-field-card">
+                                    <div class="image-field-header">
+                                        <i class="fas fa-image me-2"></i>
+                                        <h5>Question Image</h5>
+                                        <span class="image-field-badge">General Question Image</span>
+                                    </div>
+                                    <div class="image-field-body">
+                                        <input type="file" name="image" class="form-file" 
+                                               accept="image/*" id="questionImageInput">
+                                        
+                                        {% if question.image %}
+                                        <div class="current-image-preview mt-3">
+                                            <div class="image-preview-label">Current Image:</div>
+                                            <div class="image-thumbnail-preview" 
+                                                 onclick="viewQuestionImage('{{ question.image.url }}', 'Question Image - Question #{{ question.id }}')">
+                                                <img src="{{ question.image.url }}" 
+                                                     class="preview-image" 
+                                                     alt="Question Image">
+                                                <div class="image-preview-overlay">
+                                                    <i class="fas fa-expand-alt"></i>
+                                                </div>
+                                            </div>
+                                            <div class="image-info">
+                                                <small class="text-muted">{{ question.image.name }}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="form-hint mt-2">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            General question images
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Old Diagram Field (for backward compatibility) -->
+                            <div class="col-md-6 mb-4">
+                                <div class="image-field-card">
+                                    <div class="image-field-header">
+                                        <i class="fas fa-draw-polygon me-2"></i>
+                                        <h5>Legacy Diagram</h5>
+                                        <span class="image-field-badge text-warning">Old Field</span>
+                                    </div>
+                                    <div class="image-field-body">
+                                        <input type="file" name="diagram" class="form-file" 
+                                               accept="image/*" id="legacyDiagramInput">
+                                        
+                                        {% if question.diagram %}
+                                        <div class="current-image-preview mt-3">
+                                            <div class="image-preview-label">Current Image:</div>
+                                            <div class="image-thumbnail-preview" 
+                                                 onclick="viewQuestionImage('{{ question.diagram.url }}', 'Legacy Diagram - Question #{{ question.id }}')">
+                                                <img src="{{ question.diagram.url }}" 
+                                                     class="preview-image" 
+                                                     alt="Legacy Diagram">
+                                                <div class="image-preview-overlay">
+                                                    <i class="fas fa-expand-alt"></i>
+                                                </div>
+                                            </div>
+                                            <div class="image-info">
+                                                <small class="text-muted">{{ question.diagram.name }}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="form-hint mt-2">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Legacy diagram field - consider using Diagram Image instead
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Answer Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <h3>Answer & Explanation</h3>
+                    </div>
+                    <div class="section-body">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-check me-2"></i>
+                                Answer *
+                            </label>
+                            <textarea name="answer" class="form-textarea" id="answerText" 
+                                      rows="3" placeholder="Enter the answer..." required>{{ question.answer|safe|striptags }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-comment-alt me-2"></i>
+                                Detailed Explanation
+                            </label>
+                            <textarea name="explanation" class="form-textarea" id="explanationText" 
+                                      rows="3" placeholder="Enter detailed explanation (optional)">{{ question.explanation|safe|striptags }}</textarea>
+                            <div class="form-hint">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Provide step-by-step explanation or additional context
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{% url 'view_question_detail' question.id %}" class="btn-cancel">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" onclick="previewQuestion()" class="btn-preview">
+                                <i class="fas fa-eye me-2"></i>Preview
+                            </button>
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="image-modal" id="imageModal">
+    <div class="image-modal-content">
+        <button class="image-modal-close" onclick="closeImageModal()">&times;</button>
+        <img id="modalImage" class="image-modal-img" src="" alt="">
+        <div id="modalCaption" class="image-modal-caption"></div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="confirmation-modal" id="previewModal">
+    <div class="confirmation-content" style="max-width: 800px;">
+        <div class="confirmation-header" style="background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);">
+            <div class="confirmation-icon">
+                <i class="fas fa-eye"></i>
+            </div>
+            <h3>Question Preview</h3>
+            <button class="close-modal" onclick="closePreviewModal()">&times;</button>
+        </div>
+        <div class="confirmation-body" id="previewContent" style="text-align: left; max-height: 600px; overflow-y: auto;">
+            <!-- Preview content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Image Fields Specific Styles */
+    .image-fields-section .section-body {
+        padding: 20px;
+    }
+    
+    .image-field-card {
+        background: white;
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        overflow: hidden;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .image-field-card:hover {
+        border-color: #4361ee;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .image-field-header {
+        background: #f8f9fa;
+        padding: 15px;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .image-field-header h5 {
+        margin: 0;
+        font-size: 1rem;
+        color: #495057;
+        display: flex;
+        align-items: center;
+    }
+    
+    .image-field-badge {
+        background: #e9ecef;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6c757d;
+    }
+    
+    .image-field-body {
+        padding: 15px;
+    }
+    
+    .current-image-preview {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        background: white;
+    }
+    
+    .image-preview-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .image-thumbnail-preview {
+        position: relative;
+        width: 100%;
+        height: 150px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid #dee2e6;
+        background: #f8f9fa;
+    }
+    
+    .preview-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: white;
+    }
+    
+    .image-preview-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(67, 97, 238, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    .image-thumbnail-preview:hover .image-preview-overlay {
+        opacity: 1;
+    }
+    
+    .image-info {
+        margin-top: 10px;
+        text-align: center;
+    }
+    
+    /* Image Modal */
+    .image-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .image-modal-content {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+        text-align: center;
+    }
+    
+    .image-modal-img {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 10px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    
+    .image-modal-caption {
+        color: white;
+        margin-top: 20px;
+        font-size: 1.2rem;
+        padding: 10px 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 5px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .image-modal-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    
+    .image-modal-close:hover {
+        transform: scale(1.2);
+    }
+    
+    /* Preview Modal Styles */
+    .preview-question-content {
+        padding: 20px;
+    }
+    
+    .preview-header {
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .question-preview-box, .answer-preview-box, .explanation-preview-box {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #4361ee;
+        margin-top: 5px;
+    }
+    
+    .answer-preview-box {
+        border-left-color: #28a745;
+        background: #d4edda;
+    }
+    
+    .explanation-preview-box {
+        border-left-color: #ffc107;
+    }
+    
+    .preview-option {
+        padding: 10px 15px;
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+    
+    /* Edit Form Specific Styles (existing) */
+    .edit-form-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    
+    .edit-header {
+        background: linear-gradient(135deg, #ff9e00 0%, #ff9100 100%);
+        color: white;
+        padding: 2rem;
+    }
+    
+    .edit-form-content {
+        padding: 2rem;
+    }
+    
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+    
+    .form-input, .form-select, .form-textarea, .form-file {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        background: white;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+    }
+    
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .form-hint {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .option-letter {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        background: #4361ee;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 24px;
+        margin-right: 10px;
+        font-weight: bold;
+    }
+    
+    .correct-options-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 10px;
+    }
+    
+    .correct-option-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 15px;
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .correct-option-checkbox:hover {
+        border-color: #4361ee;
+    }
+    
+    .correct-option-checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .correct-option-checkbox label {
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    .tf-options {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .tf-option {
+        flex: 1;
+    }
+    
+    .tf-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+    
+    .tf-label.tf-true:hover {
+        background: #d4edda;
+        border-color: #28a745;
+    }
+    
+    .tf-label.tf-false:hover {
+        background: #f8d7da;
+        border-color: #dc3545;
+    }
+    
+    .tf-option input[type="radio"] {
+        display: none;
+    }
+    
+    .tf-option input[type="radio"]:checked + .tf-label.tf-true {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+    
+    .tf-option input[type="radio"]:checked + .tf-label.tf-false {
+        background: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+    
+    .current-file {
+        background: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+    
+    .view-file-link {
+        color: #4361ee;
+        text-decoration: none;
+    }
+    
+    .view-file-link:hover {
+        text-decoration: underline;
+    }
+    
+    .form-actions {
+        padding: 2rem 0;
+        border-top: 2px solid #e9ecef;
+    }
+    
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        color: #4361ee;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 10px 20px;
+        background: rgba(67, 97, 238, 0.1);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-back:hover {
+        background: rgba(67, 97, 238, 0.2);
+        color: #3a0ca3;
+    }
+    
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 25px;
+        background: #6c757d;
+        color: white;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel:hover {
+        background: #495057;
+        color: white;
+    }
+    
+    .btn-preview {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 25px;
+        background: #4361ee;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-preview:hover {
+        background: #3a0ca3;
+        transform: translateY(-2px);
+    }
+    
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #2ec4b6 0%, #06d6a0 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(46, 196, 182, 0.3);
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+        border: 2px solid #28a745;
+    }
+    
+    .difficulty-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .difficulty-dot.easy { background: #2ec4b6; }
+    .difficulty-dot.medium { background: #ff9e00; }
+    .difficulty-dot.hard { background: #e63946; }
+    
+    /* Confirmation Modal */
+    .confirmation-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    
+    .confirmation-content {
+        background: white;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 15px;
+        overflow: hidden;
+        animation: modalSlideIn 0.3s ease;
+    }
+    
+    .confirmation-header {
+        background: linear-gradient(135deg, #e63946 0%, #d00000 100%);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .confirmation-body {
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .confirmation-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+    
+    .btn-confirm-delete {
+        background: linear-gradient(135deg, #e63946 0%, #d00000 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .close-modal {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .image-field-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .image-field-badge {
+            align-self: flex-start;
+        }
+        
+        .image-thumbnail-preview {
+            height: 120px;
+        }
+        
+        .form-actions .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .form-actions .d-flex > div {
+            width: 100%;
+        }
+        
+        .btn-cancel, .btn-preview, .btn-save {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+    let currentImageModal = null;
+    
+    // Show/hide sections based on question type
+    document.getElementById('questionType').addEventListener('change', function() {
+        const type = this.value;
+        
+        // Hide all conditional sections
+        document.getElementById('mcqOptionsSection').style.display = 'none';
+        document.getElementById('tfSection').style.display = 'none';
+        
+        // Show relevant section
+        if (type === 'objective') {
+            document.getElementById('mcqOptionsSection').style.display = 'block';
+        } else if (type === 'true_false') {
+            document.getElementById('tfSection').style.display = 'block';
+        }
+    });
+    
+    // Image Modal Functionality
+    function viewQuestionImage(imageUrl, caption) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalCaption = document.getElementById('modalCaption');
+        
+        modalImg.src = imageUrl;
+        modalCaption.textContent = caption;
+        modal.style.display = 'flex';
+        currentImageModal = modal;
+        
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeImageModal() {
+        const modal = document.getElementById('imageModal');
+        modal.style.display = 'none';
+        currentImageModal = null;
+        
+        // Restore body scroll
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Preview functionality
+    function previewQuestion() {
+        // Collect form data
+        const form = document.getElementById('editQuestionForm');
+        const formData = new FormData(form);
+        
+        // Build preview content
+        let previewHTML = `
+            <div class="preview-question-content">
+                <div class="preview-header">
+                    <h4 class="mb-2">Question Preview</h4>
+                    <p class="mb-0">This is how your question will appear to users</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>Question Text:</h5>
+                    <div class="question-preview-box">
+                        ${formData.get('question') || 'No question text entered'}
+                    </div>
+                </div>
+        `;
+        
+        // Add MCQ options if applicable
+        if (formData.get('question_type') === 'objective') {
+            previewHTML += `
+                <div class="mb-4">
+                    <h5>Multiple Choice Options:</h5>
+                    <div class="row">
+            `;
+            
+            const options = ['A', 'B', 'C', 'D'];
+            options.forEach((letter, index) => {
+                const optionValue = formData.get(`option${index + 1}`);
+                if (optionValue) {
+                    previewHTML += `
+                        <div class="col-md-6 mb-2">
+                            <div class="preview-option">
+                                <strong>${letter}:</strong> ${optionValue}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            previewHTML += `
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Add answer
+        previewHTML += `
+            <div class="mb-4">
+                <h5>Answer:</h5>
+                <div class="answer-preview-box">
+                    ${formData.get('answer') || 'No answer provided'}
+                </div>
+            </div>
+        `;
+        
+        // Add explanation if exists
+        if (formData.get('explanation')) {
+            previewHTML += `
+                <div class="mb-4">
+                    <h5>Explanation:</h5>
+                    <div class="explanation-preview-box">
+                        ${formData.get('explanation')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        previewHTML += `</div>`;
+        
+        // Display preview
+        document.getElementById('previewContent').innerHTML = previewHTML;
+        document.getElementById('previewModal').style.display = 'flex';
+    }
+    
+    function closePreviewModal() {
+        document.getElementById('previewModal').style.display = 'none';
+    }
+    
+    // Form validation
+    document.getElementById('editQuestionForm').addEventListener('submit', function(e) {
+        const questionType = document.getElementById('questionType').value;
+        
+        // Validate MCQ options
+        if (questionType === 'objective') {
+            const option1 = this.querySelector('input[name="option1"]').value;
+            const option2 = this.querySelector('input[name="option2"]').value;
+            const correctOptions = this.querySelectorAll('input[name="correct_options"]:checked');
+            
+            if (!option1 || !option2) {
+                e.preventDefault();
+                alert('Please provide at least Option 1 and Option 2 for MCQ questions.');
+                return;
+            }
+            
+            if (correctOptions.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one correct option for MCQ questions.');
+                return;
+            }
+        }
+        
+        // Validate True/False answer
+        if (questionType === 'true_false') {
+            const tfAnswer = this.querySelector('input[name="answer"]:checked');
+            if (!tfAnswer) {
+                e.preventDefault();
+                alert('Please select either True or False for the answer.');
+                return;
+            }
+        }
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalHTML = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+        submitBtn.disabled = true;
+        
+        // Re-enable button after 5 seconds if submission fails
+        setTimeout(() => {
+            submitBtn.innerHTML = originalHTML;
+            submitBtn.disabled = false;
+        }, 5000);
+    });
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const previewModal = document.getElementById('previewModal');
+        const imageModal = document.getElementById('imageModal');
+        
+        if (event.target === previewModal) {
+            closePreviewModal();
+        }
+        if (event.target === imageModal) {
+            closeImageModal();
+        }
+    }
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            if (currentImageModal) {
+                closeImageModal();
+            }
+            if (document.getElementById('previewModal').style.display === 'flex') {
+                closePreviewModal();
+            }
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEET Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/file/exam.css">
+    <script>
+        let maxRefreshes = 2;
+        let maxTabSwitches = 2;
+        let refreshCount = localStorage.getItem('refresh_count') ? parseInt(localStorage.getItem('refresh_count')) : 0;
+        let tabSwitchCount = localStorage.getItem('tab_switch_count') ? parseInt(localStorage.getItem('tab_switch_count')) : 0;
+
+        let timeLeft = localStorage.getItem('test_timeLeft');
+        if (timeLeft === null || isNaN(timeLeft)) {
+            timeLeft = 1800;
+            localStorage.setItem('test_timeLeft', timeLeft);
+        } else {
+            timeLeft = parseInt(timeLeft);
+        }
+    </script>
+</head>
+<body>
+    <div class="header-top8">
+        <img src="/static/images/nassonline.jpg" alt="Logo" class="logo8">
+        <div class="header-info8">
+            <h3 class="welcome8">Welcome, {{ data.username }}</h3>
+            <a href="{% url 'Login' %}">
+                <button class="reg8">
+                    LogOut <i class="fa fa-sign-out" style="font-size:16px;"></i>
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <h1>Test</h1>
+    <h3>Time Remaining: <span id="timer">30:00</span></h3>
+
+    {% if selected_subject %}
+        <h2>Subject: {{ selected_subject }}</h2>
+    {% else %}
+        <h2>General Exam</h2>
+    {% endif %}
+
+    <h2>Answer the following questions</h2>
+
+    <form id="test-form" method="post" action="{% url 'submit_test' %}">
+        {% csrf_token %}
+        
+        {% for question in questions %}
+            <fieldset>
+                <legend>Question {{ forloop.counter }}: {{ question.question|safe }}</legend>
+                {% if question.option1 %}
+                    <input type="radio" name="q{{ question.id }}" value="{{ question.id }}_1" required> {{ question.option1 }}<br>
+                {% endif %}
+                {% if question.option2 %}
+                    <input type="radio" name="q{{ question.id }}" value="{{ question.id }}_2" required> {{ question.option2 }}<br>
+                {% endif %}
+                {% if question.option3 %}
+                    <input type="radio" name="q{{ question.id }}" value="{{ question.id }}_3" required> {{ question.option3 }}<br>
+                {% endif %}
+                {% if question.option4 %}
+                    <input type="radio" name="q{{ question.id }}" value="{{ question.id }}_4" required> {{ question.option4 }}<br>
+                {% endif %}
+                {% if question.option5 %}
+                    <input type="radio" name="q{{ question.id }}" value="{{ question.id }}_5"> {{ question.option5 }}<br>
+                {% endif %}
+                {% if question.option6 %}
+                    <input type="radio" name="q{{ question.id }}" value="{{ question.id }}_6"> {{ question.option6 }}<br>
+                {% endif %}
+            </fieldset>
+            <br>
+        {% endfor %}
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById("test-form").addEventListener("submit", function(event) {
+            let unanswered = false;
+            document.querySelectorAll("fieldset").forEach(fieldset => {
+                let checked = fieldset.querySelector("input[type=radio]:checked");
+                if (!checked) {
+                    unanswered = true;
+                    fieldset.style.border = "2px solid red";
+                }
+            });
+
+            if (unanswered) {
+                event.preventDefault();
+                alert("Please answer all questions before submitting.");
+            }
+        });
+    </script>
+</body>
+</html>

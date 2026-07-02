@@ -1,0 +1,1327 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View All Questions | Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0d9488;
+            --primary-dark: #0f766e;
+            --primary-light: #14b8a6;
+            --accent: #06b6d4;
+            --dark: #111827;
+            --light: #f9fafb;
+            --text: #1f2937;
+            --gray: #6b7280;
+            --error: #dc3545;
+            --success: #28a745;
+            --warning: #ffc107;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .page-header {
+            background: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .page-title {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(13, 148, 136, 0.25);
+            outline: none;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .question-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-light);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .question-id {
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(13, 148, 136, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .question-subject {
+            font-weight: 600;
+            color: var(--dark);
+            background: #f8f9fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 5px;
+        }
+
+        .question-content {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .question-preview {
+            max-height: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .question-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .badge-type {
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent);
+        }
+
+        .badge-difficulty-easy {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+
+        .badge-difficulty-medium {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-difficulty-hard {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--error);
+        }
+
+        .badge-marks {
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-view {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-edit {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-view:hover, .btn-edit:hover, .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .no-questions {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .no-questions i {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .question-options {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-letter {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .option-correct {
+            background: var(--success) !important;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .question-full {
+            white-space: pre-wrap;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+            
+            .question-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        .back-btn {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'images/nassonline.jpg' %}" alt="Logo" height="40" class="me-2">
+                Question Management
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin_dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-user me-1"></i> {{ request.user.username }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </a>
+                    </li>
+                </ul> -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="page-title">📚 All Questions Database</h1>
+                    <p class="text-muted mb-0">View, manage, and filter all questions from all subjects</p>
+                </div>
+                <a href="{% url 'admin_dashboard' %}" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h3 id="totalQuestions" class="mb-1">0</h3>
+                    <p class="text-muted mb-0">Total Questions</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3 id="totalSubjects" class="mb-1">{{ subjects|length }}</h3>
+                    <p class="text-muted mb-0">Subjects</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 id="totalMarks" class="mb-1">0</h3>
+                    <p class="text-muted mb-0">Total Marks</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 id="objectiveCount" class="mb-1">0</h3>
+                    <p class="text-muted mb-0">MCQ Questions</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="form-label">Subject:</label>
+                    <select class="filter-select" id="subjectFilter" onchange="applyFilters()">
+                        <option value="all">All Subjects</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.id }}">{{ subject.name }} ({{ subject.class_name.class_name }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="form-label">Question Type:</label>
+                    <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+                        <option value="all">All Types</option>
+                        <option value="objective">Objective (MCQ)</option>
+                        <option value="descriptive">Descriptive</option>
+                        <option value="match_following">Match Following</option>
+                        <option value="fill_in_the_blanks">Fill in Blanks</option>
+                        <option value="numerical">Numerical</option>
+                        <option value="true_false">True/False</option>
+                        <option value="short_answer">Short Answer</option>
+                        <option value="long_answer">Long Answer</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="form-label">Difficulty:</label>
+                    <select class="filter-select" id="difficultyFilter" onchange="applyFilters()">
+                        <option value="all">All Levels</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="form-label">Search:</label>
+                    <input type="text" class="filter-select" id="searchFilter" 
+                           placeholder="Search questions, chapters..." 
+                           onkeyup="applyFilters()">
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col">
+                    <button class="btn btn-outline-primary btn-sm" onclick="resetFilters()">
+                        <i class="fas fa-redo me-1"></i> Reset Filters
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="refreshQuestions()">
+                        <i class="fas fa-sync-alt me-1"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions Container -->
+        <div id="questionsContainer">
+            <div class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading questions...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container" id="paginationContainer">
+            <!-- Pagination will be loaded here -->
+        </div>
+    </div>
+
+    <!-- View Question Modal -->
+    <div class="modal fade" id="viewQuestionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Question Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="questionDetails">
+                    <!-- Question details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-warning" id="editQuestionBtn">
+                        <i class="fas fa-edit me-1"></i> Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteQuestionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                    </div>
+                    <p>Are you sure you want to delete this question? This action cannot be undone.</p>
+                    <div class="alert alert-warning">
+                        <p class="mb-1"><strong>Question ID:</strong> <span id="deleteQuestionId"></span></p>
+                        <p class="mb-0" id="deleteQuestionPreview"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash me-1"></i> Delete Question
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Bootstrap JS -->
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Global variables
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let currentSubject = 'all';
+    let currentType = 'all';
+    let currentDifficulty = 'all';
+    let searchTerm = '';
+    let totalPages = 1;
+    let totalQuestions = 0;
+    let filteredQuestions = 0;
+
+    // Get URL parameters
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        const results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get subject from URL parameter
+        const urlSubject = getUrlParameter('subject');
+        if (urlSubject) {
+            document.getElementById('subjectFilter').value = urlSubject;
+            currentSubject = urlSubject;
+        }
+        
+        // Load questions automatically
+        loadQuestions();
+        
+        // Handle edit button in view modal
+        document.getElementById('editQuestionBtn').addEventListener('click', function() {
+            const questionId = this.getAttribute('data-question-id');
+            if (questionId) {
+                window.location.href = `/edit-question/${questionId}/`;
+            }
+        });
+        
+        // Handle delete confirmation
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            const questionId = this.getAttribute('data-question-id');
+            deleteQuestion(questionId);
+        });
+    });
+
+    // Load questions from server with pagination
+    async function loadQuestions(page = 1) {
+        showLoading();
+        try {
+            // Build query parameters
+            const params = new URLSearchParams({
+                page: page,
+                per_page: itemsPerPage,
+                subject: currentSubject,
+                type: currentType,
+                difficulty: currentDifficulty,
+                search: searchTerm
+            });
+            
+            const response = await fetch(`/api/questions/all/?${params}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                currentPage = data.page;
+                totalPages = data.total_pages;
+                totalQuestions = data.total;
+                filteredQuestions = data.filtered_total || data.total;
+                
+                // Update statistics
+                updateStatistics(data);
+                
+                // Render questions
+                renderQuestions(data.questions);
+                renderPagination();
+            } else {
+                throw new Error(data.error || 'Failed to load questions');
+            }
+        } catch (error) {
+            console.error('Error loading questions:', error);
+            showError('Failed to load questions. Please try again.');
+            showEmptyState();
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Update statistics
+    function updateStatistics(data) {
+        document.getElementById('totalQuestions').textContent = totalQuestions;
+        
+        // Calculate total marks for filtered questions
+        const totalMarks = data.questions.reduce((sum, q) => sum + (parseInt(q.marks) || 0), 0);
+        document.getElementById('totalMarks').textContent = totalMarks;
+        
+        // Count objective questions in filtered results
+        const objectiveCount = data.questions.filter(q => q.question_type === 'objective').length;
+        document.getElementById('objectiveCount').textContent = objectiveCount;
+        
+        // Update filtered count display
+        document.getElementById('totalSubjects').textContent = `${filteredQuestions} / ${totalQuestions}`;
+    }
+
+    // Show questions
+    function renderQuestions(questions) {
+        const container = document.getElementById('questionsContainer');
+        
+        if (!questions || questions.length === 0) {
+            container.innerHTML = `
+                <div class="no-questions">
+                    <i class="fas fa-inbox"></i>
+                    <h4 class="mt-3">No Questions Found</h4>
+                    <p class="text-muted">${searchTerm ? 'No questions match your search criteria.' : 'No questions have been added yet.'}</p>
+                    ${!searchTerm && currentSubject === 'all' ? '<a href="{% url "add_biology_question" %}" class="btn btn-primary mt-2">Add Your First Question</a>' : ''}
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        questions.forEach((question, index) => {
+            const questionNumber = ((currentPage - 1) * itemsPerPage) + index + 1;
+            
+            // Format question type for display
+            const questionTypeMap = {
+                'objective': 'MCQ',
+                'descriptive': 'Descriptive',
+                'match_following': 'Match Following',
+                'fill_in_the_blanks': 'Fill in Blanks',
+                'numerical': 'Numerical',
+                'true_false': 'True/False',
+                'short_answer': 'Short Answer',
+                'long_answer': 'Long Answer',
+                'diagram_based': 'Diagram Based',
+                'graph_based': 'Graph Based'
+            };
+            
+            const typeDisplay = questionTypeMap[question.question_type] || question.question_type;
+            
+            // Difficulty badge
+            let difficultyClass = 'badge-difficulty-medium';
+            if (question.difficulty === 'easy') difficultyClass = 'badge-difficulty-easy';
+            if (question.difficulty === 'hard') difficultyClass = 'badge-difficulty-hard';
+            
+            // Format date
+            const createdDate = new Date(question.created_at).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+            
+            html += `
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="question-id">#${question.id}</span>
+                            <span class="question-subject">${question.subject_name}</span>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-view" onclick="viewQuestion(${question.id})" title="View">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-edit" onclick="editQuestion(${question.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-delete" onclick="confirmDelete(${question.id})" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="question-content">
+                        <div class="question-preview">${questionNumber}. ${question.question}</div>
+                    </div>
+                    
+                    <div class="question-details">
+                        <div class="detail-item">
+                            <i class="fas fa-tag text-muted"></i>
+                            <span class="badge badge-type">${typeDisplay}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-chart-line text-muted"></i>
+                            <span class="badge ${difficultyClass}">${question.difficulty}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-star text-muted"></i>
+                            <span class="badge badge-marks">${question.marks} Mark${question.marks > 1 ? 's' : ''}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-book text-muted"></i>
+                            <span>${question.chapter}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-calendar text-muted"></i>
+                            <span>${createdDate}</span>
+                        </div>
+                    </div>
+                    
+                    ${question.question_type === 'objective' && question.option1 ? `
+                    <div class="question-options">
+                        <p class="mb-2"><strong>Options:</strong></p>
+                        <div class="option-item">
+                            <span class="option-letter ${question.correct_options && question.correct_options.includes('1') ? 'option-correct' : ''}">A</span>
+                            ${question.option1}
+                        </div>
+                        <div class="option-item">
+                            <span class="option-letter ${question.correct_options && question.correct_options.includes('2') ? 'option-correct' : ''}">B</span>
+                            ${question.option2}
+                        </div>
+                        <div class="option-item">
+                            <span class="option-letter ${question.correct_options && question.correct_options.includes('3') ? 'option-correct' : ''}">C</span>
+                            ${question.option3}
+                        </div>
+                        <div class="option-item">
+                            <span class="option-letter ${question.correct_options && question.correct_options.includes('4') ? 'option-correct' : ''}">D</span>
+                            ${question.option4}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    // Render pagination controls
+    function renderPagination() {
+        const container = document.getElementById('paginationContainer');
+        
+        if (totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+        
+        let html = `
+            <nav aria-label="Question pagination">
+                <ul class="pagination">
+                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${currentPage - 1})" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+        `;
+        
+        // Show page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                html += `
+                    <li class="page-item ${currentPage === i ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                    </li>
+                `;
+            } else if (i === currentPage - 3 || i === currentPage + 3) {
+                html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+        }
+        
+        html += `
+                    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${currentPage + 1})" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        `;
+        
+        container.innerHTML = html;
+    }
+
+    // Change page
+    function changePage(page) {
+        if (page < 1 || page > totalPages) return;
+        loadQuestions(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Apply filters
+    function applyFilters() {
+        currentSubject = document.getElementById('subjectFilter').value;
+        currentType = document.getElementById('typeFilter').value;
+        currentDifficulty = document.getElementById('difficultyFilter').value;
+        searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+        
+        // Reset to page 1 when filtering
+        currentPage = 1;
+        loadQuestions(1);
+    }
+
+    // Reset all filters
+    function resetFilters() {
+        document.getElementById('subjectFilter').value = 'all';
+        document.getElementById('typeFilter').value = 'all';
+        document.getElementById('difficultyFilter').value = 'all';
+        document.getElementById('searchFilter').value = '';
+        
+        currentSubject = 'all';
+        currentType = 'all';
+        currentDifficulty = 'all';
+        searchTerm = '';
+        
+        // Reset to page 1
+        currentPage = 1;
+        loadQuestions(1);
+    }
+
+    // Refresh questions
+    function refreshQuestions() {
+        loadQuestions(currentPage);
+    }
+
+    // View question details - Topic/Question section first, then Question, then Answer
+    async function viewQuestion(questionId) {
+        try {
+            const response = await fetch(`/api/questions/${questionId}/`);
+            const question = await response.json();
+            
+            // Create modal content with TOPIC/QUESTION SECTION first
+            let detailsHtml = `
+                <!-- Question Details Section -->
+                <div class="mb-3">
+                    <h6>Question Details:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Subject:</strong> ${question.subject_name}</p>
+                            <p><strong>Chapter:</strong> ${question.chapter}</p>
+                            <p><strong>Topic:</strong> ${question.topic}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Type:</strong> <span class="badge badge-type">${question.question_type}</span></p>
+                            <p><strong>Difficulty:</strong> <span class="badge ${question.difficulty === 'easy' ? 'badge-difficulty-easy' : question.difficulty === 'medium' ? 'badge-difficulty-medium' : 'badge-difficulty-hard'}">${question.difficulty}</span></p>
+                            <p><strong>Marks:</strong> <span class="badge badge-marks">${question.marks}</span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actual Question -->
+                <div class="mb-3">
+                    <h6>Question:</h6>
+                    <div class="question-full">${question.question}</div>
+                </div>
+            `;
+            
+            // Add ANSWER SECTION below the question based on question type
+            detailsHtml += `
+                <!-- Answer Section -->
+                <div class="mt-4 pt-3 border-top">
+                    <h6>Answer:</h6>
+            `;
+            
+            if (question.question_type === 'objective') {
+                detailsHtml += `
+                    <div class="mb-3">
+                        <div class="question-options">
+                            <div class="option-item">
+                                <span class="option-letter ${question.correct_options && question.correct_options.includes('1') ? 'option-correct' : ''}">A</span>
+                                ${question.option1 || 'Not set'}
+                            </div>
+                            <div class="option-item">
+                                <span class="option-letter ${question.correct_options && question.correct_options.includes('2') ? 'option-correct' : ''}">B</span>
+                                ${question.option2 || 'Not set'}
+                            </div>
+                            <div class="option-item">
+                                <span class="option-letter ${question.correct_options && question.correct_options.includes('3') ? 'option-correct' : ''}">C</span>
+                                ${question.option3 || 'Not set'}
+                            </div>
+                            <div class="option-item">
+                                <span class="option-letter ${question.correct_options && question.correct_options.includes('4') ? 'option-correct' : ''}">D</span>
+                                ${question.option4 || 'Not set'}
+                            </div>
+                        </div>
+                        <p class="mt-2"><strong>Correct Answer(s):</strong> ${question.correct_options || 'Not set'}</p>
+                    </div>
+                `;
+            } else if (question.question_type === 'match_following') {
+                detailsHtml += `
+                    <div class="mb-3">
+                        <div class="question-full">${question.match_items || 'Not set'}</div>
+                        <p class="mt-2"><strong>Correct Matches:</strong> ${question.match_answers || 'Not set'}</p>
+                    </div>
+                `;
+            } else if (question.question_type === 'fill_in_the_blanks') {
+                detailsHtml += `
+                    <div class="mb-3">
+                        <div class="question-full">${question.blank_answers || 'Not set'}</div>
+                    </div>
+                `;
+            } else if (question.question_type === 'numerical') {
+                detailsHtml += `
+                    <div class="mb-3">
+                        <div class="question-full">${question.numerical_solution || 'Not set'}</div>
+                        <p class="mt-2"><strong>Final Answer:</strong> ${question.final_answer || 'Not set'}</p>
+                    </div>
+                `;
+            } else {
+                detailsHtml += `
+                    <div class="mb-3">
+                        <div class="question-full">${question.answer || 'Not set'}</div>
+                    </div>
+                `;
+            }
+            
+            // Close the Answer Section div
+            detailsHtml += `</div>`;
+            
+            // Add metadata at the bottom
+            detailsHtml += `
+                <div class="mt-3 pt-3 border-top">
+                    <p><strong>Created By:</strong> ${question.created_by || 'Admin'}</p>
+                    <p><strong>Created At:</strong> ${new Date(question.created_at).toLocaleString()}</p>
+                </div>
+            `;
+            
+            document.getElementById('questionDetails').innerHTML = detailsHtml;
+            document.getElementById('editQuestionBtn').setAttribute('data-question-id', questionId);
+            
+            const modal = new bootstrap.Modal(document.getElementById('viewQuestionModal'));
+            modal.show();
+            
+        } catch (error) {
+            console.error('Error loading question:', error);
+            showError('Failed to load question details.');
+        }
+    }
+
+    // Edit question
+    function editQuestion(questionId) {
+        window.location.href = `/edit-question/${questionId}/`;
+    }
+
+    // Confirm delete
+    async function confirmDelete(questionId) {
+        try {
+            const response = await fetch(`/api/questions/${questionId}/`);
+            const question = await response.json();
+            
+            document.getElementById('deleteQuestionId').textContent = question.id;
+            document.getElementById('deleteQuestionPreview').textContent = 
+                question.question.length > 100 ? 
+                question.question.substring(0, 100) + '...' : 
+                question.question;
+            
+            document.getElementById('confirmDeleteBtn').setAttribute('data-question-id', questionId);
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteQuestionModal'));
+            modal.show();
+        } catch (error) {
+            console.error('Error loading question for delete:', error);
+            showError('Failed to load question for deletion.');
+        }
+    }
+
+    // Delete question with proper error handling for HTML responses
+    async function deleteQuestion(questionId) {
+        try {
+            console.log('Starting delete for question:', questionId);
+            
+            // Get CSRF token
+            const csrfToken = getCSRFToken();
+            console.log('CSRF Token available:', csrfToken ? 'Yes' : 'No');
+            
+            if (!csrfToken) {
+                showError('Security token missing. Please refresh the page.');
+                return;
+            }
+            
+            // Make DELETE request
+            const response = await fetch(`/api/questions/${questionId}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+            
+            console.log('Delete response status:', response.status);
+            
+            // Get response text first to see what we received
+            const responseText = await response.text();
+            console.log('Delete response text (first 500 chars):', responseText.substring(0, 500));
+            
+            let data;
+            try {
+                // Try to parse as JSON
+                data = JSON.parse(responseText);
+            } catch (jsonError) {
+                console.error('Failed to parse response as JSON:', jsonError);
+                
+                // Check if it's an HTML error page
+                if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+                    // Extract error from HTML if possible
+                    const errorMatch = responseText.match(/<h1[^>]*>([^<]+)<\/h1>/);
+                    const errorTitle = errorMatch ? errorMatch[1] : 'Server Error';
+                    
+                    throw new Error(`Server returned HTML error page: ${errorTitle}`);
+                } else {
+                    throw new Error(`Invalid response from server: ${responseText.substring(0, 200)}`);
+                }
+            }
+            
+            if (response.ok && data.success) {
+                // Close the delete modal
+                const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteQuestionModal'));
+                if (deleteModal) {
+                    deleteModal.hide();
+                }
+                
+                // Show success message
+                showSuccess(data.message || 'Question deleted successfully!');
+                
+                // Reload the questions after a short delay
+                setTimeout(() => {
+                    loadQuestions(currentPage);
+                }, 1000);
+                
+            } else {
+                throw new Error(data.error || data.detail || `Server error: ${response.status}`);
+            }
+            
+        } catch (error) {
+            console.error('Error deleting question:', error);
+            
+            // Show appropriate error message
+            let errorMessage = 'Failed to delete question. ';
+            
+            if (error.message.includes('HTML error page')) {
+                errorMessage += 'Server encountered an internal error. Please check server logs.';
+            } else if (error.message.includes('Invalid response')) {
+                errorMessage += 'Server returned unexpected response.';
+            } else if (error.message.includes('404')) {
+                errorMessage = 'Question not found. It may have been already deleted.';
+            } else if (error.message.includes('403') || error.message.includes('401')) {
+                errorMessage = 'You are not authorized to delete this question.';
+            } else if (error.message.includes('CSRF')) {
+                errorMessage = 'Security token error. Please refresh the page.';
+            } else {
+                errorMessage += error.message;
+            }
+            
+            showError(errorMessage);
+        }
+    }
+
+    // Helper functions
+    function showLoading() {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = `
+            <div class="loading-spinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading questions...</p>
+            </div>
+        `;
+    }
+
+    function hideLoading() {
+        // Loading is hidden when content is rendered
+    }
+
+    function getCSRFToken() {
+        // Method 1: Try to get from form input
+        let token = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (token && token.value) {
+            return token.value;
+        }
+        
+        // Method 2: Try to get from cookies
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        
+        if (cookieValue) {
+            return cookieValue;
+        }
+        
+        // Method 3: Try to get from meta tag
+        const metaToken = document.querySelector('meta[name="csrf-token"]');
+        if (metaToken && metaToken.getAttribute('content')) {
+            return metaToken.getAttribute('content');
+        }
+        
+        // Method 4: Try to get from Django's default location
+        const djangoToken = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (djangoToken && djangoToken.value) {
+            return djangoToken.value;
+        }
+        
+        return null;
+    }
+
+    function showEmptyState() {
+        const container = document.getElementById('questionsContainer');
+        container.innerHTML = `
+            <div class="no-questions">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4 class="mt-3">Unable to Load Questions</h4>
+                <p class="text-muted">There was an error loading the questions.</p>
+                <button class="btn btn-primary mt-2" onclick="loadQuestions()">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+            </div>
+        `;
+    }
+
+    function showSuccess(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 3000);
+    }
+
+    function showError(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+
+    // Debug function to test delete API
+    async function testDeleteAPI() {
+        try {
+            const questionId = prompt('Enter Question ID to test delete:');
+            if (!questionId) return;
+            
+            console.log('Testing delete for question:', questionId);
+            
+            // First check if question exists
+            const checkResponse = await fetch(`/api/questions/${questionId}/`);
+            if (!checkResponse.ok) {
+                alert(`Question ${questionId} not found! Status: ${checkResponse.status}`);
+                return;
+            }
+            
+            // Test DELETE
+            const csrfToken = getCSRFToken();
+            if (!csrfToken) {
+                alert('CSRF token not found!');
+                return;
+            }
+            
+            const deleteResponse = await fetch(`/api/questions/${questionId}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+            
+            const data = await deleteResponse.json();
+            
+            alert(`DELETE Response:\nStatus: ${deleteResponse.status}\nSuccess: ${data.success}\nMessage: ${data.message || data.error}`);
+            console.log('Test delete result:', data);
+            
+        } catch (error) {
+            console.error('Test delete error:', error);
+            alert('Test error: ' + error.message);
+        }
+    }
+
+    // Test API connectivity
+    async function testAPIConnectivity() {
+        try {
+            console.log('Testing API connectivity...');
+            
+            // Test 1: Check if test endpoint works
+            const testResponse = await fetch('/api/test-delete/');
+            console.log('Test endpoint status:', testResponse.status);
+            
+            // Test 2: Check if delete endpoint exists
+            const questionId = prompt('Enter a question ID to test (or leave empty to skip):');
+            if (questionId) {
+                const checkResponse = await fetch(`/api/questions/${questionId}/`);
+                console.log('Question check status:', checkResponse.status);
+                
+                if (checkResponse.ok) {
+                    alert(`Question ${questionId} exists and can be accessed.`);
+                } else {
+                    alert(`Question ${questionId} check failed: ${checkResponse.status}`);
+                }
+            }
+            
+        } catch (error) {
+            console.error('API connectivity test failed:', error);
+            alert('API connectivity test failed: ' + error.message);
+        }
+    }
+</script>
+</body>
+</html>
+</body>
+</html>

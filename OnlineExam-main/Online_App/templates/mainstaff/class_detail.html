@@ -1,0 +1,551 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Class Details</title>
+    <style>
+        body { font-family: Segoe UI, sans-serif; background: #f1f4f8; padding: 30px; }
+        .box { background: #fff; padding: 25px; border-radius: 12px; width: 700px; margin: auto;
+               box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        h2 { color: #0d9488; }
+        .list-box { margin-top: 20px; padding: 15px; background: #fafafa; border-radius: 10px; border: 1px solid #ddd; }
+        a.btn { display: block; padding: 12px; margin-top: 20px; background: #0d9488; color: #fff;
+                text-align: center; border-radius: 8px; text-decoration: none; }
+        a.btn:hover { background: #0f766e; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Class: {{ class_obj.class_name }}</h2>
+
+    <div class="list-box">
+        <h3>Subjects</h3>
+        {% if subjects %}
+            {% for s in subjects %}
+                <p>• {{ s.name }}</p>
+            {% endfor %}
+        {% else %}
+            <p>No subjects added yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="list-box">
+        <h3>Chapters</h3>
+        {% if chapters %}
+            {% for c in chapters %}
+                <p>• {{ c.name }} ({{ c.subject.name }})</p>
+            {% endfor %}
+        {% else %}
+            <p>No chapters added yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="list-box">
+        <h3>Topics</h3>
+        {% if topics %}
+            {% for t in topics %}
+                <p>• {{ t.name }} ({{ t.chapter.name }})</p>
+            {% endfor %}
+        {% else %}
+            <p>No topics added yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="list-box">
+        <h3>Subtopics</h3>
+        {% if subtopics %}
+            {% for st in subtopics %}
+                <p>• {{ st.name }} ({{ st.topic.name }})</p>
+            {% endfor %}
+        {% else %}
+            <p>No subtopics added yet.</p>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'manage_subjects'  %}" class="btn">
+    Manage Subjects / Chapters / Topics
+</a>
+
+
+</div>
+
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Class Details: {{ class_obj.class_name }}</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #f1f4f8; 
+            padding: 20px; 
+            margin: 0;
+        }
+        
+        .box { 
+            background: #fff; 
+            padding: 25px; 
+            border-radius: 12px; 
+            max-width: 800px; 
+            margin: 0 auto;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
+        }
+        
+        h2 { 
+            color: #0d9488; 
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8f3f2;
+        }
+        
+        .section-title {
+            color: #0d9488;
+            margin: 25px 0 15px 0;
+            font-size: 1.2em;
+        }
+        
+        /* Expandable item styles */
+        .expandable-item {
+            margin-bottom: 8px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .item-header {
+            cursor: pointer;
+            padding: 14px 16px;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        
+        .item-header:hover {
+            background: #e8f3f2;
+        }
+        
+        .item-content {
+            display: none;
+            padding: 16px;
+            background: #fafafa;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .toggle-icon {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0d9488;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .item-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .item-count {
+            background: #0d9488;
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 10px;
+        }
+        
+        /* Icons for different levels */
+        .subject-icon { color: #0d9488; }
+        .chapter-icon { color: #3b82f6; }
+        .topic-icon { color: #8b5cf6; }
+        .subtopic-icon { color: #10b981; }
+        
+        /* Nested content styles */
+        .nested-content {
+            padding-left: 25px;
+            border-left: 2px solid #e0e0e0;
+            margin-top: 10px;
+        }
+        
+        .empty-message {
+            color: #999;
+            font-style: italic;
+            padding: 12px;
+            text-align: center;
+            background: #f5f5f5;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        
+        a.btn { 
+            display: inline-block;
+            padding: 12px 24px; 
+            background: #0d9488; 
+            color: #fff;
+            text-align: center; 
+            border-radius: 8px; 
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        a.btn:hover { 
+            background: #0f766e; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        /* Statistics */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0 30px 0;
+        }
+        
+        .stat-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0d9488;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>📚 Class: {{ class_obj.class_name }}</h2>
+    
+    <!-- Statistics -->
+    <div class="stats-container">
+        <div class="stat-box">
+            <div class="stat-number">{{ subjects.count }}</div>
+            <div class="stat-label">Subjects</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ chapters.count }}</div>
+            <div class="stat-label">Chapters</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ topics.count }}</div>
+            <div class="stat-label">Topics</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ subtopics.count }}</div>
+            <div class="stat-label">Subtopics</div>
+        </div>
+    </div>
+    
+    <!-- SUBJECTS SECTION -->
+    <h3 class="section-title">📚 Subjects</h3>
+    {% if subjects %}
+        {% for subject in subjects %}
+            <div class="expandable-item">
+                <div class="item-header" onclick="toggleContent('subject-{{ subject.id }}')">
+                    <div class="item-title">
+                        <span class="subject-icon">📚</span>
+                        {{ subject.name }}
+                        <span class="item-count">{{ subject.chapter_set.count }}</span>
+                    </div>
+                    <span class="toggle-icon" id="icon-subject-{{ subject.id }}">+</span>
+                </div>
+                <div class="item-content" id="subject-{{ subject.id }}">
+                    <!-- Chapters in this subject -->
+                    {% with subject_chapters=subject.chapter_set.all %}
+                        {% if subject_chapters %}
+                            <h4 style="color: #3b82f6; margin: 0 0 10px 0;">Chapters in {{ subject.name }}:</h4>
+                            {% for chapter in subject_chapters %}
+                                <div class="nested-content">
+                                    <div class="expandable-item">
+                                        <div class="item-header" onclick="toggleContent('chapter-{{ chapter.id }}')">
+                                            <div class="item-title">
+                                                <span class="chapter-icon">📖</span>
+                                                {{ chapter.name }}
+                                                <span class="item-count">{{ chapter.topic_set.count }}</span>
+                                            </div>
+                                            <span class="toggle-icon" id="icon-chapter-{{ chapter.id }}">+</span>
+                                        </div>
+                                        <div class="item-content" id="chapter-{{ chapter.id }}">
+                                            <!-- Topics in this chapter -->
+                                            {% with chapter_topics=chapter.topic_set.all %}
+                                                {% if chapter_topics %}
+                                                    <h5 style="color: #8b5cf6; margin: 0 0 10px 0;">Topics in {{ chapter.name }}:</h5>
+                                                    {% for topic in chapter_topics %}
+                                                        <div class="nested-content">
+                                                            <div class="expandable-item">
+                                                                <div class="item-header" onclick="toggleContent('topic-{{ topic.id }}')">
+                                                                    <div class="item-title">
+                                                                        <span class="topic-icon">📝</span>
+                                                                        {{ topic.name }}
+                                                                        <span class="item-count">{{ topic.subtopic_set.count }}</span>
+                                                                    </div>
+                                                                    <span class="toggle-icon" id="icon-topic-{{ topic.id }}">+</span>
+                                                                </div>
+                                                                <div class="item-content" id="topic-{{ topic.id }}">
+                                                                    <!-- Subtopics in this topic -->
+                                                                    {% with topic_subtopics=topic.subtopic_set.all %}
+                                                                        {% if topic_subtopics %}
+                                                                            <h6 style="color: #10b981; margin: 0 0 10px 0;">Subtopics in {{ topic.name }}:</h6>
+                                                                            {% for subtopic in topic_subtopics %}
+                                                                                <div class="nested-content">
+                                                                                    <div class="expandable-item">
+                                                                                        <div class="item-header">
+                                                                                            <div class="item-title">
+                                                                                                <span class="subtopic-icon">•</span>
+                                                                                                {{ subtopic.name }}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            {% endfor %}
+                                                                        {% else %}
+                                                                            <div class="empty-message">No subtopics added yet for this topic.</div>
+                                                                        {% endif %}
+                                                                    {% endwith %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <div class="empty-message">No topics added yet for this chapter.</div>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-message">No chapters added yet for this subject.</div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-message">No subjects added yet for this class.</div>
+    {% endif %}
+    
+    <!-- ALL CHAPTERS SECTION (Collapsed by default) -->
+    <h3 class="section-title">📖 All Chapters</h3>
+    <div class="expandable-item">
+        <div class="item-header" onclick="toggleContent('all-chapters')">
+            <div class="item-title">
+                <span class="chapter-icon">📖</span>
+                View All Chapters ({{ chapters.count }})
+            </div>
+            <span class="toggle-icon" id="icon-all-chapters">+</span>
+        </div>
+        <div class="item-content" id="all-chapters">
+            {% if chapters %}
+                {% for chapter in chapters %}
+                    <div class="nested-content">
+                        <div class="expandable-item">
+                            <div class="item-header" onclick="toggleContent('all-chapter-{{ chapter.id }}')">
+                                <div class="item-title">
+                                    <strong>{{ chapter.name }}</strong>
+                                    <small style="color: #666;">({{ chapter.subject.name }})</small>
+                                    <span class="item-count">{{ chapter.topic_set.count }}</span>
+                                </div>
+                                <span class="toggle-icon" id="icon-all-chapter-{{ chapter.id }}">+</span>
+                            </div>
+                            <div class="item-content" id="all-chapter-{{ chapter.id }}">
+                                {% with chapter_topics=chapter.topic_set.all %}
+                                    {% if chapter_topics %}
+                                        {% for topic in chapter_topics %}
+                                            <div class="nested-content">
+                                                <div class="item-header">
+                                                    <div class="item-title">
+                                                        <span class="topic-icon">📝</span>
+                                                        {{ topic.name }}
+                                                        <span class="item-count">{{ topic.subtopic_set.count }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="empty-message">No topics in this chapter.</div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-message">No chapters added yet.</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- ALL TOPICS SECTION (Collapsed by default) -->
+    <h3 class="section-title">📝 All Topics</h3>
+    <div class="expandable-item">
+        <div class="item-header" onclick="toggleContent('all-topics')">
+            <div class="item-title">
+                <span class="topic-icon">📝</span>
+                View All Topics ({{ topics.count }})
+            </div>
+            <span class="toggle-icon" id="icon-all-topics">+</span>
+        </div>
+        <div class="item-content" id="all-topics">
+            {% if topics %}
+                {% for topic in topics %}
+                    <div class="nested-content">
+                        <div class="expandable-item">
+                            <div class="item-header" onclick="toggleContent('all-topic-{{ topic.id }}')">
+                                <div class="item-title">
+                                    <strong>{{ topic.name }}</strong>
+                                    <small style="color: #666;">({{ topic.chapter.name }} → {{ topic.chapter.subject.name }})</small>
+                                    <span class="item-count">{{ topic.subtopic_set.count }}</span>
+                                </div>
+                                <span class="toggle-icon" id="icon-all-topic-{{ topic.id }}">+</span>
+                            </div>
+                            <div class="item-content" id="all-topic-{{ topic.id }}">
+                                {% with topic_subtopics=topic.subtopic_set.all %}
+                                    {% if topic_subtopics %}
+                                        {% for subtopic in topic_subtopics %}
+                                            <div class="nested-content">
+                                                <div class="item-header">
+                                                    <div class="item-title">
+                                                        <span class="subtopic-icon">•</span>
+                                                        {{ subtopic.name }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="empty-message">No subtopics for this topic.</div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-message">No topics added yet.</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- ALL SUBTOPICS SECTION (Collapsed by default) -->
+    <h3 class="section-title">• All Subtopics</h3>
+    <div class="expandable-item">
+        <div class="item-header" onclick="toggleContent('all-subtopics')">
+            <div class="item-title">
+                <span class="subtopic-icon">•</span>
+                View All Subtopics ({{ subtopics.count }})
+            </div>
+            <span class="toggle-icon" id="icon-all-subtopics">+</span>
+        </div>
+        <div class="item-content" id="all-subtopics">
+            {% if subtopics %}
+                {% for subtopic in subtopics %}
+                    <div class="nested-content">
+                        <div class="item-header">
+                            <div class="item-title">
+                                <strong>{{ subtopic.name }}</strong>
+                                <small style="color: #666;">({{ subtopic.topic.name }} → {{ subtopic.topic.chapter.name }} → {{ subtopic.topic.chapter.subject.name }})</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-message">No subtopics added yet.</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'manage_subjects' %}" class="btn">
+            ✏️ Manage Content
+        </a>
+        <a href="{% url 'class_list' %}" class="btn btn-secondary">
+            ← Back to Classes
+        </a>
+    </div>
+</div>
+
+<script>
+    function toggleContent(elementId) {
+        const content = document.getElementById(elementId);
+        const icon = document.getElementById('icon-' + elementId);
+        
+        if (content.style.display === 'block') {
+            content.style.display = 'none';
+            icon.textContent = '+';
+        } else {
+            content.style.display = 'block';
+            icon.textContent = '−';
+        }
+    }
+    
+    // Keyboard accessibility
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.classList.contains('item-header')) {
+            e.target.click();
+        }
+    });
+    
+    // Open first subject by default
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstSubject = document.querySelector('.expandable-item .item-header');
+        if (firstSubject) {
+            const subjectId = firstSubject.nextElementSibling.id;
+            if (subjectId) {
+                toggleContent(subjectId);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Questions</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* MAIN LAYOUT */
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* LEFT PANEL */
+        .left-panel {
+            width: 25%;
+            background: #f4f4f4;
+            border-right: 2px solid #ddd;
+            padding: 20px;
+        }
+
+        .subject-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 6px;
+        }
+
+        .subject-btn:hover {
+            background: #0056b3;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            width: 75%;
+            padding: 20px;
+        }
+
+        select, input {
+            width: 48%;
+            padding: 10px;
+            margin: 10px 1%;
+            font-size: 15px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- LEFT SUBJECT PANEL -->
+    <div class="left-panel">
+        <h2>Subjects</h2>
+        <button class="subject-btn" onclick="loadChapters('Biology')">Biology</button>
+        <button class="subject-btn" onclick="loadChapters('Chemistry')">Chemistry</button>
+        <button class="subject-btn" onclick="loadChapters('Physics')">Physics</button>
+        <button class="subject-btn" onclick="loadChapters('Mathematics')">Mathematics</button>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+        <h2 id="selected-subject">Select a subject</h2>
+
+        <!-- DROPDOWNS AND SEARCH BAR -->
+        <div id="filters" class="hidden">
+            <select id="chapter"></select>
+            <select id="topic"></select>
+            <select id="subtopic"></select>
+            <input type="text" id="search" placeholder="Search questions...">
+        </div>
+
+        <!-- TABLE -->
+        <table id="questions-table" class="hidden">
+            <thead>
+                <tr>
+                    <th>Marks</th>
+                    <th>Type</th>
+                    <th>Question</th>
+                    <th>Answer</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+    </div>
+</div>
+
+
+<script>
+/* LOAD CHAPTERS WHEN SUBJECT CLICKED */
+function loadChapters(subject) {
+    document.getElementById("selected-subject").innerText = subject;
+    document.getElementById("filters").classList.remove("hidden");
+
+    fetch(`/ajax/get-chapters/?subject=${subject}`)
+    .then(res => res.json())
+    .then(data => {
+        let chapter = document.getElementById("chapter");
+        chapter.innerHTML = `<option value="">Select Chapter</option>`;
+        data.chapters.forEach(c => {
+            chapter.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+    });
+}
+
+/* LOAD TOPICS */
+document.getElementById("chapter").addEventListener("change", function() {
+    let subject = document.getElementById("selected-subject").innerText;
+
+    fetch(`/ajax/get-topics/?subject=${subject}&chapter=${this.value}`)
+    .then(res => res.json())
+    .then(data => {
+        let topic = document.getElementById("topic");
+        topic.innerHTML = `<option value="">Select Topic</option>`;
+        data.topics.forEach(t => {
+            topic.innerHTML += `<option value="${t}">${t}</option>`;
+        });
+    });
+});
+
+/* LOAD SUBTOPICS */
+document.getElementById("topic").addEventListener("change", function() {
+    let subject = document.getElementById("selected-subject").innerText;
+    let chapter = document.getElementById("chapter").value;
+
+    fetch(`/ajax/get-subtopics/?subject=${subject}&chapter=${chapter}&topic=${this.value}`)
+    .then(res => res.json())
+    .then(data => {
+        let sub = document.getElementById("subtopic");
+        sub.innerHTML = `<option value="">Select Sub-topic</option>`;
+        data.subtopics.forEach(s => {
+            sub.innerHTML += `<option value="${s}">${s}</option>`;
+        });
+    });
+});
+
+/* LOAD QUESTIONS */
+document.getElementById("subtopic").addEventListener("change", loadQuestions);
+document.getElementById("search").addEventListener("keyup", loadQuestions);
+
+function loadQuestions() {
+    let subject = document.getElementById("selected-subject").innerText;
+    let chapter = document.getElementById("chapter").value;
+    let topic = document.getElementById("topic").value;
+    let subtopic = document.getElementById("subtopic").value;
+    let search = document.getElementById("search").value;
+
+    if (!subtopic) return;
+
+    fetch(`/ajax/get-questions/?subject=${subject}&chapter=${chapter}&topic=${topic}&subtopic=${subtopic}&search=${search}`)
+    .then(res => res.json())
+    .then(data => {
+        let tbody = document.querySelector("#questions-table tbody");
+        tbody.innerHTML = "";
+
+        data.questions.forEach(q => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${q.marks}</td>
+                    <td>${q.question_type}</td>
+                    <td>${q.question}</td>
+                    <td>${q.answer}</td>
+                </tr>`;
+        });
+
+        document.getElementById("questions-table").classList.remove("hidden");
+    });
+}
+</script>
+
+</body>
+</html>

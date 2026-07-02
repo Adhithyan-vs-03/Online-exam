@@ -1,0 +1,1978 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">📝 Evaluate Exam - Interactive Marking</h1>
+            <p class="text-gray-600 mt-2">{{ submission.student_name }} - {{ submission.exam_title }}</p>
+            <p class="text-sm text-gray-500">Submitted: {{ submission.submitted_at|date:"F j, Y, g:i a" }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'teacher_pending_evaluations' %}" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200">
+                ← Back to List
+            </a>
+            <button onclick="printEvaluation()" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200">
+                🖨️ Print Evaluation
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Left: Answer Sheet with Marking Tools -->
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-xl shadow-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">📄 PDF Answer Sheet - Interactive Marking</h2>
+                    <div class="flex gap-2">
+                        <button onclick="toggleMarkingMode()" id="markingModeBtn" class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg hover:bg-yellow-200">
+                            ✏️ Enable Marking
+                        </button>
+                        <button onclick="clearAllMarks()" class="bg-red-100 text-red-700 px-4 py-2 rounded-lg hover:bg-red-200">
+                            🗑️ Clear Marks
+                        </button>
+                        {% if has_answer_file %}
+                        <a href="{{ submission.answer_file.url }}" target="_blank"
+                           class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                            <i class="fas fa-download mr-2"></i> Download PDF
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Marking Toolbar -->
+                <div id="markingToolbar" class="hidden mb-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div class="flex flex-wrap gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Pen:</span>
+                            <input type="color" id="penColor" value="#ff4444" class="w-8 h-8 cursor-pointer">
+                            <input type="range" id="penSize" min="1" max="10" value="3" class="w-24">
+                            <span id="penSizeLabel" class="text-sm text-gray-600">3px</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Highlighter:</span>
+                            <input type="color" id="highlighterColor" value="#ffff00" class="w-8 h-8 cursor-pointer">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Add Comment:</span>
+                            <button onclick="addCommentBox()" class="bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200">
+                                💬 Add
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-700">Add Marks:</span>
+                            <button onclick="addMarksToTotal()" class="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200">
+                                ✅ Add Marks
+                            </button>
+                        </div>
+                        <button onclick="clearLastMark()" class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200 ml-auto">
+                            ↩️ Undo Last
+                        </button>
+                        <button onclick="toggleDrawingMode()" id="drawingModeBtn" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200">
+                            🎯 Drawing Mode
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- PDF Viewer Container -->
+                <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                    {% if has_answer_file %}
+                        <!-- PDF Viewer -->
+                        <div id="pdfContainer" class="relative bg-gray-100 h-[800px] overflow-hidden">
+                            <!-- PDF Loading Indicator -->
+                            <div id="pdfLoading" class="absolute inset-0 bg-gray-100 flex items-center justify-center z-10">
+                                <div class="text-center">
+                                    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                                    <p class="text-lg font-medium text-gray-700 mb-2">Loading PDF Viewer...</p>
+                                    <p class="text-gray-600">This may take a moment depending on the PDF size.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- PDF.js Viewer Container -->
+                            <div id="pdfViewer" class="w-full h-full overflow-auto bg-white relative">
+                                <div id="pdfCanvasContainer" class="relative">
+                                    <!-- PDF pages will be rendered here as canvases -->
+                                </div>
+                                
+                                <!-- Marking Canvas - FIXED POSITIONING -->
+                                <canvas id="markingCanvas" 
+                                        class="absolute top-0 left-0 pointer-events-none"
+                                        style="transform-origin: top left;"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- PDF Error Fallback -->
+                        <div id="pdfError" class="hidden text-center py-12 bg-gray-50">
+                            <i class="fas fa-exclamation-triangle text-5xl text-yellow-400 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-700 mb-2">PDF Viewer Failed to Load</p>
+                            <p class="text-gray-600 mb-6">The PDF viewer encountered an error. Please try one of these options:</p>
+                            <div class="flex flex-wrap justify-center gap-4 max-w-2xl mx-auto">
+                                {% if submission.answer_file.url %}
+                                <a href="{{ submission.answer_file.url }}" target="_blank"
+                                   class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 flex items-center gap-2">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    Open in New Tab
+                                </a>
+                                <a href="{{ submission.answer_file.url }}" download
+                                   class="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-900 flex items-center gap-2">
+                                    <i class="fas fa-download"></i>
+                                    Download PDF
+                                </a>
+                                {% else %}
+                                <div class="text-center col-span-4">
+                                    <i class="fas fa-file text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-gray-600">No PDF file available for viewing</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-12">
+                            <i class="fas fa-exclamation-triangle text-5xl text-yellow-400 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-700">No Answer Sheet Uploaded</p>
+                            <p class="text-gray-600">The student has not submitted an answer sheet yet.</p>
+                            <div class="mt-4">
+                                <a href="{% url 'teacher_pending_evaluations' %}" class="text-blue-600 hover:text-blue-800 text-sm">
+                                    ← Return to pending evaluations
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Questions with Answer Key and Marks -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">📋 Questions & Answer Key</h2>
+                
+                <!-- Questions Container -->
+                <div id="questionsContainer" class="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                    {% for question in questions %}
+                    <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="font-bold text-gray-800">Q{{ question.number }}</span>
+                            <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                {{ question.marks }} marks
+                            </span>
+                        </div>
+                        
+                        <!-- Question -->
+                        <div class="mb-3">
+                            <div class="text-sm font-medium text-gray-700 mb-1">Question:</div>
+                            <div class="text-sm text-gray-600 bg-white p-2 rounded border">
+                                {{ question.question|striptags|truncatechars:80 }}
+                            </div>
+                        </div>
+                        
+                        <!-- Answer Key -->
+                        <div class="mb-3">
+                            <div class="text-sm font-medium text-gray-700 mb-1">Answer Key:</div>
+                            <div class="text-sm bg-green-50 p-2 rounded border border-green-200">
+                                {% if question.correct_answer %}
+                                    {{ question.correct_answer|striptags|truncatechars:80 }}
+                                {% else %}
+                                    <span class="text-gray-500">Not provided</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Quick Stats - UPDATED TO SHOW TOTAL MARKS -->
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <h3 class="font-medium text-gray-700 mb-3">📊 Exam Summary</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Questions:</span>
+                            <span class="font-bold">{{ questions|length }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Marks Available:</span>
+                            <span class="font-bold text-blue-600" id="totalExamMarks">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Marks from PDF:</span>
+                            <span class="font-bold text-green-600" id="marksFromPDFSidebar">0</span>
+                        </div>
+                        <div class="pt-2 border-t">
+                            <div class="flex justify-between font-bold">
+                                <span class="text-gray-700">Final Marks:</span>
+                                <span class="text-green-600 text-lg" id="finalMarksSidebar">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Evaluation Summary Section -->
+    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">📊 Evaluation Summary</h2>
+        
+        <!-- Form for submitting evaluation -->
+        <form method="POST" id="evaluationForm" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Hidden Inputs -->
+            <input type="hidden" name="marking_data" id="markingData" value="">
+            
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Marks Summary -->
+                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                    <h3 class="font-bold text-gray-800 mb-4">Marks Summary</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Marks from PDF:</span>
+                            <span class="font-medium" id="marksFromPDF">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Additional Marks:</span>
+                            <!-- MARKS INPUT WITH POPUP -->
+                            <div class="relative">
+                                <input type="number" 
+                                       name="additional_marks" 
+                                       id="additional_marks"
+                                       value="0"
+                                       min="0" 
+                                       step="0.5"
+                                       class="w-24 px-2 py-1 border rounded text-right text-sm"
+                                       oninput="showDigitRulesPopup(event); updateAllCalculations()">
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t">
+                            <div class="flex justify-between font-bold">
+                                <span class="text-gray-700">Total Obtained:</span>
+                                <span class="text-green-600 text-lg" id="finalMarksObtained">0</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Out of:</span>
+                            <input type="number" 
+                                   name="total_marks" 
+                                   id="total_marks"
+                                   value="{{ submission.total_marks|default:100 }}"
+                                   min="0" 
+                                   max="1000" 
+                                   step="0.5"
+                                   class="w-24 px-2 py-1 border rounded text-right text-sm"
+                                   oninput="updateAllCalculations()"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Grade Summary -->
+                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                    <h3 class="font-bold text-gray-800 mb-4">Grade Summary</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Percentage:</label>
+                            <div class="text-2xl font-bold text-blue-600" id="summaryPercentage">0%</div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Final Grade:</label>
+                            <div class="flex gap-2">
+                                <select name="grade" 
+                                        id="grade_select"
+                                        class="flex-1 px-3 py-2 border rounded focus:ring-1 focus:ring-blue-500 text-sm"
+                                        onchange="updateAllCalculations()">
+                                    <option value="">Auto-calculate</option>
+                                    <option value="A+">A+ (Excellent)</option>
+                                    <option value="A">A (Very Good)</option>
+                                    <option value="B+">B+ (Good)</option>
+                                    <option value="B">B (Satisfactory)</option>
+                                    <option value="C">C (Average)</option>
+                                    <option value="D">D (Pass)</option>
+                                    <option value="F">F (Fail)</option>
+                                </select>
+                                <span id="calculatedGrade" class="bg-gray-100 px-3 py-2 rounded font-bold text-gray-700 text-sm">
+                                    -
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Summary -->
+                <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                    <h3 class="font-bold text-gray-800 mb-4">Status</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-sm text-gray-600 mb-1">Overall Status:</div>
+                            <div class="font-bold text-yellow-600" id="statusSummary">Not Evaluated</div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-600 mb-1">Progress:</div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="progressBar" class="bg-gradient-to-r from-green-400 to-green-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0%</span>
+                                <span>50%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Teacher Comments -->
+            <div class="mt-6">
+                <label class="block text-lg font-medium text-gray-800 mb-3">
+                    📝 Detailed Feedback
+                </label>
+                <textarea name="teacher_comments" 
+                          id="teacher_comments"
+                          rows="5"
+                          placeholder="Provide detailed feedback, suggestions, and overall comments..."
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">{{ submission.teacher_comments }}</textarea>
+            </div>
+            
+            <!-- Submit Buttons -->
+            <div class="mt-8 space-y-3">
+                <button type="submit" 
+                        onclick="prepareFormSubmission()"
+                        class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 shadow-lg transition">
+                    <i class="fas fa-check-circle mr-2"></i> Submit Final Evaluation
+                </button>
+                
+                <button type="button" 
+                        onclick="saveDraft()" 
+                        class="w-full bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 py-3 rounded-lg font-semibold hover:from-blue-200 hover:to-blue-300 transition">
+                    <i class="fas fa-save mr-2"></i> Save as Draft
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Digit Recognition Rules Popup -->
+<div id="digitRulesPopup" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="bg-green-500 text-white p-4 rounded-t-lg flex justify-between items-center">
+            <h3 class="text-lg font-bold">Digit Recognition Rules</h3>
+            <button onclick="closeDigitRulesPopup()" class="text-white hover:text-gray-200 text-xl">
+                ×
+            </button>
+        </div>
+        <div class="p-4">
+            <p class="text-gray-600 mb-4">You entered: <strong><span id="popupMarksValue">0</span></strong></p>
+            <p class="text-sm text-gray-700 mb-2">Handwritten digit recognition features:</p>
+            <ul id="digitRulesList" class="space-y-2 text-sm text-gray-700">
+                <!-- Digit rules will be populated here -->
+            </ul>
+        </div>
+        <div class="p-4 border-t border-gray-200 flex justify-end">
+            <button onclick="closeDigitRulesPopup()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Marks Entry Popup (for canvas drawing) -->
+<div id="marksEntryPopup" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4">
+        <div class="bg-blue-500 text-white p-4 rounded-t-lg flex justify-between items-center">
+            <h3 class="text-lg font-bold">Enter Marks</h3>
+            <button onclick="closeMarksEntryPopup()" class="text-white hover:text-gray-200 text-xl">
+                ×
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="mb-6">
+                <div class="text-center mb-4">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-3">
+                        <span class="text-2xl font-bold text-blue-600" id="detectedNumber">1</span>
+                    </div>
+                    <p class="text-gray-600">Auto-detected number: <strong><span id="detectedNumberText">1</span></strong></p>
+                    <p class="text-sm text-gray-500 mt-1">You can adjust the marks below</p>
+                </div>
+                
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Enter marks (supports fractions like 1.5, 2.5):
+                </label>
+                <div class="flex items-center gap-2 mb-4">
+                    <input type="number" 
+                           id="marksInput"
+                           min="0" 
+                           max="100" 
+                           step="0.5"
+                           value="1"
+                           class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg text-center"
+                           oninput="updateMarksPreview()"
+                           onkeydown="handleMarksInputKeydown(event)">
+                    <div class="flex flex-col gap-1">
+                        <button type="button" onclick="incrementMarks(0.5)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm">
+                            +0.5
+                        </button>
+                        <button type="button" onclick="decrementMarks(0.5)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm">
+                            -0.5
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Quick marks buttons -->
+                <div class="grid grid-cols-3 gap-2 mb-6">
+                    <button type="button" onclick="setQuickMark(0)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded text-sm">
+                        0
+                    </button>
+                    <button type="button" onclick="setQuickMark(0.5)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded text-sm">
+                        0.5
+                    </button>
+                    <button type="button" onclick="setQuickMark(1)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded text-sm">
+                        1
+                    </button>
+                    <button type="button" onclick="setQuickMark(1.5)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded text-sm">
+                        1.5
+                    </button>
+                    <button type="button" onclick="setQuickMark(2)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded text-sm">
+                        2
+                    </button>
+                    <button type="button" onclick="setQuickMark(2.5)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded text-sm">
+                        2.5
+                    </button>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-6">
+                    <p class="text-sm text-gray-700">
+                        <span class="font-medium">Preview:</span> Adding <span class="font-bold text-blue-600" id="marksPreview">1</span> mark(s) to total
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="closeMarksEntryPopup()" class="flex-1 bg-gray-100 text-gray-700 px-4 py-3 rounded-lg font-medium hover:bg-gray-200">
+                    Cancel
+                </button>
+                <button onclick="submitCanvasMarks()" class="flex-1 bg-blue-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-600">
+                    Add Marks
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include PDF.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+
+<script>
+// ================================
+// GLOBAL VARIABLES
+// ================================
+let markingMode = false;
+let drawingMode = true;
+let canvas, ctx;
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+let markings = [];
+let currentTool = 'pen';
+let penColor = '#ff4444';
+let penSize = 3;
+let highlighterColor = '#ffff00';
+let hasAnswerFile = {{ has_answer_file|yesno:"true,false" }};
+let pdfPages = [];
+let pdfScale = 1.5;
+let currentScrollTop = 0;
+let pdfTotalHeight = 0;
+let pdfContainerWidth = 0;
+let marksFromPDF = 0; // Track marks added from PDF canvas
+
+// Variables for canvas marks entry
+let pendingCanvasMark = null;
+let pendingMarkCoords = { x: 0, y: 0 };
+
+// Digit recognition rules - EXACTLY as you provided
+const digitRules = {
+    0: "Circular/oval shape",
+    1: "Simple vertical line",
+    2: "Curved top, straight bottom",
+    3: "Double curve",
+    4: "Right angles (crossed lines)",
+    5: "Complex with hook",
+    6: "Loop at bottom",
+    7: "Diagonal line",
+    8: "Two loops (circular)",
+    9: "Loop at top"
+};
+
+// ================================
+// INITIALIZATION
+// ================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM loaded, initializing...");
+    initToolControls();
+    
+    if (hasAnswerFile) {
+        console.log("Has answer file, initializing PDF viewer...");
+        initializePDFViewer();
+    } else {
+        console.log("No answer file available");
+        document.getElementById('pdfContainer').classList.add('hidden');
+    }
+    
+    loadSavedMarkings();
+    initializeMarksCalculation();
+    loadEvaluationData();
+    
+    // Initialize marks input popup listener
+    const marksInput = document.getElementById('additional_marks');
+    if (marksInput) {
+        marksInput.addEventListener('input', showDigitRulesPopup);
+    }
+    
+    // Add event listener for Enter key on marks input
+    const marksEntryInput = document.getElementById('marksInput');
+    if (marksEntryInput) {
+        marksEntryInput.addEventListener('keydown', handleMarksInputKeydown);
+    }
+});
+
+// ================================
+// POPUP FUNCTIONS
+// ================================
+
+// 1. Digit Rules Popup (for additional marks input)
+function showDigitRulesPopup(event) {
+    const input = event.target;
+    const marks = input.value.trim();
+    
+    if (marks === "" || marks === "0") {
+        closeDigitRulesPopup();
+        return;
+    }
+    
+    // Show entered marks
+    document.getElementById('popupMarksValue').textContent = marks;
+    
+    // Clear previous rules
+    const rulesList = document.getElementById('digitRulesList');
+    rulesList.innerHTML = '';
+    
+    // Show rules for each digit
+    for (let digit of marks) {
+        if (digitRules[digit]) {
+            const li = document.createElement('li');
+            li.className = 'flex items-start';
+            li.innerHTML = `
+                <span class="bg-gray-100 text-gray-800 font-bold w-6 h-6 flex items-center justify-center rounded mr-2 text-xs">${digit}</span>
+                <span>${digitRules[digit]}</span>
+            `;
+            rulesList.appendChild(li);
+        }
+    }
+    
+    // Show popup
+    document.getElementById('digitRulesPopup').classList.remove('hidden');
+    
+    // Auto-close after 5 seconds
+    setTimeout(() => {
+        if (!document.getElementById('digitRulesPopup').classList.contains('hidden')) {
+            closeDigitRulesPopup();
+        }
+    }, 5000);
+}
+
+function closeDigitRulesPopup() {
+    document.getElementById('digitRulesPopup').classList.add('hidden');
+}
+
+// 2. Marks Entry Popup (for canvas drawing)
+function showMarksEntryPopup(detectedNumber, centerX, centerY) {
+    pendingCanvasMark = detectedNumber;
+    pendingMarkCoords = { x: centerX, y: centerY };
+    
+    // Update popup with detected number
+    document.getElementById('detectedNumber').textContent = detectedNumber;
+    document.getElementById('detectedNumberText').textContent = detectedNumber;
+    document.getElementById('marksInput').value = detectedNumber;
+    
+    // Update preview
+    updateMarksPreview();
+    
+    // Show popup
+    document.getElementById('marksEntryPopup').classList.remove('hidden');
+    
+    // Focus on input and select text
+    setTimeout(() => {
+        const marksInput = document.getElementById('marksInput');
+        marksInput.focus();
+        marksInput.select();
+    }, 100);
+}
+
+function closeMarksEntryPopup() {
+    document.getElementById('marksEntryPopup').classList.add('hidden');
+    pendingCanvasMark = null;
+    pendingMarkCoords = { x: 0, y: 0 };
+}
+
+function updateMarksPreview() {
+    const marksInput = document.getElementById('marksInput');
+    const marks = parseFloat(marksInput.value) || 0;
+    document.getElementById('marksPreview').textContent = marks;
+}
+
+function incrementMarks(value) {
+    const marksInput = document.getElementById('marksInput');
+    const current = parseFloat(marksInput.value) || 0;
+    marksInput.value = (current + value).toFixed(1);
+    updateMarksPreview();
+}
+
+function decrementMarks(value) {
+    const marksInput = document.getElementById('marksInput');
+    const current = parseFloat(marksInput.value) || 0;
+    const newValue = Math.max(0, current - value);
+    marksInput.value = newValue.toFixed(1);
+    updateMarksPreview();
+}
+
+function setQuickMark(value) {
+    document.getElementById('marksInput').value = value;
+    updateMarksPreview();
+}
+
+// FIXED: Handle Enter key in marks input
+function handleMarksInputKeydown(event) {
+    // Check if Enter key is pressed (keyCode 13 or key 'Enter')
+    if (event.key === 'Enter' || event.keyCode === 13) {
+        event.preventDefault(); // Prevent form submission
+        submitCanvasMarks();
+        return false;
+    }
+    
+    // Check if Escape key is pressed (keyCode 27 or key 'Escape')
+    if (event.key === 'Escape' || event.keyCode === 27) {
+        event.preventDefault();
+        closeMarksEntryPopup();
+        return false;
+    }
+    
+    return true;
+}
+
+function submitCanvasMarks() {
+    if (!pendingCanvasMark || !pendingMarkCoords) {
+        closeMarksEntryPopup();
+        return;
+    }
+    
+    const marksInput = document.getElementById('marksInput');
+    const marks = marksInput.value.trim();
+    
+    // Validate input
+    if (!marks) {
+        showToast('Please enter marks', 'error');
+        marksInput.focus();
+        return;
+    }
+    
+    if (isNaN(marks)) {
+        showToast('Please enter a valid number', 'error');
+        marksInput.focus();
+        marksInput.select();
+        return;
+    }
+    
+    const marksValue = parseFloat(marks);
+    if (marksValue < 0 || marksValue > 100) {
+        showToast('Please enter marks between 0 and 100', 'error');
+        marksInput.focus();
+        marksInput.select();
+        return;
+    }
+    
+    // Add marks to PDF total
+    addMarksToPDFTotal(marks, pendingMarkCoords.x, pendingMarkCoords.y, true);
+    
+    // Close popup
+    closeMarksEntryPopup();
+    
+    showToast(`✓ Added ${marks} marks to total`, 'success');
+}
+
+// ================================
+// PDF VIEWER FUNCTIONS
+// ================================
+async function initializePDFViewer() {
+    if (!hasAnswerFile) return;
+    
+    showLoading();
+    
+    try {
+        const pdfUrl = "{{ submission.answer_file.url }}";
+        console.log("Loading PDF from:", pdfUrl);
+        
+        // Configure PDF.js worker
+        if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+        
+        const loadingTask = pdfjsLib.getDocument({
+            url: pdfUrl,
+            cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+            cMapPacked: true,
+        });
+        
+        const pdf = await loadingTask.promise;
+        
+        console.log("PDF loaded, total pages:", pdf.numPages);
+        
+        const container = document.getElementById('pdfCanvasContainer');
+        container.innerHTML = '';
+        
+        pdfTotalHeight = 0;
+        pdfPages = [];
+        
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const pageHeight = await renderPage(pdf, pageNum, container, pdfTotalHeight);
+            pdfTotalHeight += pageHeight;
+        }
+        
+        hideLoading();
+        onPDFLoad();
+        
+    } catch (error) {
+        console.error("Error loading PDF:", error);
+        showPDFError();
+    }
+}
+
+async function renderPage(pdf, pageNum, container, offsetTop) {
+    try {
+        const page = await pdf.getPage(pageNum);
+        
+        const canvas = document.createElement('canvas');
+        canvas.id = `pdf-page-${pageNum}`;
+        canvas.className = 'pdf-page mb-4 border border-gray-300';
+        canvas.dataset.pageNum = pageNum;
+        
+        const viewport = page.getViewport({ scale: pdfScale });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        // Use exact pixel dimensions
+        canvas.style.width = viewport.width + 'px';
+        canvas.style.height = viewport.height + 'px';
+        canvas.style.display = 'block';
+        canvas.style.position = 'relative';
+        canvas.style.top = offsetTop + 'px';
+        canvas.style.left = '0';
+        
+        container.appendChild(canvas);
+        
+        // Store page info
+        pdfPages.push({
+            canvas: canvas,
+            viewport: viewport,
+            pageNum: pageNum,
+            offsetTop: offsetTop,
+            height: viewport.height,
+            width: viewport.width
+        });
+        
+        // Render page
+        const context = canvas.getContext('2d');
+        const renderContext = {
+            canvasContext: context,
+            viewport: viewport
+        };
+        
+        await page.render(renderContext).promise;
+        
+        console.log(`Page ${pageNum} rendered at offset ${offsetTop}px, height: ${viewport.height}px, width: ${viewport.width}px`);
+        return viewport.height;
+        
+    } catch (error) {
+        console.error(`Error rendering page ${pageNum}:`, error);
+        return 0;
+    }
+}
+
+// ================================
+// MARKING CANVAS FUNCTIONS
+// ================================
+function initMarkingCanvas() {
+    canvas = document.getElementById('markingCanvas');
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
+    
+    ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('Canvas context not available');
+        return;
+    }
+    
+    // Set canvas size to cover entire PDF area
+    updateCanvasSize();
+    
+    // Add scroll listener
+    const pdfViewer = document.getElementById('pdfViewer');
+    pdfViewer.addEventListener('scroll', updateCanvasPosition);
+    
+    // Handle mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    redrawMarkings();
+    console.log("Marking canvas initialized");
+}
+
+function updateCanvasSize() {
+    if (!canvas) return;
+    
+    // Find maximum width among all PDF pages
+    let maxWidth = 0;
+    if (pdfPages.length > 0) {
+        pdfPages.forEach(page => {
+            if (page.width > maxWidth) maxWidth = page.width;
+        });
+    } else {
+        maxWidth = 890; // Default width
+    }
+    
+    pdfContainerWidth = maxWidth;
+    
+    // Set canvas to cover entire PDF area
+    canvas.width = maxWidth;
+    canvas.height = pdfTotalHeight;
+    
+    // Position canvas absolutely over PDF
+    canvas.style.width = maxWidth + 'px';
+    canvas.style.height = pdfTotalHeight + 'px';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '50%';
+    canvas.style.transform = 'translateX(-50%)';
+    canvas.style.zIndex = '10';
+    
+    console.log("Canvas size updated to:", canvas.width, "x", canvas.height);
+}
+
+function updateCanvasPosition() {
+    if (!canvas) return;
+    
+    const pdfViewer = document.getElementById('pdfViewer');
+    currentScrollTop = pdfViewer.scrollTop;
+    
+    // Update canvas vertical position based on scroll
+    canvas.style.top = `-${currentScrollTop}px`;
+}
+
+function getCorrectedCoordinates(e) {
+    const pdfViewer = document.getElementById('pdfViewer');
+    const container = document.getElementById('pdfCanvasContainer');
+    const containerRect = container.getBoundingClientRect();
+    const scrollTop = pdfViewer.scrollTop;
+    
+    let clientX, clientY;
+    
+    if (e.type.includes('touch')) {
+        const touch = e.touches[0];
+        clientX = touch.clientX;
+        clientY = touch.clientY;
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
+    
+    // Calculate position relative to PDF viewer
+    const x = clientX - containerRect.left;
+    const y = clientY - containerRect.top + scrollTop;
+    
+    // Scale coordinates to match canvas resolution
+    const scaleX = canvas.width / containerRect.width;
+    const scaleY = canvas.height / containerRect.height;
+    
+    const scaledX = x * scaleX;
+    const scaledY = y * scaleY;
+    
+    return {
+        x: scaledX,
+        y: scaledY,
+        rawX: x,
+        rawY: y
+    };
+}
+
+function startDrawing(e) {
+    if (!markingMode || !hasAnswerFile || !drawingMode) return;
+    
+    e.preventDefault();
+    isDrawing = true;
+    
+    const coords = getCorrectedCoordinates(e);
+    lastX = coords.x;
+    lastY = coords.y;
+    
+    console.log("Start drawing at:", lastX.toFixed(1), lastY.toFixed(1));
+    
+    markings.push({
+        tool: currentTool,
+        color: currentTool === 'highlighter' ? highlighterColor : penColor,
+        size: currentTool === 'highlighter' ? 20 : penSize,
+        points: [[lastX, lastY]],
+        type: 'path',
+        timestamp: new Date().toISOString(),
+        scrollPosition: currentScrollTop
+    });
+}
+
+function draw(e) {
+    if (!isDrawing || !markingMode || !hasAnswerFile || !drawingMode) return;
+    
+    e.preventDefault();
+    
+    const coords = getCorrectedCoordinates(e);
+    const x = coords.x;
+    const y = coords.y;
+    
+    // Only draw if we've moved a minimum distance
+    const minDistance = penSize / 2;
+    const distance = Math.sqrt(Math.pow(x - lastX, 2) + Math.pow(y - lastY, 2));
+    
+    if (distance < minDistance && markings.length > 0) {
+        lastX = x;
+        lastY = y;
+        return;
+    }
+    
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    
+    if (currentTool === 'highlighter') {
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = highlighterColor;
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    } else {
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = penColor;
+        ctx.lineWidth = penSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+    
+    ctx.stroke();
+    
+    if (markings.length > 0) {
+        markings[markings.length - 1].points.push([x, y]);
+    }
+    
+    lastX = x;
+    lastY = y;
+    
+    saveMarkingsDebounced();
+}
+
+function stopDrawing() {
+    if (!isDrawing) return;
+    
+    isDrawing = false;
+    ctx.beginPath();
+    
+    console.log("Drawing stopped");
+    
+    // Detect marks from drawing (auto-detect numbers)
+    if (currentTool === 'pen' && markings.length > 0) {
+        const lastMark = markings[markings.length - 1];
+        console.log("Last mark has points:", lastMark.points ? lastMark.points.length : 0);
+        
+        if (lastMark.points && lastMark.points.length > 5) {
+            console.log("Attempting number detection...");
+            
+            // Add a small delay to ensure all points are captured
+            setTimeout(() => {
+                detectAndAutoFillMarks(lastMark);
+            }, 50);
+        } else {
+            console.log("Not enough points for detection (need at least 6, got", lastMark.points ? lastMark.points.length : 0, ")");
+        }
+    }
+    
+    saveMarkings();
+    updateAllCalculations();
+}
+
+// ================================
+// IMPROVED NUMBER DETECTION FUNCTIONS
+// ================================
+function detectAndAutoFillMarks(mark) {
+    const points = mark.points;
+    
+    console.log("=== STARTING NUMBER DETECTION ===");
+    console.log("Total points:", points.length);
+    
+    if (points.length < 6) {
+        console.log("❌ Too few points for number detection");
+        return;
+    }
+    
+    // Get bounding box
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    points.forEach(p => {
+        minX = Math.min(minX, p[0]);
+        maxX = Math.max(maxX, p[0]);
+        minY = Math.min(minY, p[1]);
+        maxY = Math.max(maxY, p[1]);
+    });
+    
+    const width = maxX - minX;
+    const height = maxY - minY;
+    
+    console.log(`📏 Bounding box: ${width.toFixed(1)}px × ${height.toFixed(1)}px`);
+    
+    // Check if it's a reasonable size for a number
+    if (width < 200 && height < 200 && width > 15 && height > 15) {
+        console.log("✅ Reasonable size for number detection");
+        
+        const centerX = minX + width / 2;
+        const centerY = minY + height / 2;
+        
+        // Try to detect the drawn number (0-9)
+        const detectedNumber = detectDrawnNumber(points, minX, maxX, minY, maxY);
+        
+        console.log("🔢 Detected number:", detectedNumber);
+        
+        if (detectedNumber >= 0) {
+            // Show marks entry popup instead of auto-adding
+            showMarksEntryPopup(detectedNumber, centerX, centerY);
+        } else {
+            console.log("❌ Number detection failed");
+            // Still show popup with 0 as default
+            showMarksEntryPopup(0, centerX, centerY);
+        }
+    } else {
+        console.log("⚠️ Drawing doesn't look like a number (wrong size)");
+        console.log("   Expected: 15px < width,height < 200px");
+        console.log("   Actual: width=" + width.toFixed(1) + "px, height=" + height.toFixed(1) + "px");
+        
+        // Still show popup if it looks like a mark
+        if (width > 10 && height > 10) {
+            const centerX = minX + width / 2;
+            const centerY = minY + height / 2;
+            showMarksEntryPopup(0, centerX, centerY);
+        }
+    }
+    
+    console.log("=== NUMBER DETECTION COMPLETE ===");
+}
+
+function detectDrawnNumber(points, minX, maxX, minY, maxY) {
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const aspectRatio = width / height;
+    const totalPoints = points.length;
+    const area = width * height;
+    const complexity = totalPoints / (area || 1); // Points per pixel area
+    
+    console.log(`📊 Detection metrics:`);
+    console.log(`   Aspect ratio: ${aspectRatio.toFixed(2)}`);
+    console.log(`   Total points: ${totalPoints}`);
+    console.log(`   Area: ${area.toFixed(1)}px²`);
+    console.log(`   Complexity: ${complexity.toFixed(4)} points/px²`);
+    
+    // Calculate direction changes (how many times the drawing changes direction)
+    let directionChanges = 0;
+    let lastDirection = null;
+    
+    for (let i = 2; i < points.length; i++) {
+        const dx = points[i][0] - points[i-1][0];
+        const dy = points[i][1] - points[i-1][1];
+        
+        // Determine current direction
+        let currentDirection = '';
+        if (Math.abs(dx) > Math.abs(dy)) {
+            currentDirection = dx > 0 ? 'right' : 'left';
+        } else {
+            currentDirection = dy > 0 ? 'down' : 'up';
+        }
+        
+        // Count direction changes
+        if (lastDirection && currentDirection !== lastDirection) {
+            directionChanges++;
+        }
+        
+        lastDirection = currentDirection;
+    }
+    
+    console.log(`   Direction changes: ${directionChanges}`);
+    
+    // ============================================
+    // IMPROVED NUMBER DETECTION LOGIC
+    // ============================================
+    
+    // 1. Check for Number 1: Simple vertical line
+    if (aspectRatio < 0.5 && directionChanges < 3 && complexity < 0.01) {
+        console.log("   Pattern: Simple vertical line → 1");
+        return 1;
+    }
+    
+    // 2. Check for Number 7: Diagonal line
+    if (aspectRatio > 1.2 && directionChanges < 4) {
+        console.log("   Pattern: Diagonal line → 7");
+        return 7;
+    }
+    
+    // 3. Check for Number 0: Circular/oval shape
+    const isCircular = Math.abs(width - height) < Math.max(width, height) * 0.3;
+    if (isCircular && directionChanges > 4 && complexity > 0.01) {
+        console.log("   Pattern: Circular shape → 0");
+        return 0;
+    }
+    
+    // 4. Check for Number 4: Crossed lines (L-shape or + shape)
+    if (directionChanges >= 2 && directionChanges <= 5) {
+        // Check for right angles (characteristic of 4)
+        let rightAngles = 0;
+        for (let i = 2; i < points.length - 1; i++) {
+            const dx1 = points[i][0] - points[i-1][0];
+            const dy1 = points[i][1] - points[i-1][1];
+            const dx2 = points[i+1][0] - points[i][0];
+            const dy2 = points[i+1][1] - points[i][1];
+            
+            // Check if the angle is close to 90 degrees
+            const dotProduct = dx1 * dx2 + dy1 * dy2;
+            if (Math.abs(dotProduct) < 5) {
+                rightAngles++;
+            }
+        }
+        
+        if (rightAngles >= 1) {
+            console.log("   Pattern: Right angles → 4");
+            return 4;
+        }
+    }
+    
+    // 5. Check for Number 8: Two loops (complex circular)
+    if (directionChanges > 8 && complexity > 0.02 && isCircular) {
+        console.log("   Pattern: Two loops → 8");
+        return 8;
+    }
+    
+    // 6. Check for Number 6: Loop at bottom
+    if (directionChanges > 5 && directionChanges < 9) {
+        // Check if drawing starts high and ends low (characteristic of 6)
+        const startY = points[0][1];
+        const endY = points[points.length-1][1];
+        if (endY > startY + height * 0.3) {
+            console.log("   Pattern: Loop at bottom → 6");
+            return 6;
+        }
+    }
+    
+    // 7. Check for Number 9: Loop at top
+    if (directionChanges > 5 && directionChanges < 9) {
+        // Check if drawing starts low and ends high (characteristic of 9)
+        const startY = points[0][1];
+        const endY = points[points.length-1][1];
+        if (startY > endY + height * 0.3) {
+            console.log("   Pattern: Loop at top → 9");
+            return 9;
+        }
+    }
+    
+    // 8. Check for Number 2: Curved top, straight bottom
+    if (directionChanges >= 4 && directionChanges <= 7 && aspectRatio > 0.8) {
+        console.log("   Pattern: Curved shape → 2");
+        return 2;
+    }
+    
+    // 9. Check for Number 3: Double curve
+    if (directionChanges >= 6 && directionChanges <= 9) {
+        console.log("   Pattern: Double curve → 3");
+        return 3;
+    }
+    
+    // 10. Check for Number 5: Complex with hook
+    if (directionChanges >= 7 && directionChanges <= 10) {
+        console.log("   Pattern: Complex with hook → 5");
+        return 5;
+    }
+    
+    return -1; // Not detected
+}
+
+function handleTouchStart(e) {
+    if (!markingMode || !hasAnswerFile || !drawingMode) return;
+    
+    if (e.touches.length === 1) {
+        e.preventDefault();
+        startDrawing(e);
+    }
+}
+
+function handleTouchMove(e) {
+    if (!markingMode || !hasAnswerFile || !isDrawing || !drawingMode) return;
+    
+    e.preventDefault();
+    draw(e);
+}
+
+function handleTouchEnd(e) {
+    if (isDrawing) {
+        e.preventDefault();
+        stopDrawing();
+    }
+}
+
+function redrawMarkings() {
+    if (!ctx || markings.length === 0) return;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Redraw all markings
+    markings.forEach(marking => {
+        if (marking.type === 'path' && marking.points && marking.points.length >= 2) {
+            ctx.beginPath();
+            ctx.moveTo(marking.points[0][0], marking.points[0][1]);
+            
+            for (let i = 1; i < marking.points.length; i++) {
+                ctx.lineTo(marking.points[i][0], marking.points[i][1]);
+            }
+            
+            if (marking.tool === 'highlighter') {
+                ctx.globalAlpha = 0.3;
+                ctx.strokeStyle = marking.color;
+                ctx.lineWidth = marking.size;
+            } else {
+                ctx.globalAlpha = 1;
+                ctx.strokeStyle = marking.color;
+                ctx.lineWidth = marking.size;
+            }
+            
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        } else if (marking.type === 'comment') {
+            drawCommentBox(marking.x, marking.y, marking.text);
+        } else if (marking.type === 'marks') {
+            drawMarksBox(marking.x, marking.y, marking.marks);
+        }
+    });
+    
+    ctx.globalAlpha = 1;
+}
+
+// ================================
+// MARKING TOOLS FUNCTIONS
+// ================================
+function initToolControls() {
+    const penSizeSlider = document.getElementById('penSize');
+    const penSizeLabel = document.getElementById('penSizeLabel');
+    const penColorPicker = document.getElementById('penColor');
+    const highlighterColorPicker = document.getElementById('highlighterColor');
+    
+    if (penSizeSlider && penSizeLabel) {
+        penSizeSlider.addEventListener('input', function() {
+            penSize = parseInt(this.value);
+            penSizeLabel.textContent = penSize + 'px';
+            console.log("Pen size changed to:", penSize);
+        });
+    }
+    
+    if (penColorPicker) {
+        penColorPicker.addEventListener('input', function() {
+            penColor = this.value;
+            console.log("Pen color changed to:", penColor);
+        });
+    }
+    
+    if (highlighterColorPicker) {
+        highlighterColorPicker.addEventListener('input', function() {
+            highlighterColor = this.value;
+            console.log("Highlighter color changed to:", highlighterColor);
+        });
+    }
+}
+
+function toggleMarkingMode() {
+    if (!hasAnswerFile) {
+        showToast('No answer file available for marking', 'warning');
+        return;
+    }
+    
+    markingMode = !markingMode;
+    const btn = document.getElementById('markingModeBtn');
+    const toolbar = document.getElementById('markingToolbar');
+    
+    if (markingMode) {
+        btn.innerHTML = '✏️ Disable Marking';
+        btn.className = 'bg-green-100 text-green-800 px-4 py-2 rounded-lg hover:bg-green-200';
+        toolbar.classList.remove('hidden');
+        
+        drawingMode = true;
+        const drawingBtn = document.getElementById('drawingModeBtn');
+        drawingBtn.innerHTML = '🖱️ Scroll Mode';
+        drawingBtn.className = 'bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200';
+        
+        if (canvas) {
+            canvas.style.pointerEvents = 'auto';
+            canvas.style.cursor = 'crosshair';
+        }
+        
+        currentTool = 'pen';
+        console.log("Marking mode ENABLED");
+        showToast('🎨 Marking mode enabled! You can now draw on the PDF.', 'success');
+    } else {
+        btn.innerHTML = '✏️ Enable Marking';
+        btn.className = 'bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg hover:bg-yellow-200';
+        toolbar.classList.add('hidden');
+        if (canvas) {
+            canvas.style.pointerEvents = 'none';
+            canvas.style.cursor = 'default';
+        }
+        console.log("Marking mode DISABLED");
+        showToast('Marking mode disabled', 'info');
+    }
+}
+
+function toggleDrawingMode() {
+    if (!markingMode) {
+        showToast('Please enable marking mode first', 'warning');
+        return;
+    }
+    
+    drawingMode = !drawingMode;
+    const btn = document.getElementById('drawingModeBtn');
+    
+    if (drawingMode) {
+        btn.innerHTML = '🖱️ Scroll Mode';
+        btn.className = 'bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200';
+        if (canvas) {
+            canvas.style.pointerEvents = 'auto';
+            canvas.style.cursor = 'crosshair';
+        }
+        console.log("Drawing mode ENABLED");
+        showToast('✏️ Drawing mode enabled. Drag to draw.', 'info');
+    } else {
+        btn.innerHTML = '🎯 Drawing Mode';
+        btn.className = 'bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200';
+        if (canvas) {
+            canvas.style.pointerEvents = 'none';
+            canvas.style.cursor = 'default';
+        }
+        console.log("Scroll mode ENABLED");
+        showToast('📜 Scroll mode enabled. Use mouse wheel to scroll.', 'info');
+    }
+}
+
+function clearAllMarks() {
+    if (confirm('Are you sure you want to clear all marks and comments?')) {
+        markings = [];
+        marksFromPDF = 0;
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        saveMarkings();
+        updateAllCalculations();
+        console.log("All marks cleared");
+        showToast('All marks cleared', 'info');
+    }
+}
+
+function clearLastMark() {
+    if (markings.length > 0) {
+        const lastMark = markings[markings.length - 1];
+        
+        // If last mark was a marks box, subtract from total
+        if (lastMark.type === 'marks') {
+            const markValue = parseFloat(lastMark.marks) || 0;
+            marksFromPDF = Math.max(0, marksFromPDF - markValue);
+        }
+        
+        markings.pop();
+        redrawMarkings();
+        saveMarkings();
+        updateAllCalculations();
+        console.log("Last mark removed");
+        showToast('Last mark removed', 'info');
+    } else {
+        console.log("No marks to remove");
+        showToast('No marks to remove', 'warning');
+    }
+}
+
+function addCommentBox() {
+    if (!markingMode) {
+        showToast('Please enable marking mode first', 'warning');
+        return;
+    }
+    
+    const commentText = prompt('Enter your comment:');
+    if (!commentText) return;
+    
+    const coords = getCurrentViewportCenter();
+    
+    markings.push({
+        type: 'comment',
+        text: commentText,
+        x: coords.x,
+        y: coords.y,
+        color: '#ffcc00',
+        tool: 'comment',
+        timestamp: new Date().toISOString(),
+        scrollPosition: currentScrollTop
+    });
+    
+    drawCommentBox(coords.x, coords.y, commentText);
+    saveMarkings();
+    console.log("Comment added:", commentText);
+    showToast('Comment added', 'success');
+}
+
+function getCurrentViewportCenter() {
+    const pdfViewer = document.getElementById('pdfViewer');
+    const container = document.getElementById('pdfCanvasContainer');
+    const containerRect = container.getBoundingClientRect();
+    const scrollTop = pdfViewer.scrollTop;
+    
+    const centerX = containerRect.width / 2;
+    const centerY = containerRect.height / 2 + scrollTop;
+    
+    // Scale coordinates
+    const scaleX = canvas.width / containerRect.width;
+    const scaleY = canvas.height / containerRect.height;
+    
+    return {
+        x: centerX * scaleX,
+        y: centerY * scaleY
+    };
+}
+
+function drawCommentBox(x, y, text) {
+    if (!ctx) return;
+    
+    ctx.font = '14px Arial';
+    const textWidth = ctx.measureText(text).width;
+    const boxWidth = textWidth + 20;
+    const boxHeight = 30;
+    
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillRect(x, y, boxWidth, boxHeight);
+    
+    ctx.fillStyle = '#000000';
+    ctx.fillText(text, x + 10, y + 20);
+}
+
+function addMarksToTotal() {
+    if (!markingMode) {
+        showToast('Please enable marking mode first', 'warning');
+        return;
+    }
+    
+    // Show marks entry popup
+    const coords = getCurrentViewportCenter();
+    showMarksEntryPopup(0, coords.x, coords.y);
+}
+
+function addMarksToPDFTotal(marks, x, y, autoDetected = false) {
+    const marksValue = parseFloat(marks);
+    
+    console.log(`Adding ${marksValue} marks to total (autoDetected: ${autoDetected})`);
+    
+    // Add to PDF marks total
+    marksFromPDF += marksValue;
+    
+    // Add to markings array
+    markings.push({
+        type: 'marks',
+        marks: marks.toString(),
+        x: x,
+        y: y,
+        color: '#00cc00',
+        tool: 'marks',
+        timestamp: new Date().toISOString(),
+        scrollPosition: currentScrollTop,
+        autoFilled: autoDetected
+    });
+    
+    // Draw the marks box
+    drawMarksBox(x, y, marks.toString());
+    
+    // Show visual feedback
+    showMarksPopup(x, y, marks.toString(), autoDetected);
+    
+    saveMarkings();
+    
+    // Update calculations
+    updateAllCalculations();
+    
+    // Show notification
+    const action = autoDetected ? 'Added' : 'Added';
+    console.log(`${action} ${marks} marks to total`);
+}
+
+function showMarksPopup(x, y, marks, autoDetected = false) {
+    // Convert canvas coordinates to screen coordinates
+    const pdfContainer = document.getElementById('pdfCanvasContainer');
+    if (!pdfContainer) return;
+    
+    const rect = pdfContainer.getBoundingClientRect();
+    
+    const scaleX = rect.width / canvas.width;
+    const scaleY = rect.height / canvas.height;
+    
+    const screenX = x * scaleX;
+    const screenY = y * scaleY;
+    
+    // Create popup element
+    const popup = document.createElement('div');
+    popup.className = 'marks-popup';
+    popup.textContent = `${marks} mark${parseFloat(marks) !== 1 ? 's' : ''}`;
+    popup.style.left = `${screenX - 30}px`;
+    popup.style.top = `${screenY - 50}px`;
+    popup.style.position = 'absolute';
+    popup.style.zIndex = '1000';
+    popup.style.background = autoDetected ? '#4CAF50' : '#2196F3';
+    popup.style.color = 'white';
+    popup.style.padding = '6px 12px';
+    popup.style.borderRadius = '4px';
+    popup.style.fontWeight = 'bold';
+    popup.style.fontSize = '14px';
+    popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+    popup.style.pointerEvents = 'none';
+    
+    // Add to PDF container
+    pdfContainer.appendChild(popup);
+    
+    // Remove after animation
+    setTimeout(() => {
+        if (popup.parentNode) {
+            popup.parentNode.removeChild(popup);
+        }
+    }, 1500);
+}
+
+function drawMarksBox(x, y, marks) {
+    if (!ctx) return;
+    
+    ctx.beginPath();
+    ctx.arc(x, y, 15, 0, Math.PI * 2);
+    ctx.fillStyle = '#00cc00';
+    ctx.fill();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(marks, x, y);
+}
+
+function saveMarkingsDebounced() {
+    clearTimeout(window.saveMarkingsTimeout);
+    window.saveMarkingsTimeout = setTimeout(saveMarkings, 1000);
+}
+
+function saveMarkings() {
+    try {
+        const markingData = JSON.stringify(markings);
+        document.getElementById('markingData').value = markingData;
+        console.log("Markings saved, total marks:", marksFromPDF);
+    } catch (error) {
+        console.error('Error saving markings:', error);
+    }
+}
+
+function loadSavedMarkings() {
+    try {
+        const markingData = document.getElementById('markingData').value;
+        if (markingData) {
+            markings = JSON.parse(markingData);
+            console.log("Loaded", markings.length, "saved markings");
+            
+            // Recalculate marks from PDF
+            marksFromPDF = 0;
+            markings.forEach(marking => {
+                if (marking.type === 'marks') {
+                    marksFromPDF += parseFloat(marking.marks) || 0;
+                }
+            });
+            
+            console.log("Recalculated marks from PDF:", marksFromPDF);
+            
+            // Redraw markings after a short delay
+            setTimeout(() => {
+                redrawMarkings();
+                updateAllCalculations();
+            }, 500);
+        }
+    } catch (error) {
+        console.error('Error loading markings:', error);
+    }
+}
+
+// ================================
+// MARKS CALCULATION FUNCTIONS
+// ================================
+function initializeMarksCalculation() {
+    console.log("Initializing marks calculation");
+    updateAllCalculations();
+}
+
+function updateAllCalculations() {
+    updateFinalSummary();
+    updateSidebarTotals();
+}
+
+// Function to update sidebar totals
+function updateSidebarTotals() {
+    // Calculate total exam marks from all questions
+    let totalExamMarks = 0;
+    {% for question in questions %}
+    totalExamMarks += {{ question.marks|default:0 }};
+    {% endfor %}
+    
+    // Update total exam marks display
+    const totalExamMarksElement = document.getElementById('totalExamMarks');
+    if (totalExamMarksElement) {
+        totalExamMarksElement.textContent = totalExamMarks;
+    }
+    
+    // Update marks from PDF in sidebar
+    const marksFromPDFSidebarElement = document.getElementById('marksFromPDFSidebar');
+    if (marksFromPDFSidebarElement) {
+        marksFromPDFSidebarElement.textContent = marksFromPDF.toFixed(1);
+    }
+    
+    // Update final marks in sidebar
+    const additionalMarks = parseFloat(document.getElementById('additional_marks').value) || 0;
+    const finalMarks = marksFromPDF + additionalMarks;
+    const finalMarksSidebarElement = document.getElementById('finalMarksSidebar');
+    if (finalMarksSidebarElement) {
+        finalMarksSidebarElement.textContent = finalMarks.toFixed(1);
+    }
+}
+
+function updateFinalSummary() {
+    const additionalMarks = parseFloat(document.getElementById('additional_marks').value) || 0;
+    const totalMarksInput = document.getElementById('total_marks');
+    const totalMarks = parseFloat(totalMarksInput.value) || 100;
+    
+    const totalObtained = marksFromPDF + additionalMarks;
+    
+    // Update marks from PDF display
+    const marksFromPDFElement = document.getElementById('marksFromPDF');
+    if (marksFromPDFElement) {
+        marksFromPDFElement.textContent = marksFromPDF.toFixed(1);
+    }
+    
+    // Update total obtained
+    const finalMarksObtainedElement = document.getElementById('finalMarksObtained');
+    if (finalMarksObtainedElement) {
+        finalMarksObtainedElement.textContent = totalObtained.toFixed(1);
+    }
+    
+    // Update percentage
+    const percentage = totalMarks > 0 ? (totalObtained / totalMarks) * 100 : 0;
+    const summaryPercentageElement = document.getElementById('summaryPercentage');
+    if (summaryPercentageElement) {
+        summaryPercentageElement.textContent = `${percentage.toFixed(1)}%`;
+    }
+    
+    // Update progress bar
+    const progressBarElement = document.getElementById('progressBar');
+    if (progressBarElement) {
+        progressBarElement.style.width = `${Math.min(100, percentage)}%`;
+    }
+    
+    // Update status
+    const statusSummaryElement = document.getElementById('statusSummary');
+    if (statusSummaryElement) {
+        let statusText = 'Not Evaluated';
+        let statusClass = 'font-bold text-yellow-600';
+        
+        if (percentage >= 75) {
+            statusText = 'Excellent';
+            statusClass = 'font-bold text-green-600';
+        } else if (percentage >= 50) {
+            statusText = 'Good';
+            statusClass = 'font-bold text-blue-600';
+        } else if (percentage >= 33) {
+            statusText = 'Pass';
+            statusClass = 'font-bold text-yellow-600';
+        } else if (percentage > 0) {
+            statusText = 'Fail';
+            statusClass = 'font-bold text-red-600';
+        }
+        
+        statusSummaryElement.textContent = statusText;
+        statusSummaryElement.className = statusClass;
+    }
+    
+    calculateGrade();
+}
+
+function calculateGrade() {
+    const percentage = parseFloat(document.getElementById('summaryPercentage').textContent) || 0;
+    const gradeSelect = document.getElementById('grade_select');
+    const calculatedGrade = document.getElementById('calculatedGrade');
+    
+    if (gradeSelect.value) {
+        calculatedGrade.textContent = gradeSelect.value;
+    } else {
+        let grade = '';
+        if (percentage >= 90) grade = 'A+';
+        else if (percentage >= 80) grade = 'A';
+        else if (percentage >= 70) grade = 'B+';
+        else if (percentage >= 60) grade = 'B';
+        else if (percentage >= 50) grade = 'C';
+        else if (percentage >= 40) grade = 'D';
+        else grade = 'F';
+        
+        calculatedGrade.textContent = grade;
+    }
+}
+
+// ================================
+// FORM SUBMISSION FUNCTIONS
+// ================================
+function prepareFormSubmission() {
+    const totalMarksInput = document.getElementById('total_marks');
+    const totalMarks = parseFloat(totalMarksInput.value) || 0;
+    
+    if (totalMarks <= 0) {
+        showToast('Please enter valid total marks', 'error');
+        return false;
+    }
+    
+    saveMarkings();
+    updateAllCalculations();
+    
+    const totalObtained = marksFromPDF + (parseFloat(document.getElementById('additional_marks').value) || 0);
+    
+    console.log(`Submitting evaluation: ${totalObtained.toFixed(1)} out of ${totalMarks}`);
+    showToast(`Submitting evaluation with total marks: ${totalObtained.toFixed(1)} out of ${totalMarks}`, 'info');
+    return true;
+}
+
+function saveDraft() {
+    saveMarkings();
+    const form = document.getElementById('evaluationForm');
+    const draftInput = document.createElement('input');
+    draftInput.type = 'hidden';
+    draftInput.name = 'save_as_draft';
+    draftInput.value = 'true';
+    form.appendChild(draftInput);
+    form.submit();
+}
+
+// ================================
+// PDF VIEWER UTILITY FUNCTIONS
+// ================================
+function onPDFLoad() {
+    console.log('PDF loaded successfully');
+    hideLoading();
+    hideError();
+    
+    // Initialize marking canvas AFTER PDF loads
+    setTimeout(() => {
+        initMarkingCanvas();
+        redrawMarkings();
+        updateAllCalculations();
+    }, 100);
+    
+    showToast('✅ PDF loaded successfully', 'success');
+}
+
+function showPDFError() {
+    hideLoading();
+    const errorEl = document.getElementById('pdfError');
+    const container = document.getElementById('pdfContainer');
+    if (errorEl && container) {
+        errorEl.classList.remove('hidden');
+        container.classList.add('hidden');
+    }
+}
+
+function showLoading() {
+    const loading = document.getElementById('pdfLoading');
+    if (loading) loading.classList.remove('hidden');
+}
+
+function hideLoading() {
+    const loading = document.getElementById('pdfLoading');
+    if (loading) loading.classList.add('hidden');
+}
+
+function hideError() {
+    const error = document.getElementById('pdfError');
+    if (error) error.classList.add('hidden');
+}
+
+function loadEvaluationData() {
+    try {
+        updateAllCalculations();
+    } catch (error) {
+        console.error('Error loading evaluation data:', error);
+    }
+}
+
+// ================================
+// UI UTILITY FUNCTIONS
+// ================================
+function printEvaluation() {
+    console.log("Printing evaluation");
+    window.print();
+}
+
+function showToast(message, type = 'info') {
+    document.querySelectorAll('.toast-message').forEach(toast => toast.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = `toast-message fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg font-medium`;
+    
+    if (type === 'success') {
+        toast.className += ' bg-green-500 text-white';
+    } else if (type === 'error') {
+        toast.className += ' bg-red-500 text-white';
+    } else if (type === 'warning') {
+        toast.className += ' bg-yellow-500 text-white';
+    } else {
+        toast.className += ' bg-blue-500 text-white';
+    }
+    
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+</script>
+
+<style>
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+#markingCanvas {
+    cursor: crosshair;
+    z-index: 10;
+    pointer-events: none;
+}
+
+#markingCanvas.drawing-mode {
+    pointer-events: auto;
+    cursor: crosshair;
+}
+
+#markingCanvas.scroll-mode {
+    pointer-events: none;
+    cursor = 'default';
+}
+
+/* Popup Styles */
+#digitRulesPopup, #marksEntryPopup {
+    z-index: 9999;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Print styles */
+@media print {
+    .no-print, #markingToolbar, button, #digitRulesPopup, #marksEntryPopup {
+        display: none !important;
+    }
+    
+    body {
+        font-size: 12px;
+    }
+    
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+}
+
+/* Toast message styles */
+.toast-message {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Ensure PDF container is positioned correctly */
+#pdfCanvasContainer {
+    position: relative;
+    min-height: 100%;
+}
+
+#pdfViewer {
+    position: relative;
+    overflow: auto;
+}
+
+/* Questions sidebar styles */
+#questionsContainer {
+    max-height: calc(100vh - 200px);
+}
+
+/* Marks box animation */
+@keyframes marksPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.marks-box {
+    animation: marksPulse 0.5s ease;
+}
+</style>
+{% endblock %}

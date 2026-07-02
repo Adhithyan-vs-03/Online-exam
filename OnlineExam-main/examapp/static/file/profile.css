@@ -1,0 +1,93 @@
+h3{
+    font-family: Calibri; 
+    color: #fff;
+    font-size: 25pt;         
+    font-style: normal; 
+    font-weight: bold; 
+    color:rgb(232, 230, 244);
+    text-align: center; 
+    text-decoration: underline
+  }
+  
+  table{
+    font-family: Calibri; 
+    color:white; 
+    font-size: 11pt; 
+    font-style: normal;
+    font-weight: bold;
+    text-align:left; 
+    background-color: SlateBlue; 
+    border-collapse: collapse; 
+    border: 2px solid navy
+  }
+  table.inner{
+    border: 0px
+  }
+  .error-message {
+    color: red;
+    display: none;
+}
+/* General body styling */
+body {
+  background-color: linear-gradient(#31077a, #a29bfe);
+  color: #333;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container */
+.container {
+  width: 80%;
+  margin: 20px auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Table styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+td {
+  padding: 10px;
+}
+
+input, textarea, select {
+  width: 90%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Buttons */
+button {
+  background: #6c5ce7;
+  color: #fff;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #4e3cb4;
+}
+
+/* Error Messages */
+.error-message {
+  color: red;
+  font-size: 12px;
+  display: none; /* Hide by default */
+}
+
+/* Headings */
+h3 {
+  text-align: center;
+  color: #2d3436;
+}

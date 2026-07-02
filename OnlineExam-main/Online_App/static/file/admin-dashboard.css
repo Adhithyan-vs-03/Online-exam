@@ -1,0 +1,325 @@
+/* Reset and base settings */
+body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-image: url("/static/images/pexels-y.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    font-family: Arial, sans-serif;
+}
+
+/* Header Top Bar */
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #f0e0e0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    height: 70px;
+    box-sizing: border-box;
+}
+
+.logo {
+    border-radius: 15px;
+    width: 150px;
+    height: auto;
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.welcome {
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+    margin: 0;
+}
+
+.notification-icon {
+    font-size: 20px;
+    color: #000;
+    cursor: pointer;
+}
+
+.reg {
+    background-color: #024e59;
+    color: #fff;
+    font-size: 16px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.reg:hover {
+    background-color: #013740;
+}
+
+/* Main container layout */
+.container {
+    margin-top: 80px;
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    align-content: flex-start;
+}
+
+/* Sidebar */
+aside {
+    width: 250px;
+    height: 100vh;
+    padding: 10px;
+    background: transparent;
+}
+
+aside ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+aside ul li {
+    padding: 10px 20px;
+    background-color: #024e59;
+    color: white;
+    margin: 10px 0;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+aside ul li img {
+    width: 25px;
+    height: 25px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+aside ul li:hover {
+    background-color: #0f798a;
+}
+
+/* Dropdown styles */
+.dropdown-menu {
+    display: none;
+    background-color: #024e59;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.dropdown-menu.show,
+.dropdown-menu.active {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+}
+
+.dropdown-menu li {
+    background-color: #4b64d3;
+    margin: 3px 0;
+    border-radius: 5px;
+    padding: 8px 12px;
+}
+
+.dropdown-menu li:hover {
+    background-color: #0d3168;
+}
+
+/* Sub-dropdowns */
+.sub-dropdown-menu {
+    display: none;
+    padding-left: 15px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.sub-dropdown.active > .sub-dropdown-menu {
+    display: block;
+    max-height: 150px;
+}
+
+/* Number summary boxes */
+.number-box {
+    display: flex;
+    gap: 50px;
+    margin-top: 20px;
+    margin-left: 10%;
+    height: 150px;
+}
+
+.number-box div {
+    width: 170px;
+    background-color: #f7e8e8;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px black;
+    text-align: center;
+}
+
+.number-box div img {
+    width: 40px;
+    margin-bottom: 5px;
+}
+
+/* Exam Details Section */
+.exam-details-container {
+    background: rgba(255, 255, 255, 0.85);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px auto;
+    width: 70%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.exam-details-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.exam-details-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin: 0 auto 30px;
+}
+
+.exam-details-container input,
+.exam-details-container select,
+.exam-details-container button {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #aaa;
+    font-size: 16px;
+}
+
+.exam-details-container button {
+    background-color: #024e59;
+    color: white;
+    cursor: pointer;
+}
+
+.exam-details-container button:hover {
+    background-color: #013740;
+}
+
+.exam-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.exam-table th,
+.exam-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+.exam-table th {
+    background-color: #024e59;
+    color: white;
+}
+
+/* Package Management Section */
+#package-management {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#package-management h2 {
+    margin-bottom: 20px;
+}
+
+.cards-container3 {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.card3 {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 250px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card3 img {
+    width: 100%;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.card3 h1 {
+    font-size: 18px;
+    color: #333;
+    margin: 10px 0;
+}
+
+.card3 .price3 {
+    font-size: 16px;
+    color: #28a745;
+    font-weight: bold;
+}
+
+.card3 p {
+    font-size: 14px;
+    color: #555;
+    margin: 5px 0;
+}
+
+.card3 button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.card3 button:hover {
+    background: #0056b3;
+}
+
+.card3 .remove-btn {
+    background: #dc3545;
+}
+
+.card3 .remove-btn:hover {
+    background: #a71d2a;
+}
+
+/* Footer */
+footer {
+    margin-top: 30px;
+    text-align: center;
+    color: #444;
+}

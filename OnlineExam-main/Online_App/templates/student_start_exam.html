@@ -1,0 +1,1480 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ paper.exam_name }} - Student Exam</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    
+    <!-- MathJax for LaTeX equations -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+        }
+        
+        .timer {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .timer-warning {
+            color: #ef4444;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* School Logo Styles */
+        .paper-header-with-logo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .school-logo-left, .school-logo-right {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .school-logo-left img, .school-logo-right img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+            background: white;
+        }
+        
+        .school-info {
+            flex: 1;
+            padding: 0 20px;
+            text-align: center;
+        }
+        
+        .school-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #1e3a8a;
+        }
+        
+        .school-address {
+            font-size: 14px;
+            color: #4b5563;
+            margin-bottom: 5px;
+        }
+        
+        .school-contact {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        /* Exam Info Styles */
+        .exam-info-box {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .exam-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-decoration: underline;
+        }
+        
+        .exam-details-table {
+            width: 100%;
+            margin-bottom: 15px;
+            border-collapse: collapse;
+        }
+        
+        .exam-details-table td {
+            padding: 8px;
+        }
+        
+        /* Instructions Styles */
+        .instructions-section {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            background: #f8fafc;
+        }
+        
+        .section-title {
+            border-bottom: 2px solid black;
+            padding-bottom: 5px;
+            margin: 20px 0 15px 0;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        /* Question Paper Content */
+        .question-paper-content {
+            font-family: 'Times New Roman', Times, serif;
+        }
+        
+        .question-box {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 6px;
+            margin-right: 12px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .mcq-options {
+            margin-left: 30px;
+            margin-top: 10px;
+        }
+        
+        .option-letter {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        /* Additional Elements */
+        .additional-activities-section {
+            margin-top: 30px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+        
+        .signature-section {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px dashed #333;
+        }
+        
+        .signature-box {
+            text-align: center;
+            width: 250px;
+        }
+        
+        .signature-line {
+            width: 100%;
+            border-top: 1px solid #333;
+            margin-bottom: 10px;
+        }
+        
+        .watermark {
+            position: fixed;
+            opacity: 0.1;
+            font-size: 120px;
+            transform: rotate(-45deg);
+            z-index: -1;
+            color: #ccc;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+        
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+        
+        .uploaded-file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Popup animations */
+        @keyframes popupFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        #successModal > div, #errorModal > div {
+            animation: popupFadeIn 0.3s ease-out;
+        }
+        
+        /* Modal background */
+        .fixed.inset-0 {
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Toast notifications */
+        .toast-message {
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        
+        /* For printing */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .question-paper-content, .question-paper-content * {
+                visibility: visible;
+            }
+            .question-paper-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 15mm;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        /* Custom scrollbar */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Question sidebar */
+        .question-sidebar-item {
+            padding: 10px 15px;
+            border-left: 3px solid transparent;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .question-sidebar-item:hover {
+            background: #f0f9ff;
+            border-left-color: #3b82f6;
+        }
+        
+        .question-sidebar-item.active {
+            background: #dbeafe;
+            border-left-color: #2563eb;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header with Timer -->
+    <header class="bg-white shadow-lg fixed top-0 left-0 right-0 z-50 no-print">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">
+                            {{ paper.exam_name|default:"Online Examination" }}
+                        </h1>
+                        <p class="text-sm text-gray-600">
+                            <i class="fas fa-user text-blue-500"></i> {{ user.username }}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <div class="flex items-center justify-center gap-2 mb-1">
+                        <i class="fas fa-clock text-blue-500"></i>
+                        <div class="text-xl font-bold timer" id="timer">
+                            <span id="timeDisplay">00:00:00</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium">TIME REMAINING</p>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button onclick="printQuestionPaper()" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 font-medium">
+                        <i class="fas fa-print mr-2"></i>Print Paper
+                    </button>
+                    <button onclick="toggleFullscreen()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium">
+                        <i class="fas fa-expand mr-2"></i>Fullscreen
+                    </button>
+                    <button onclick="submitExam()" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium">
+                        <i class="fas fa-paper-plane mr-2"></i>Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-24 pb-10">
+        <div class="flex gap-6">
+            <!-- Left: Complete Question Paper -->
+            <div class="w-2/3">
+                <div class="question-paper-content bg-white rounded-2xl shadow-xl p-8">
+                    <!-- Watermark if present -->
+                    {% if paper.additional_elements %}
+                        {% for element in paper.additional_elements %}
+                            {% if element.type == 'watermark' %}
+                            <div class="watermark" style="opacity: {{ element.config.opacity|default:'0.1' }}; font-size: {{ element.config.size|default:'120px' }};">
+                                {{ element.config.text|default:'CONFIDENTIAL' }}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <!-- School Logo & Header -->
+                    {% if teacher_settings %}
+                        {% if teacher_settings.logo_position == 'left' %}
+                        <div class="paper-header-with-logo">
+                            {% if teacher_settings.logo_image %}
+                            <div class="school-logo-left">
+                                <img src="{{ teacher_settings.logo_image.url }}" alt="School Logo">
+                            </div>
+                            {% endif %}
+                            
+                            <div class="school-info">
+                                <div class="school-name">{{ teacher_settings.school_name }}</div>
+                                <div class="school-address">{{ teacher_settings.school_address }}</div>
+                                <div class="school-contact">{{ teacher_settings.school_contact }}</div>
+                                <div class="school-contact">{{ teacher_settings.affiliation_number }}</div>
+                            </div>
+                            
+                            {% if teacher_settings.logo_position == 'both' and teacher_settings.logo_image %}
+                            <div class="school-logo-right">
+                                <img src="{{ teacher_settings.logo_image.url }}" alt="School Logo">
+                            </div>
+                            {% else %}
+                            <div class="school-logo-right"></div>
+                            {% endif %}
+                        </div>
+                        
+                        {% elif teacher_settings.logo_position == 'center' %}
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            {% if teacher_settings.logo_image %}
+                            <div class="school-logo-left" style="display: inline-block; margin-bottom: 10px;">
+                                <img src="{{ teacher_settings.logo_image.url }}" alt="School Logo">
+                            </div>
+                            {% endif %}
+                            <div class="school-info" style="text-align: center;">
+                                <div class="school-name">{{ teacher_settings.school_name }}</div>
+                                <div class="school-address">{{ teacher_settings.school_address }}</div>
+                                <div class="school-contact">{{ teacher_settings.school_contact }}</div>
+                                <div class="school-contact">{{ teacher_settings.affiliation_number }}</div>
+                            </div>
+                        </div>
+                        
+                        {% elif teacher_settings.logo_position == 'none' %}
+                        <div class="text-center mb-6">
+                            <div class="school-name">{{ teacher_settings.school_name }}</div>
+                            <div class="school-address">{{ teacher_settings.school_address }}</div>
+                            <div class="school-contact">{{ teacher_settings.school_contact }}</div>
+                            <div class="school-contact">{{ teacher_settings.affiliation_number }}</div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <!-- Default header if no teacher settings -->
+                        <div class="text-center mb-6">
+                            <div class="school-name">{{ paper.school_name|default:"Your School Name" }}</div>
+                            <div class="school-address">{{ paper.school_address|default:"City, State, PIN Code" }}</div>
+                            <div class="school-contact">{{ paper.school_contact|default:"Phone: 1234567890 | Email: school@example.com" }}</div>
+                            <div class="school-contact">{{ paper.affiliation_number|default:"Affiliation No: 123456" }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Exam Details -->
+                    <div class="exam-info-box">
+                        <div class="exam-title">{{ paper.exam_name|default:"Mid-Term Examination" }}</div>
+                        <table class="exam-details-table">
+                            <tr>
+                                <td style="width: 25%; text-align: right; padding-right: 10px; font-weight: bold;">Class:</td>
+                                <td style="width: 25%; text-align: left; padding-left: 10px;">{{ paper.class_name|default:"Not specified" }}</td>
+                        
+                                <td style="text-align: right; padding-right: 10px; font-weight: bold;">Total Marks:</td>
+                                <td style="text-align: left; padding-left: 10px;">{{ paper.total_marks|default:100 }}</td>
+                            </tr>
+                            <tr>
+                                <!-- <td style="text-align: right; padding-right: 10px; font-weight: bold;">Total Marks:</td>
+                                <td style="text-align: left; padding-left: 10px;">{{ paper.total_marks|default:100 }}</td> -->
+                                <td style="width: 25%; text-align: right; padding-right: 10px; font-weight: bold;">Course:</td>
+                                <td style="width: 25%; text-align: left; padding-left: 10px;">{{ paper.course_name|default:"All Courses" }}</td>
+                                <td style="text-align: right; padding-right: 10px; font-weight: bold;">Full Time:</td>
+                                <td style="text-align: left; padding-left: 10px;">{{ paper.time_duration|default:"3 hours" }}</td>
+                                <!-- <td style="text-align: right; padding-right: 10px; font-weight: bold;">Time:</td>
+                                <td style="text-align: left; padding-left: 10px;">{{ paper.time_duration|default:"3 hours" }}</td> -->
+                            </tr>
+                        </table>
+                        <div style="font-weight: bold; font-size: 15px;">
+                            Date: {% if paper.exam_date %}{{ paper.exam_date|date:"F d, Y" }}{% else %}{% now "F d, Y" %}{% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Instructions -->
+                    {% if paper.instructions %}
+                    <div class="instructions-section">
+                        <div class="section-title">General Instructions</div>
+                        <div style="white-space: pre-line; font-size: 14px;">{{ paper.instructions }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Display All Questions -->
+                    {% if all_questions %}
+                        {% for question in all_questions %}
+                            <!-- Section Titles -->
+                            {% if forloop.first %}
+                                {% if paper.sections.section_a %}
+                                <div class="section-title">Section A: Objective Questions</div>
+                                <div style="margin-bottom: 10px;"><em>Choose the correct option.</em></div>
+                                {% elif paper.sections.section_b %}
+                                <div class="section-title">Section B: Subjective Questions</div>
+                                <div style="margin-bottom: 10px;"><em>Answer the following questions briefly.</em></div>
+                                {% elif paper.sections.section_c %}
+                                <div class="section-title">Section C: Applied Questions</div>
+                                <div style="margin-bottom: 10px;"><em>Answer the following questions in detail.</em></div>
+                                {% endif %}
+                            {% endif %}
+                            
+                            <!-- Question Display -->
+                            <div class="question-box">
+                                <div class="question-number">{{ forloop.counter }}</div>
+                                <div style="margin-left: 10px; flex: 1;">
+                                    <div style="margin-bottom: 5px;">{{ question.question|safe }}</div>
+                                    
+                                    <!-- MCQ Options -->
+                                    {% if question.type == 'objective' and question.option1 %}
+                                    <div class="mcq-options">
+                                        {% if question.option1 %}<div><span class="option-letter">(a)</span> {{ question.option1 }}</div>{% endif %}
+                                        {% if question.option2 %}<div><span class="option-letter">(b)</span> {{ question.option2 }}</div>{% endif %}
+                                        {% if question.option3 %}<div><span class="option-letter">(c)</span> {{ question.option3 }}</div>{% endif %}
+                                        {% if question.option4 %}<div><span class="option-letter">(d)</span> {{ question.option4 }}</div>{% endif %}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div style="text-align: right; margin-top: 10px; font-weight: bold;">
+                                        [{{ question.marks|default:1 }} Mark{{ question.marks|default:1|pluralize }}]
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-center py-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                            <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-700 mb-2">No Questions Available</h3>
+                        <p class="text-gray-600">This exam paper doesn't have any questions.</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Additional Elements from Teacher's Paper -->
+                    {% if paper.additional_elements %}
+                    <div class="additional-activities-section">
+                        {% for element in paper.additional_elements %}
+                            {% if element.type != 'watermark' and element.type != 'signature' and element.type != 'footer' %}
+                            <div class="mb-4 p-4 border border-gray-200 rounded-lg">
+                                <h4 class="font-bold text-gray-700 mb-2">{{ element.name|default:element.type|title }}</h4>
+                                <div>{{ element.content|default:element.config.content|linebreaks }}</div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <!-- Signature Section -->
+                        {% for element in paper.additional_elements %}
+                            {% if element.type == 'signature' %}
+                            <div class="signature-section">
+                                <div style="display: flex; justify-content: space-between;">
+                                    {% if element.config.principal %}
+                                    <div class="signature-box">
+                                        <div style="font-weight: bold; margin-bottom: 10px;">Principal</div>
+                                        {% if element.config.principalImg %}
+                                            <img src="{{ element.config.principalImg }}" alt="Principal Signature" 
+                                                 style="max-width: 200px; max-height: 60px; margin-bottom: 10px;">
+                                        {% else %}
+                                            <div class="signature-line"></div>
+                                        {% endif %}
+                                        <div>________________________</div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if element.config.invigilator %}
+                                    <div class="signature-box">
+                                        <div style="font-weight: bold; margin-bottom: 10px;">Invigilator</div>
+                                        {% if element.config.invigilatorImg %}
+                                            <img src="{{ element.config.invigilatorImg }}" alt="Invigilator Signature" 
+                                                 style="max-width: 200px; max-height: 60px; margin-bottom: 10px;">
+                                        {% else %}
+                                            <div class="signature-line"></div>
+                                        {% endif %}
+                                        <div>________________________</div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <!-- Empty div for spacing -->
+                                    <div style="width: 250px;"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Right: Question List & Answer Upload -->
+            <div class="w-1/3">
+                <div class="bg-white rounded-2xl shadow-xl p-5 sticky top-24 h-[calc(100vh-8rem)] flex flex-col">
+                    <h3 class="font-bold text-gray-700 text-lg mb-4">
+                        <i class="fas fa-list-ol text-blue-500 mr-2"></i>Questions List
+                    </h3>
+                    
+                    <!-- Questions List -->
+                    <div class="flex-1 overflow-y-auto scrollbar-thin mb-4">
+                        {% for question in all_questions %}
+                        <div class="question-sidebar-item {% if forloop.first %}active{% endif %}" 
+                             id="sidebar-q{{ forloop.counter }}">
+                            <div class="flex justify-between items-center">
+                                <div class="font-medium">Question {{ forloop.counter }}</div>
+                                <div class="text-sm text-gray-500">{{ question.marks|default:1 }} Mark{{ question.marks|default:1|pluralize }}</div>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-1 truncate">
+                                {{ question.question|striptags|truncatechars:50 }}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-inbox text-3xl mb-2"></i>
+                            <p>No questions available</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Answer Upload Section -->
+                    <form id="examForm" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="paper_id" value="{{ paper.id }}">
+                        <input type="hidden" name="time_taken" id="time_taken" value="0">
+                        
+                        <div class="bg-gray-50 p-5 rounded-xl mb-4">
+                            <h4 class="font-bold text-gray-700 mb-4">
+                                <i class="fas fa-upload text-blue-500 mr-2"></i>
+                                Upload Your Answer Sheet
+                            </h4>
+                            
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Upload Answer Sheet (PDF, JPG, PNG, DOC)
+                                </label>
+                                
+                                <!-- UPLOAD AREA -->
+                                <div class="upload-area" 
+                                     id="upload-area"
+                                     onclick="document.getElementById('file-input').click()">
+                                    <div class="text-center">
+                                        <i class="fas fa-cloud-upload-alt text-3xl text-blue-500 mb-3"></i>
+                                        <p class="font-medium text-gray-700 mb-1">Click to upload answer sheet</p>
+                                        <p class="text-sm text-gray-500">
+                                            Upload your complete answer sheet (handwritten or typed)
+                                        </p>
+                                        <p class="text-xs text-gray-400 mt-2">Max size: 10MB</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- FILE INPUT -->
+                                <input type="file" 
+                                       id="file-input"
+                                       name="answer_file"
+                                       class="hidden"
+                                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                       onchange="handleFileUpload(this)">
+                                
+                                <!-- File Preview -->
+                                <div id="file-preview" class="mt-4 hidden">
+                                    <div class="uploaded-file-item">
+                                        <div class="flex items-center gap-3">
+                                            <i class="fas fa-file text-blue-500"></i>
+                                            <div>
+                                                <p class="font-medium" id="file-name"></p>
+                                                <p class="text-sm text-gray-500" id="file-size"></p>
+                                            </div>
+                                        </div>
+                                        <button type="button" 
+                                                onclick="removeFile()"
+                                                class="text-red-500 hover:text-red-700">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Notes -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Additional Notes (Optional)
+                                </label>
+                                <textarea name="additional_notes" 
+                                          class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                          rows="3"
+                                          placeholder="Add any additional notes or comments..."></textarea>
+                            </div>
+                            
+                            <!-- Progress Stats -->
+                            <div class="border-t pt-4">
+                                <h4 class="font-bold text-sm text-gray-700 mb-3">Exam Info</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Total Questions:</span>
+                                        <span class="font-bold">{{ total_questions }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Total Marks:</span>
+                                        <span class="font-bold">{{ paper.total_marks|default:100 }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Time Allotted:</span>
+                                        <span class="font-bold">{{ paper.time_duration|default:"3 hours" }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Time Remaining:</span>
+                                        <span class="font-bold" id="timeRemainingDisplay">--:--:--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <button type="button" onclick="submitExam()" 
+                                class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 font-medium shadow-lg">
+                            <i class="fas fa-paper-plane mr-2"></i>Submit Exam
+                        </button>
+                        
+                        <!-- Warning Message -->
+                        <div class="text-xs text-center text-gray-500 mt-3">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Once submitted, you cannot change your answers
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Submit Modal -->
+    <div id="submitModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden no-print">
+        <div class="bg-white rounded-2xl p-6 max-w-lg w-full mx-4 shadow-2xl">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full mb-4">
+                    <i class="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Submit Exam?</h3>
+                <p class="text-gray-600">Are you sure you want to submit your exam? You cannot change answers after submission.</p>
+            </div>
+            
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-yellow-500 mt-1 mr-3"></i>
+                    <div>
+                        <h4 class="font-medium text-yellow-800 mb-1">Submission Summary</h4>
+                        <div class="space-y-1 text-sm text-yellow-700">
+                            <div class="flex justify-between">
+                                <span>Total Questions:</span>
+                                <span class="font-bold">{{ total_questions }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Answer File Uploaded:</span>
+                                <span class="font-bold" id="fileUploadStatus">No</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Time Remaining:</span>
+                                <span class="font-bold" id="modalTimeRemaining">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="closeSubmitModal()" 
+                        class="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-medium">
+                    Cancel
+                </button>
+                <button onclick="finalSubmit()" 
+                        class="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 font-medium">
+                    <i class="fas fa-paper-plane mr-2"></i>Submit Exam
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ================================
+    // GLOBAL VARIABLES
+    // ================================
+    let timeLeft = {{ exam_time_seconds|default:3600 }};
+    let timerInterval;
+    let startTime = Date.now();
+    let isFullscreen = false;
+    let uploadedFile = null;
+    let isSubmitting = false;
+
+    // ================================
+    // INITIALIZATION
+    // ================================
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ Exam Interface Loaded');
+        console.log('📄 Paper ID:', "{{ paper.id }}");
+        
+        // Initialize components
+        startTimer();
+        setupScrollHighlighting();
+        loadSavedFile();
+        updateFileUploadStatus();
+        
+        // Ensure upload area click handler
+        const uploadArea = document.getElementById('upload-area');
+        if (uploadArea) {
+            uploadArea.onclick = function() {
+                const fileInput = document.getElementById('file-input');
+                if (fileInput) {
+                    fileInput.click();
+                }
+            };
+        }
+        
+        // Prevent default form submission
+        const examForm = document.getElementById('examForm');
+        if (examForm) {
+            examForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (isSubmitting) {
+                    console.log("⚠️ Preventing duplicate submission");
+                    return false;
+                }
+                submitExam();
+            });
+        }
+        
+        console.log("✅ Initialization complete");
+    });
+
+    // ================================
+    // TIMER FUNCTIONS
+    // ================================
+    function startTimer() {
+        updateTimerDisplay();
+        
+        timerInterval = setInterval(function() {
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                autoSubmitExam();
+                return;
+            }
+            
+            timeLeft--;
+            updateTimerDisplay();
+            
+            // Update time taken in MINUTES (for the form field)
+            const timeTakenSeconds = Math.floor((Date.now() - startTime) / 1000);
+            const timeTakenMinutes = Math.round(timeTakenSeconds / 60);
+            const timeTakenInput = document.getElementById('time_taken');
+            if (timeTakenInput) {
+                timeTakenInput.value = timeTakenMinutes;
+            }
+            
+            // Warning when 5 minutes remaining
+            if (timeLeft === 300) {
+                showToast('⚠️ Only 5 minutes remaining!', 'warning');
+            }
+            
+            // Critical when 1 minute remaining
+            if (timeLeft <= 60 && timeLeft > 0) {
+                const timerElement = document.getElementById('timer');
+                if (timerElement) {
+                    timerElement.classList.add('timer-warning');
+                }
+                if (timeLeft === 60) {
+                    showToast('⚠️ Only 1 minute remaining!', 'warning');
+                }
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const hours = Math.floor(timeLeft / 3600);
+        const minutes = Math.floor((timeLeft % 3600) / 60);
+        const seconds = timeLeft % 60;
+        
+        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const shortTimeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        const timeDisplay = document.getElementById('timeDisplay');
+        const timeRemainingDisplay = document.getElementById('timeRemainingDisplay');
+        const modalTimeRemaining = document.getElementById('modalTimeRemaining');
+        
+        if (timeDisplay) timeDisplay.textContent = timeString;
+        if (timeRemainingDisplay) timeRemainingDisplay.textContent = timeString;
+        if (modalTimeRemaining) modalTimeRemaining.textContent = shortTimeString;
+    }
+
+    // ================================
+    // FILE UPLOAD FUNCTIONS
+    // ================================
+    function handleFileUpload(input) {
+        console.log("📁 File selected:", input.files[0]);
+        
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            uploadedFile = file;
+            
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('❌ File size exceeds 10MB limit', 'error');
+                input.value = '';
+                uploadedFile = null;
+                updateFileUploadStatus();
+                return;
+            }
+            
+            // Validate file type
+            const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 
+                               'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (!validTypes.includes(file.type)) {
+                showToast('❌ Invalid file type. Please upload PDF, JPG, PNG, or DOC files.', 'error');
+                input.value = '';
+                uploadedFile = null;
+                updateFileUploadStatus();
+                return;
+            }
+            
+            // Show preview
+            const previewDiv = document.getElementById('file-preview');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const uploadArea = document.getElementById('upload-area');
+            
+            if (previewDiv && fileName && fileSize) {
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                previewDiv.classList.remove('hidden');
+                
+                // Update upload area style
+                if (uploadArea) {
+                    uploadArea.innerHTML = `
+                        <div class="text-center">
+                            <i class="fas fa-check-circle text-3xl text-green-500 mb-3"></i>
+                            <p class="font-medium text-green-600 mb-1">File Ready</p>
+                            <p class="text-sm text-gray-500">Click to change file</p>
+                        </div>
+                    `;
+                    uploadArea.style.borderColor = '#10b981';
+                    uploadArea.style.backgroundColor = '#f0fdf4';
+                }
+                
+                showToast('✅ File uploaded successfully!', 'success');
+            }
+            
+            // Update file upload status
+            updateFileUploadStatus();
+        }
+    }
+
+    function removeFile() {
+        console.log("🗑️ Removing uploaded file");
+        
+        const fileInput = document.getElementById('file-input');
+        const previewDiv = document.getElementById('file-preview');
+        const uploadArea = document.getElementById('upload-area');
+        
+        if (fileInput) fileInput.value = '';
+        uploadedFile = null;
+        
+        if (previewDiv) previewDiv.classList.add('hidden');
+        
+        // Reset upload area
+        if (uploadArea) {
+            uploadArea.innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-cloud-upload-alt text-3xl text-blue-500 mb-3"></i>
+                    <p class="font-medium text-gray-700 mb-1">Click to upload answer sheet</p>
+                    <p class="text-sm text-gray-500">Upload your complete answer sheet (handwritten or typed)</p>
+                    <p class="text-xs text-gray-400 mt-2">Max size: 10MB</p>
+                </div>
+            `;
+            uploadArea.style.borderColor = '';
+            uploadArea.style.backgroundColor = '';
+        }
+        
+        updateFileUploadStatus();
+        showToast('🗑️ File removed', 'info');
+    }
+
+    function loadSavedFile() {
+        // Check if there's a previously saved file (from localStorage)
+        const savedFileData = localStorage.getItem(`exam_${"{{ paper.id }}"}_file`);
+        if (savedFileData) {
+            try {
+                const fileData = JSON.parse(savedFileData);
+                console.log("📂 Found saved file data:", fileData);
+                
+                // Update UI to show file is saved
+                const uploadArea = document.getElementById('upload-area');
+                if (uploadArea) {
+                    uploadArea.innerHTML = `
+                        <div class="text-center">
+                            <i class="fas fa-file text-3xl text-blue-500 mb-3"></i>
+                            <p class="font-medium text-gray-700 mb-1">File saved from previous session</p>
+                            <p class="text-sm text-gray-500">Click to upload new file</p>
+                        </div>
+                    `;
+                }
+                
+                // Update file upload status
+                updateFileUploadStatus();
+                
+            } catch (e) {
+                console.error("Error loading saved file:", e);
+                localStorage.removeItem(`exam_${"{{ paper.id }}"}_file`);
+            }
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // ================================
+    // MODAL & SUBMISSION FUNCTIONS
+    // ================================
+    function updateFileUploadStatus() {
+        const hasFile = uploadedFile !== null || 
+                       (document.getElementById('file-input') && 
+                        document.getElementById('file-input').files && 
+                        document.getElementById('file-input').files.length > 0);
+        
+        const statusElement = document.getElementById('fileUploadStatus');
+        if (statusElement) {
+            statusElement.textContent = hasFile ? 'Yes' : 'No';
+            statusElement.className = hasFile ? 'font-bold text-green-600' : 'font-bold text-red-600';
+        }
+    }
+
+    function submitExam() {
+        console.log("🚀 Opening submit modal...");
+        
+        // Update file upload status
+        updateFileUploadStatus();
+        
+        // Show modal
+        const modal = document.getElementById('submitModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+        }
+        
+        // Prevent body scrolling
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSubmitModal() {
+        const modal = document.getElementById('submitModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        
+        // Restore body scrolling
+        document.body.style.overflow = '';
+    }
+
+    function finalSubmit() {
+        if (isSubmitting) {
+            console.log("⚠️ Already submitting, please wait...");
+            return;
+        }
+        
+        console.log("✅ Final submission initiated");
+        isSubmitting = true;
+        
+        // Stop timer
+        clearInterval(timerInterval);
+        
+        // Calculate time in minutes (as required by your model)
+        const timeTakenSeconds = Math.floor((Date.now() - startTime) / 1000);
+        const timeTakenMinutes = Math.round(timeTakenSeconds / 60);
+        
+        // Update the time_taken field (in minutes)
+        const timeTakenInput = document.getElementById('time_taken');
+        if (timeTakenInput) {
+            timeTakenInput.value = timeTakenMinutes;
+        }
+        
+        // Show loading state
+        const submitBtn = document.querySelector('button[onclick="finalSubmit()"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+            submitBtn.disabled = true;
+        }
+        
+        // Validate file upload
+        const fileInput = document.getElementById('file-input');
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            const confirmed = confirm("⚠️ You haven't uploaded an answer file. Are you sure you want to submit without an answer sheet?");
+            if (!confirmed) {
+                isSubmitting = false;
+                closeSubmitModal();
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit Exam';
+                    submitBtn.disabled = false;
+                }
+                return;
+            }
+        }
+        
+        // Create FormData object
+        const formData = new FormData();
+        formData.append('paper_id', '{{ paper.id }}');
+        formData.append('time_taken', timeTakenMinutes);
+        formData.append('additional_notes', document.querySelector('[name="additional_notes"]').value);
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        
+        // Add file if exists
+        if (fileInput.files && fileInput.files[0]) {
+            formData.append('answer_file', fileInput.files[0]);
+        }
+        
+        // Submit via AJAX
+        fetch('{% url "submit_exam" %}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success popup
+                showSuccessPopup(data.message);
+                
+                // Close the submit modal
+                closeSubmitModal();
+                
+                // Redirect to available exams page after 3 seconds
+                setTimeout(() => {
+                    window.location.href = '{% url "student_available_exams" %}';
+                }, 3000);
+            } else {
+                // Show error message
+                showErrorPopup(data.error || 'Submission failed');
+                
+                // Reset submission state
+                isSubmitting = false;
+                
+                // Reset button
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit Exam';
+                    submitBtn.disabled = false;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Submission error:', error);
+            showErrorPopup('Network error. Please try again.');
+            
+            // Reset submission state
+            isSubmitting = false;
+            
+            // Reset button
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Submit Exam';
+                submitBtn.disabled = false;
+            }
+        });
+    }
+
+    function showSuccessPopup(message) {
+        // Create success modal
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.id = 'successModal';
+        
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl text-center">
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-full mb-6">
+                    <i class="fas fa-check text-4xl text-green-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Submission Successful!</h3>
+                <p class="text-gray-600 mb-6">${message}</p>
+                <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-center justify-center">
+                        <i class="fas fa-info-circle text-green-500 mr-2"></i>
+                        <span class="text-green-700 font-medium">Your exam has been sent for teacher evaluation</span>
+                    </div>
+                </div>
+                <button onclick="closeSuccessPopup()" 
+                        class="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-xl hover:from-green-700 hover:to-green-600 font-medium">
+                    Continue to Available Exams
+                </button>
+                <p class="text-xs text-gray-500 mt-4">Redirecting in 3 seconds...</p>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+
+    function showErrorPopup(errorMessage) {
+        // Create error modal
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.id = 'errorModal';
+        
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl text-center">
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-full mb-6">
+                    <i class="fas fa-exclamation-triangle text-4xl text-red-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4">Submission Failed</h3>
+                <p class="text-gray-600 mb-6">${errorMessage}</p>
+                <button onclick="closeErrorPopup()" 
+                        class="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl hover:from-red-700 hover:to-red-600 font-medium">
+                    Try Again
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+
+    function closeSuccessPopup() {
+        const modal = document.getElementById('successModal');
+        if (modal) {
+            modal.remove();
+        }
+        // Redirect immediately to available exams
+        window.location.href = '{% url "student_available_exams" %}';
+    }
+
+    function closeErrorPopup() {
+        const modal = document.getElementById('errorModal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    function autoSubmitExam() {
+        console.log("⏰ Auto-submitting exam (time expired)");
+        
+        // Show notification
+        showToast('⏰ Time expired! Auto-submitting...', 'warning');
+        
+        // Wait 2 seconds then submit
+        setTimeout(function() {
+            if (!isSubmitting) {
+                // Calculate time in minutes
+                const timeTakenSeconds = Math.floor((Date.now() - startTime) / 1000);
+                const timeTakenMinutes = Math.round(timeTakenSeconds / 60);
+                
+                // Update the time_taken field
+                const timeTakenInput = document.getElementById('time_taken');
+                if (timeTakenInput) {
+                    timeTakenInput.value = timeTakenMinutes;
+                }
+                
+                // Auto-submit via AJAX
+                finalSubmit();
+            }
+        }, 2000);
+    }
+
+    // ================================
+    // UI HELPER FUNCTIONS
+    // ================================
+    function setupScrollHighlighting() {
+        // Highlight current question in sidebar when scrolling
+        const questionItems = document.querySelectorAll('.question-sidebar-item');
+        const questionBoxes = document.querySelectorAll('.question-box');
+        
+        if (questionItems.length > 0 && questionBoxes.length > 0) {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.3
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Get question number from the question box
+                        const questionNumber = entry.target.querySelector('.question-number')?.textContent;
+                        if (questionNumber) {
+                            // Remove active class from all
+                            questionItems.forEach(item => {
+                                item.classList.remove('active');
+                            });
+                            
+                            // Add active class to corresponding sidebar item
+                            const sidebarItem = document.getElementById(`sidebar-q${questionNumber}`);
+                            if (sidebarItem) {
+                                sidebarItem.classList.add('active');
+                            }
+                        }
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe all question boxes
+            questionBoxes.forEach(box => {
+                observer.observe(box);
+            });
+            
+            // Also make sidebar items clickable
+            questionItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const qNum = this.id.replace('sidebar-q', '');
+                    const targetQuestion = document.querySelector(`.question-box:nth-child(${parseInt(qNum) + 2})`);
+                    if (targetQuestion) {
+                        targetQuestion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+        }
+    }
+
+    function showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-24 right-6 z-50 bg-white rounded-lg shadow-xl p-4 max-w-sm border-l-4';
+        
+        // Set color based on type
+        let borderColor = 'border-blue-500';
+        let icon = 'info-circle';
+        let iconColor = 'text-blue-500';
+        
+        switch(type) {
+            case 'success':
+                borderColor = 'border-green-500';
+                icon = 'check-circle';
+                iconColor = 'text-green-500';
+                break;
+            case 'warning':
+                borderColor = 'border-yellow-500';
+                icon = 'exclamation-triangle';
+                iconColor = 'text-yellow-500';
+                break;
+            case 'error':
+                borderColor = 'border-red-500';
+                icon = 'times-circle';
+                iconColor = 'text-red-500';
+                break;
+        }
+        
+        toast.classList.add(borderColor);
+        
+        toast.innerHTML = `
+            <div class="flex items-start">
+                <i class="fas fa-${icon} ${iconColor} text-lg mt-1 mr-3"></i>
+                <div class="flex-1">
+                    <p class="font-medium text-gray-800">${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        
+        // Add to document
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(0)';
+        }, 10);
+        
+        // Remove after 5 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 5000);
+    }
+
+    function printQuestionPaper() {
+        console.log("🖨️ Printing question paper...");
+        window.print();
+    }
+
+    function toggleFullscreen() {
+        const elem = document.documentElement;
+        
+        if (!isFullscreen) {
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+            isFullscreen = true;
+            showToast('🔲 Fullscreen mode enabled', 'info');
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+            isFullscreen = false;
+            showToast('📱 Fullscreen mode disabled', 'info');
+        }
+    }
+
+    // ================================
+    // EVENT LISTENERS
+    // ================================
+    // Prevent accidental page reload/close
+    window.addEventListener('beforeunload', function (e) {
+        if (!isSubmitting && timeLeft > 0) {
+            // Save file data to localStorage if exists
+            const fileInput = document.getElementById('file-input');
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const fileData = {
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        lastModified: file.lastModified,
+                        data: e.target.result
+                    };
+                    
+                    try {
+                        localStorage.setItem(`exam_${"{{ paper.id }}"}_file`, JSON.stringify(fileData));
+                        console.log("💾 File saved to localStorage");
+                    } catch (err) {
+                        console.error("❌ Could not save file to localStorage:", err);
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // Save timer state
+            localStorage.setItem(`exam_${"{{ paper.id }}"}_timer`, timeLeft.toString());
+            localStorage.setItem(`exam_${"{{ paper.id }}"}_startTime`, startTime.toString());
+            
+            // Show warning message
+            e.preventDefault();
+            e.returnValue = '⚠️ Your exam is still in progress. Are you sure you want to leave?';
+            return e.returnValue;
+        }
+    });
+
+    // Handle fullscreen change
+    document.addEventListener('fullscreenchange', function() {
+        isFullscreen = !!document.fullscreenElement;
+    });
+
+    // Handle visibility change (tab switch detection)
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            showToast('⚠️ Tab switch detected! Please stay on this page.', 'warning');
+        }
+    });
+
+    // ================================
+    // MATHJAX CONFIGURATION
+    // ================================
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+
+    console.log("🎓 Exam Interface Fully Loaded and Ready!");
+    </script>
+</body>
+</html>

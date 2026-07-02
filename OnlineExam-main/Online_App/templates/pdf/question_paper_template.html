@@ -1,0 +1,185 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ paper.exam_name }}</title>
+</head>
+<body>
+    
+    {% if watermark %}
+    <div class="watermark" style="opacity: {{ watermark.opacity }}; font-size: {{ watermark.size }};">
+        {{ watermark.text }}
+    </div>
+    {% endif %}
+    
+    <!-- Header with Logo -->
+    <div class="paper-header">
+        {% if paper.logo_position == 'left' %}
+        <table width="100%">
+            <tr>
+                <td width="100" valign="top">
+                    {% if logo_path %}
+                    <img src="{{ logo_path }}" alt="School Logo" style="max-width: 80px; max-height: 80px;">
+                    {% endif %}
+                </td>
+                <td align="center">
+                    <div class="school-name">{{ paper.school_name }}</div>
+                    <div class="school-address">{{ paper.school_address }}</div>
+                    <div class="school-contact">{{ paper.school_contact }}</div>
+                    {% if paper.affiliation_number %}
+                    <div class="school-contact">Affiliation No: {{ paper.affiliation_number }}</div>
+                    {% endif %}
+                </td>
+                <td width="100"></td>
+            </tr>
+        </table>
+        {% elif paper.logo_position == 'both' %}
+        <table width="100%">
+            <tr>
+                <td width="100" valign="top">
+                    {% if logo_path %}
+                    <img src="{{ logo_path }}" alt="School Logo" style="max-width: 80px; max-height: 80px;">
+                    {% endif %}
+                </td>
+                <td align="center">
+                    <div class="school-name">{{ paper.school_name }}</div>
+                    <div class="school-address">{{ paper.school_address }}</div>
+                    <div class="school-contact">{{ paper.school_contact }}</div>
+                    {% if paper.affiliation_number %}
+                    <div class="school-contact">Affiliation No: {{ paper.affiliation_number }}</div>
+                    {% endif %}
+                </td>
+                <td width="100" valign="top">
+                    {% if logo_path %}
+                    <img src="{{ logo_path }}" alt="School Logo" style="max-width: 80px; max-height: 80px;">
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+        {% elif paper.logo_position == 'center' %}
+        <div align="center">
+            {% if logo_path %}
+            <div style="margin-bottom: 10px;">
+                <img src="{{ logo_path }}" alt="School Logo" style="max-width: 80px; max-height: 80px;">
+            </div>
+            {% endif %}
+            <div class="school-name">{{ paper.school_name }}</div>
+            <div class="school-address">{{ paper.school_address }}</div>
+            <div class="school-contact">{{ paper.school_contact }}</div>
+            {% if paper.affiliation_number %}
+            <div class="school-contact">Affiliation No: {{ paper.affiliation_number }}</div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div align="center">
+            <div class="school-name">{{ paper.school_name }}</div>
+            <div class="school-address">{{ paper.school_address }}</div>
+            <div class="school-contact">{{ paper.school_contact }}</div>
+            {% if paper.affiliation_number %}
+            <div class="school-contact">Affiliation No: {{ paper.affiliation_number }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Exam Title -->
+    <div class="exam-title" align="center">
+        {{ paper.exam_name }}
+    </div>
+    
+    <!-- Exam Details -->
+    <div class="exam-details">
+        <table width="100%">
+            <tr>
+                <td><strong>Class:</strong> {{ paper.class_name }}</td>
+                <td><strong>Course:</strong> {{ paper.course_name }}</td>
+            </tr>
+            <tr>
+                <td><strong>Total Marks:</strong> {{ paper.total_marks }}</td>
+                <td><strong>Time:</strong> {{ paper.time_duration }}</td>
+            </tr>
+            <tr>
+                <td colspan="2"><strong>Date:</strong> {{ paper.exam_date_formatted }}</td>
+            </tr>
+        </table>
+    </div>
+    
+    <!-- Instructions -->
+    {% if paper.instructions %}
+    <div class="instructions">
+        <strong>General Instructions:</strong>
+        <div style="white-space: pre-line; margin-top: 10px;">{{ paper.instructions }}</div>
+    </div>
+    {% endif %}
+    
+    <!-- Questions -->
+    {% for section in paper.sections %}
+    {% if section.questions %}
+    <div class="section-title">
+        {{ section.title }}
+        {% if section.instructions %}
+        <div style="font-size: 11pt; font-weight: normal; font-style: italic; margin-top: 5px;">
+            {{ section.instructions }}
+        </div>
+        {% endif %}
+    </div>
+    
+    {% for question in section.questions %}
+    <div class="question">
+        <div class="question-number">{{ forloop.counter }}.</div>
+        <div style="display: inline-block; width: calc(100% - 30px);">
+            <div>{{ question.question_text|safe }}</div>
+            
+            {% if question.options %}
+            <div class="mcq-options">
+                {% for option in question.options %}
+                <div class="option">
+                    <span class="option-letter">({{ option.letter }})</span> {{ option.text }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="marks">[{{ question.marks }} Mark{{ question.marks|pluralize }}]</div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+    
+    <!-- Additional Elements -->
+    {% if additional_elements %}
+    {% for element in additional_elements %}
+    {% if element.type != 'watermark' and element.type != 'signature' and element.type != 'footer' %}
+    <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
+        <div class="section-title">{{ element.name }}</div>
+        <div>{{ element.content|safe }}</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+    
+    <!-- Footer -->
+    {% if paper.show_footer %}
+    <div class="footer">
+        Page 1 of 1 • Generated on {{ current_date }}
+    </div>
+    {% endif %}
+    
+    <!-- Signature Section -->
+    {% if signatures %}
+    <div class="signature-section">
+        {% for signature in signatures %}
+        {% if signature.include %}
+        <div class="signature-box">
+            <div>{{ signature.role }}</div>
+            <div class="signature-line"></div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+</body>
+</html>

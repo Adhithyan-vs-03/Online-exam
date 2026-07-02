@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biology Question Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #27ae60;
+        }
+
+        h2 {
+            color: #1e3d59;
+            margin-bottom: 10px;
+        }
+
+        .subject-badge {
+            background: #27ae60;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .question-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            width: 150px;
+            color: #2c3e50;
+        }
+
+        .info-value {
+            color: #34495e;
+        }
+
+        .question-box {
+            background: #fff;
+            border: 2px solid #27ae60;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .question-title {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .question-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .answer-box {
+            background: #fff;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .answer-title {
+            color: #3498db;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .answer-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #e9f7fe;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .options-box {
+            background: #fff;
+            border: 2px solid #e67e22;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .options-title {
+            color: #e67e22;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #fdf2e9;
+            border-radius: 5px;
+        }
+
+        .option-number {
+            background: #e67e22;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .option-text {
+            flex: 1;
+            color: #2c3e50;
+        }
+
+        .correct-option {
+            background: #d5f4e6;
+            border-left: 4px solid #27ae60;
+        }
+
+        .formula-box {
+            background: #fff;
+            border: 2px solid #9b59b6;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .formula-title {
+            color: #9b59b6;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .formula-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #f4ecf7;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .diagram-box {
+            background: #fff;
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .diagram-title {
+            color: #f39c12;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .diagram-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: #fef9e7;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #219653;
+            text-decoration: none;
+            color: white;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .info-row {
+                flex-direction: column;
+                margin-bottom: 15px;
+            }
+            
+            .info-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .question-content, .answer-content {
+                padding: 15px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Biology Question Details</h2>
+            <span class="subject-badge">Biology</span>
+        </div>
+
+        <div class="question-info">
+            <div class="info-row">
+                <div class="info-label">Chapter:</div>
+                <div class="info-value">{{ question.chapter }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Topic:</div>
+                <div class="info-value">{{ question.topic }}</div>
+            </div>
+            <!-- <div class="info-row">
+                <div class="info-label">Sub-topic:</div>
+                <div class="info-value">{{ question.sub_topic }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Marks:</div>
+                <div class="info-value">{{ question.marks }}</div>
+            </div> -->
+            <div class="info-row">
+                <div class="info-label">Question Type:</div>
+                <div class="info-value">{{ question.question_type|title }}</div>
+            </div>
+        </div>
+
+        {% if question.formula %}
+        <div class="formula-box">
+            <div class="formula-title">Biological Formula/Equation</div>
+            <div class="formula-content">{{ question.formula|safe }}</div>
+        </div>
+        {% endif %}
+
+        {% if question.diagram_reference %}
+        <div class="diagram-box">
+            <div class="diagram-title">Diagram Reference</div>
+            <div class="diagram-content">{{ question.diagram_reference|safe }}</div>
+        </div>
+        {% endif %}
+
+        <div class="question-box">
+            <div class="question-title">Question</div>
+            <div class="question-content">{{ question.question|safe }}</div>
+        </div>
+
+        
+
+        {% if question.question_type == 'objective' and question.option1 %}
+        <div class="options-box">
+            <div class="options-title">Options</div>
+            
+            {% if question.option1 %}
+            <div class="option-item {% if question.correct_option == 1 %}correct-option{% endif %}">
+                <div class="option-number">1</div>
+                <div class="option-text">{{ question.option1 }}</div>
+            </div>
+            {% endif %}
+            
+            {% if question.option2 %}
+            <div class="option-item {% if question.correct_option == 2 %}correct-option{% endif %}">
+                <div class="option-number">2</div>
+                <div class="option-text">{{ question.option2 }}</div>
+            </div>
+            {% endif %}
+            
+            {% if question.option3 %}
+            <div class="option-item {% if question.correct_option == 3 %}correct-option{% endif %}">
+                <div class="option-number">3</div>
+                <div class="option-text">{{ question.option3 }}</div>
+            </div>
+            {% endif %}
+            
+            {% if question.option4 %}
+            <div class="option-item {% if question.correct_option == 4 %}correct-option{% endif %}">
+                <div class="option-number">4</div>
+                <div class="option-text">{{ question.option4 }}</div>
+            </div>
+            {% endif %}
+            
+            {% if question.option5 %}
+            <div class="option-item {% if question.correct_option == 5 %}correct-option{% endif %}">
+                <div class="option-number">5</div>
+                <div class="option-text">{{ question.option5 }}</div>
+            </div>
+            {% endif %}
+            
+            {% if question.correct_option %}
+            <div style="margin-top: 20px; padding: 10px; background: #d5f4e6; border-radius: 5px;">
+                <strong>Correct Option:</strong> Option {{ question.correct_option }}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if question.answer %}
+        <div class="answer-box">
+            <div class="answer-title">Answer</div>
+            <div class="answer-content">{{ question.answer|safe }}</div>
+        </div>
+        {% endif %}
+
+        <div class="actions">
+            <a href="{% url 'add_biology_question' %}" class="back-btn">← Back to Biology Questions</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,355 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        .notification-new {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+        }
+        .notification-read {
+            background-color: white;
+        }
+        .type-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .type-evaluated { background-color: #dbeafe; color: #1e40af; }
+        .type-new_exam { background-color: #f0fdf4; color: #166534; }
+        .type-reminder { background-color: #fef3c7; color: #92400e; }
+        .type-general { background-color: #f3f4f6; color: #374151; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+
+<!-- Header -->
+<header class="bg-white shadow-md sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="{% url 'Student' %}" class="text-gray-600 hover:text-blue-600">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Notifications</h1>
+                    <p class="text-sm text-gray-600">Your latest updates and alerts</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="font-medium text-gray-700">{{ data.username }}</span>
+                <a href="{% url 'login' %}" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Notifications</p>
+                        <h3 class="text-2xl font-bold text-gray-900">{{ notifications|length }}</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                        <i class="fas fa-bell text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Unread</p>
+                        <h3 class="text-2xl font-bold text-gray-900">{{ unread_notifications_count }}</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                        <i class="fas fa-envelope text-red-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Evaluated Exams</p>
+                        <h3 class="text-2xl font-bold text-gray-900">
+                            {% with evaluated_count=0 %}
+                                {% for notification in notifications %}
+                                    {% if notification.notification_type == 'exam_evaluated' %}
+                                        {% with evaluated_count=evaluated_count|add:1 %}
+                                        {% endwith %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ evaluated_count }}
+                            {% endwith %}
+                        </h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                        <i class="fas fa-file-check text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications List -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900">All Notifications</h2>
+                    <div class="text-sm text-gray-500">
+                        Sorted by latest
+                    </div>
+                </div>
+            </div>
+            
+            {% if notifications %}
+            <div class="divide-y divide-gray-200">
+                {% for notification in notifications %}
+                <div class="p-6 {% if not notification.is_read %}notification-new{% else %}notification-read{% endif %} hover:bg-gray-50 transition-colors">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <!-- Notification Icon -->
+                                <div class="flex-shrink-0">
+                                    {% if notification.notification_type == 'exam_evaluated' %}
+                                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                        <i class="fas fa-check-circle text-green-600"></i>
+                                    </div>
+                                    {% elif notification.notification_type == 'new_exam' %}
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-calendar-alt text-blue-600"></i>
+                                    </div>
+                                    {% elif notification.notification_type == 'reminder' %}
+                                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                        <i class="fas fa-clock text-yellow-600"></i>
+                                    </div>
+                                    {% else %}
+                                    <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                        <i class="fas fa-info-circle text-gray-600"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="flex-1">
+                                    <!-- Notification Type Badge -->
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="type-badge type-{{ notification.notification_type }}">
+                                            {% if notification.notification_type == 'exam_evaluated' %}
+                                            <i class="fas fa-file-alt mr-1"></i> Exam Evaluated
+                                            {% elif notification.notification_type == 'new_exam' %}
+                                            <i class="fas fa-plus-circle mr-1"></i> New Exam
+                                            {% elif notification.notification_type == 'reminder' %}
+                                            <i class="fas fa-clock mr-1"></i> Reminder
+                                            {% else %}
+                                            <i class="fas fa-bell mr-1"></i> General
+                                            {% endif %}
+                                        </span>
+                                        {% if not notification.is_read %}
+                                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                                            NEW
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Message -->
+                                    <p class="text-gray-800 mb-2">{{ notification.message }}</p>
+                                    
+                                    <!-- Time -->
+                                    <div class="flex items-center gap-4 text-sm text-gray-500">
+                                        <span>
+                                            <i class="far fa-clock mr-1"></i>
+                                            {{ notification.created_at|date:"M d, Y" }} at {{ notification.created_at|time:"g:i A" }}
+                                        </span>
+                                        <span>
+                                            <i class="far fa-calendar mr-1"></i>
+                                            {{ notification.created_at|timesince }} ago
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="mt-4 flex flex-wrap gap-2">
+                                        {% if notification.submission and notification.notification_type == 'exam_evaluated' %}
+                                        <a href="{% url 'student_view_evaluation' notification.submission.id %}" 
+                                           class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                                            <i class="fas fa-eye"></i>
+                                            View Answer Sheet
+                                        </a>
+                                        {% endif %}
+                                        
+                                        {% if notification.notification_type == 'new_exam' %}
+                                        <a href="{% url 'student_available_exams' %}" 
+                                           class="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                                            <i class="fas fa-play"></i>
+                                            Take Exam
+                                        </a>
+                                        {% endif %}
+                                        
+                                        <button onclick="markAsRead('{{ notification.id }}')" 
+                                                class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+                                            <i class="fas fa-check"></i>
+                                            Mark as Read
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-16">
+                <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-bell-slash text-gray-400 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">No notifications yet</h3>
+                <p class="text-gray-500 max-w-md mx-auto mb-6">
+                    You don't have any notifications at the moment. Notifications will appear here when teachers evaluate your exams or when new exams are available.
+                </p>
+                <div class="flex justify-center gap-3">
+                    <a href="{% url 'Student' %}" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                        <i class="fas fa-home mr-2"></i>Back to Dashboard
+                    </a>
+                    <a href="{% url 'student_available_exams' %}" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+                        <i class="fas fa-search mr-2"></i>Check Available Exams
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Pagination or Status -->
+            {% if notifications %}
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-500">
+                        Showing {{ notifications|length }} notification{{ notifications|pluralize }}
+                    </div>
+                    <div class="flex items-center gap-2">
+                        {% if unread_notifications_count > 0 %}
+                        <button onclick="markAllAsRead()" 
+                                class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition flex items-center gap-2">
+                            <i class="fas fa-check-double"></i>
+                            Mark All as Read
+                        </button>
+                        {% endif %}
+                        <a href="{% url 'Student' %}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+                            <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Help Section -->
+        <div class="mt-8 bg-blue-50 rounded-lg p-6 border border-blue-200">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-600 text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-blue-900 mb-2">About Notifications</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-check-circle text-green-500 mt-1"></i>
+                            <div>
+                                <p class="font-medium">Exam Evaluated</p>
+                                <p>Teachers have evaluated your exam. Click "View Answer Sheet" to see your marks and feedback.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-calendar-plus text-blue-500 mt-1"></i>
+                            <div>
+                                <p class="font-medium">New Exam Available</p>
+                                <p>A new exam has been published. Click "Take Exam" to start attempting it.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Get CSRF token function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Mark single notification as read
+function markAsRead(notificationId) {
+    fetch(`/student/notifications/mark-read/${notificationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload the page to show updated status
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error marking notification as read');
+    });
+}
+
+// Mark all notifications as read
+function markAllAsRead() {
+    fetch('{% url "student_mark_all_notifications_read" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload the page
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error marking all notifications as read');
+    });
+}
+
+// Auto-mark notifications as read when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any auto-load functionality here
+});
+</script>
+
+</body>
+</html>

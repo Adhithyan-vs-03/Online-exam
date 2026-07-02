@@ -1,0 +1,1688 @@
+{% block content %}
+
+<div class="container-fluid px-4 py-4">
+    <!-- Header Section -->
+    <div class="header-section mb-5">
+        <div class="d-flex justify-content-between align-items-center">
+            
+        </div>
+        
+        <!-- Stats Bar -->
+       <!-- Stats Bar -->
+<div class="stats-bar mt-4">
+    <div class="stat-card stat-total">
+        <div class="stat-icon">
+            <i class="fas fa-question-circle"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ total_count|default:questions.paginator.count }}</div>
+            <div class="stat-label">Total Questions</div>
+        </div>
+    </div>
+    
+    <!-- Objective (MCQ) -->
+    <div class="stat-card stat-mcq">
+        <div class="stat-icon">
+            <i class="fas fa-list-ul"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ mcq_count|default:"0" }}</div>
+            <div class="stat-label">MCQ</div>
+        </div>
+    </div>
+    
+    <!-- Descriptive -->
+    <div class="stat-card stat-descriptive">
+        <div class="stat-icon">
+            <i class="fas fa-align-left"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ descriptive_count|default:"0" }}</div>
+            <div class="stat-label">Descriptive</div>
+        </div>
+    </div>
+    
+    <!-- Match the Following -->
+    <div class="stat-card stat-match">
+        <div class="stat-icon">
+            <i class="fas fa-link"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ match_count|default:"0" }}</div>
+            <div class="stat-label">Match</div>
+        </div>
+    </div>
+    
+    <!-- Fill in the Blanks -->
+    <div class="stat-card stat-fill">
+        <div class="stat-icon">
+            <i class="fas fa-edit"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ fill_count|default:"0" }}</div>
+            <div class="stat-label">Fill Blanks</div>
+        </div>
+    </div>
+    
+    <!-- Numerical -->
+    <div class="stat-card stat-num">
+        <div class="stat-icon">
+            <i class="fas fa-calculator"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ numerical_count|default:"0" }}</div>
+            <div class="stat-label">Numerical</div>
+        </div>
+    </div>
+    
+    <!-- True/False -->
+    <div class="stat-card stat-tf">
+        <div class="stat-icon">
+            <i class="fas fa-check-double"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ true_false_count|default:"0" }}</div>
+            <div class="stat-label">True/False</div>
+        </div>
+    </div>
+    
+    <!-- Short Answer -->
+    <div class="stat-card stat-short">
+        <div class="stat-icon">
+            <i class="fas fa-pen-alt"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ short_answer_count|default:"0" }}</div>
+            <div class="stat-label">Short Answer</div>
+        </div>
+    </div>
+    
+    <!-- Long Answer -->
+    <div class="stat-card stat-long">
+        <div class="stat-icon">
+            <i class="fas fa-file-alt"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ long_answer_count|default:"0" }}</div>
+            <div class="stat-label">Long Answer</div>
+        </div>
+    </div>
+    
+    <!-- Diagram Based -->
+    <div class="stat-card stat-diag">
+        <div class="stat-icon">
+            <i class="fas fa-draw-polygon"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ diagram_count|default:"0" }}</div>
+            <div class="stat-label">Diagram</div>
+        </div>
+    </div>
+    
+    <!-- Graph Based -->
+    <div class="stat-card stat-graph">
+        <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div>
+            <div class="stat-number">{{ graph_count|default:"0" }}</div>
+            <div class="stat-label">Graph</div>
+        </div>
+    </div>
+</div>
+    </div>
+    
+   
+            </form>
+        </div>
+    </div>
+
+    <!-- Questions Table -->
+    <div class="questions-table-container">
+        <div class="table-responsive">
+            <table class="questions-table" id="questionsTable">
+                <thead>
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th>Subject</th>
+                        <th>Chapter</th>
+                        <th>Topic</th>
+                        <th class="text-center">Type</th>
+                        <th>Question</th>
+                         <th class="text-center">Image</th> 
+                        <th>Answer</th>
+                        <th class="text-center">Difficulty</th>
+                        <th class="text-center">Marks</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if questions %}
+                        {% for question in questions %}
+                        <tr>
+                            <td class="text-center">
+                                <div class="question-id">
+                                    <span class="id-badge">#{{ question.id }}</span>
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <div class="subject-info">
+                                    <div class="subject-name">{{ question.subject.name }}</div>
+                                    <div class="subject-meta">
+                                        <i class="fas fa-graduation-cap me-1"></i>
+                                        {{ question.subject.class_name.class_name }}
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <div class="chapter-tag">
+                                    <i class="fas fa-bookmark me-1"></i>
+                                    {{ question.chapter|truncatechars:20|default:"-" }}
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <div class="topic-tag">
+                                    <i class="fas fa-hashtag me-1"></i>
+                                    {{ question.topic|truncatechars:20|default:"-" }}
+                                </div>
+                            </td>
+                            
+                            <td class="text-center">
+                                {% if question.question_type == 'objective' %}
+                                <span class="type-badge type-mcq">
+                                    <i class="fas fa-list-ul me-1"></i>MCQ
+                                </span>
+                                {% elif question.question_type == 'descriptive' %}
+                                <span class="type-badge type-descriptive">
+                                    <i class="fas fa-align-left me-1"></i>Desc
+                                </span>
+                                {% elif question.question_type == 'match_following' %}
+                                <span class="type-badge type-match">
+                                    <i class="fas fa-link me-1"></i>Match
+                                </span>
+                                {% elif question.question_type == 'fill_in_the_blanks' %}
+                                <span class="type-badge type-fill">
+                                    <i class="fas fa-edit me-1"></i>Fill
+                                </span>
+                                {% elif question.question_type == 'numerical' %}
+                                <span class="type-badge type-num">
+                                    <i class="fas fa-calculator me-1"></i>Num
+                                </span>
+                                {% elif question.question_type == 'true_false' %}
+                                <span class="type-badge type-tf">
+                                    <i class="fas fa-check-double me-1"></i>T/F
+                                </span>
+                                {% elif question.question_type == 'short_answer' %}
+                                <span class="type-badge type-short">
+                                    <i class="fas fa-pen-alt me-1"></i>Short
+                                </span>
+                                {% elif question.question_type == 'long_answer' %}
+                                <span class="type-badge type-long">
+                                    <i class="fas fa-file-alt me-1"></i>Long
+                                </span>
+                                {% elif question.question_type == 'diagram_based' %}
+                                <span class="type-badge type-diag">
+                                    <i class="fas fa-draw-polygon me-1"></i>Diag
+                                </span>
+                                {% elif question.question_type == 'graph_based' %}
+                                <span class="type-badge type-graph">
+                                    <i class="fas fa-chart-line me-1"></i>Graph
+                                </span>
+                                {% elif question.question_type == 'theorem' %}
+                                <span class="type-badge type-theorem">
+                                    <i class="fas fa-square-root-alt me-1"></i>Theorem
+                                </span>
+                                {% elif question.question_type == 'equation_balancing' %}
+                                <span class="type-badge type-chem">
+                                    <i class="fas fa-balance-scale me-1"></i>Chem
+                                </span>
+                                {% else %}
+                                <span class="type-badge type-default">
+                                    {{ question.question_type|slice:":5" }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            
+                            <td>
+                                <div class="question-preview">
+                                    <div class="question-text">
+                                        {{ question.question|safe|truncatechars:100|default:"No question text" }}
+                                    </div>
+                                    {% if question.question_type == 'objective' %}
+                                    <div class="mcq-options-preview mt-2">
+                                        <small class="text-muted d-block mb-1">Options:</small>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            {% if question.option1 %}
+                                            <span class="option-preview {% if question.correct_options and '1' in question.correct_options %}option-correct{% endif %}">
+                                                A: {{ question.option1|truncatechars:30 }}
+                                            </span>
+                                            {% endif %}
+                                            {% if question.option2 %}
+                                            <span class="option-preview {% if question.correct_options and '2' in question.correct_options %}option-correct{% endif %}">
+                                                B: {{ question.option2|truncatechars:30 }}
+                                            </span>
+                                            {% endif %}
+                                            {% if question.option3 %}
+                                            <span class="option-preview {% if question.correct_options and '3' in question.correct_options %}option-correct{% endif %}">
+                                                C: {{ question.option3|truncatechars:30 }}
+                                            </span>
+                                            {% endif %}
+                                            {% if question.option4 %}
+                                            <span class="option-preview {% if question.correct_options and '4' in question.correct_options %}option-correct{% endif %}">
+                                                D: {{ question.option4|truncatechars:30 }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    <div class="question-date mt-2">
+                                        <i class="far fa-clock me-1"></i>
+                                        {{ question.created_at|date:"M d, Y" }}
+                                    </div>
+                                </div>
+                            </td>
+                             <!-- Image Column -->
+<td class="text-center">
+    <div class="question-image-container">
+
+        {# GRAPH BASED QUESTION #}
+        {% if question.question_graph_image %}
+            <div class="image-thumbnail"
+                 onclick="viewQuestionImage('{{ question.question_graph_image.url }}', 'Graph #{{ question.id }}')">
+                <img src="{{ question.question_graph_image.url }}"
+                     class="image-preview"
+                     alt="Graph Image">
+                <div class="image-hover">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Graph</span>
+                </div>
+            </div>
+
+        {# DIAGRAM BASED QUESTION #}
+        {% elif question.diagram_image %}
+            <div class="image-thumbnail"
+                 onclick="viewQuestionImage('{{ question.diagram_image.url }}', 'Diagram #{{ question.id }}')">
+                <img src="{{ question.diagram_image.url }}"
+                     class="image-preview"
+                     alt="Diagram Image">
+                <div class="image-hover">
+                    <i class="fas fa-draw-polygon"></i>
+                    <span>Diagram</span>
+                </div>
+            </div>
+
+        {# THEOREM DIAGRAM #}
+        {% elif question.theorem_diagram %}
+            <div class="image-thumbnail"
+                 onclick="viewQuestionImage('{{ question.theorem_diagram.url }}', 'Theorem Diagram #{{ question.id }}')">
+                <img src="{{ question.theorem_diagram.url }}"
+                     class="image-preview"
+                     alt="Theorem Diagram">
+                <div class="image-hover">
+                    <i class="fas fa-square-root-alt"></i>
+                    <span>Theorem</span>
+                </div>
+            </div>
+
+        {# NO IMAGE #}
+        {% else %}
+            <div class="no-image-placeholder">
+                <i class="fas fa-image text-muted"></i>
+                <small class="d-block text-muted">No Image</small>
+            </div>
+        {% endif %}
+
+    </div>
+</td>
+
+                            
+                            <td>
+                                <div class="answer-preview">
+                                    {% if question.question_type == 'objective' %}
+                                        {% if question.correct_options %}
+                                            <span class="correct-answer-badge">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                Correct: 
+                                                {% for opt in question.correct_options %}
+                                                    {{ opt|upper }}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">No correct option set</span>
+                                        {% endif %}
+                                    {% elif question.question_type == 'true_false' %}
+                                        <span class="answer-text {% if question.answer == 'true' %}answer-true{% else %}answer-false{% endif %}">
+                                            {% if question.answer == 'true' %}
+                                            <i class="fas fa-check text-success me-1"></i>True
+                                            {% else %}
+                                            <i class="fas fa-times text-danger me-1"></i>False
+                                            {% endif %}
+                                        </span>
+                                    {% elif question.question_type == 'match_following' %}
+                                        <span class="answer-text">
+                                            <i class="fas fa-link me-1"></i>
+                                            {{ question.match_answers|default:"No matches"|truncatechars:30 }}
+                                        </span>
+                                    {% elif question.question_type == 'fill_in_the_blanks' %}
+                                        <span class="answer-text">
+                                            <i class="fas fa-edit me-1"></i>
+                                            {{ question.blank_answers|default:"No answers"|truncatechars:30 }}
+                                        </span>
+                                    {% elif question.question_type == 'numerical' %}
+                                        <span class="answer-text">
+                                            <i class="fas fa-calculator me-1"></i>
+                                            {{ question.final_answer|default:"No answer"|truncatechars:30 }}
+                                        </span>
+                                    {% else %}
+                                        <div class="answer-text">
+                                            {{ question.answer|safe|truncatechars:50|default:"No answer provided" }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+
+
+                            
+                            <td class="text-center">
+                                {% if question.difficulty == 'easy' %}
+                                <span class="difficulty-badge difficulty-easy">
+                                    <i class="fas fa-thermometer-empty me-1"></i>Easy
+                                </span>
+                                {% elif question.difficulty == 'medium' %}
+                                <span class="difficulty-badge difficulty-medium">
+                                    <i class="fas fa-thermometer-half me-1"></i>Medium
+                                </span>
+                                {% elif question.difficulty == 'hard' %}
+                                <span class="difficulty-badge difficulty-hard">
+                                    <i class="fas fa-thermometer-full me-1"></i>Hard
+                                </span>
+                                {% else %}
+                                <span class="difficulty-badge">
+                                    {{ question.difficulty|default:"-" }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            
+                            <td class="text-center">
+                                <span class="marks-badge">
+                                    <i class="fas fa-star me-1"></i>{{ question.marks|default:"0" }}
+                                </span>
+                            </td>
+                            
+                            <!-- Replace the action buttons in your existing table -->
+                        <td class="text-center">
+                            <div class="action-buttons">
+                                <a href="{% url 'view_question_detail' question.id %}" 
+                                class="btn-action btn-view" title="View Full Question">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'edit_question' question.id %}" 
+                                class="btn-action btn-edit" title="Edit Question">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                               
+                            </div>
+                        </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center py-5">
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-inbox"></i>
+                                </div>
+                                <h3 class="mt-3 mb-2">No Questions Found</h3>
+                                <p class="text-muted mb-4">Try adjusting your filters or add new questions.</p>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <a href="{% url 'view_all_question' %}" class="btn btn-outline-primary px-4">
+                                        <i class="fas fa-eye me-2"></i>View All
+                                    </a>
+                                    <a href="{% url 'add_question' %}" class="btn btn-primary px-4">
+                                        <i class="fas fa-plus-circle me-2"></i>Add Question
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    {% if questions.has_other_pages %}
+    <div class="pagination-section mt-5">
+        <div class="pagination-container">
+            <nav aria-label="Question pagination">
+                <ul class="pagination">
+                    {% if questions.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ questions.previous_page_number }}{% if class_filter %}&class={{ class_filter }}{% endif %}{% if subject_filter %}&subject={{ subject_filter }}{% endif %}{% if question_type_filter %}&type={{ question_type_filter }}{% endif %}{% if difficulty_filter %}&difficulty={{ difficulty_filter }}{% endif %}" 
+                           aria-label="Previous">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for i in questions.paginator.page_range %}
+                    <li class="page-item {% if questions.number == i %}active{% endif %}">
+                        <a class="page-link" 
+                           href="?page={{ i }}{% if class_filter %}&class={{ class_filter }}{% endif %}{% if subject_filter %}&subject={{ subject_filter }}{% endif %}{% if question_type_filter %}&type={{ question_type_filter }}{% endif %}{% if difficulty_filter %}&difficulty={{ difficulty_filter }}{% endif %}">
+                            {{ i }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if questions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page={{ questions.next_page_number }}{% if class_filter %}&class={{ class_filter }}{% endif %}{% if subject_filter %}&subject={{ subject_filter }}{% endif %}{% if question_type_filter %}&type={{ question_type_filter }}{% endif %}{% if difficulty_filter %}&difficulty={{ difficulty_filter }}{% endif %}" 
+                           aria-label="Next">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Question Detail Modal -->
+<div class="confirmation-modal" id="questionDetailModal">
+    <div class="confirmation-content" style="max-width: 800px;">
+        <div class="confirmation-header" style="background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);">
+            <div class="confirmation-icon">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <h3>Question Details</h3>
+            <button class="close-modal" onclick="closeQuestionModal()">&times;</button>
+        </div>
+        <div class="confirmation-body" id="questionDetailContent" style="text-align: left;">
+            <!-- Content will be loaded here via AJAX -->
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="image-modal" id="imageModal">
+    <div class="image-modal-content">
+        <button class="image-modal-close" onclick="closeImageModal()">&times;</button>
+        <img id="modalImage" class="image-modal-img" src="" alt="">
+        <div id="modalCaption" class="image-modal-caption"></div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="confirmation-modal" id="deleteConfirmationModal">
+    <div class="confirmation-content">
+        <div class="confirmation-header">
+            <div class="confirmation-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3>Confirm Delete</h3>
+            <button class="close-modal" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="confirmation-body">
+            <p>Are you sure you want to delete this question?</p>
+            <p class="text-danger"><small>This action cannot be undone.</small></p>
+            <div class="confirmation-actions">
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="button" class="btn-confirm-delete" onclick="confirmDelete()">
+                        <i class="fas fa-trash me-2"></i>Delete
+                    </button>
+                </form>
+                <button class="btn-cancel" onclick="closeDeleteModal()">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    /* Color Variables */
+    :root {
+        --primary: #4361ee;
+        --secondary: #3a0ca3;
+        --success: #4cc9f0;
+        --warning: #f72585;
+        --danger: #f72585;
+        --info: #7209b7;
+        --dark: #1a1a2e;
+        --light: #f8f9fa;
+        
+        --mcq-color: #4361ee;
+        --descriptive-color: #4cc9f0;
+        --match-color: #f72585;
+        --fill-color: #3a0ca3;
+        --num-color: #2ec4b6;
+        --tf-color: #ff9e00;
+        --short-color: #7209b7;
+        --long-color: #560bad;
+        --diag-color: #06d6a0;
+        --graph-color: #3a0ca3;
+        --theorem-color: #4361ee;
+        --chem-color: #e63946;
+        
+        --easy-color: #2ec4b6;
+        --medium-color: #ff9e00;
+        --hard-color: #e63946;
+    }
+    
+    /* Header Section */
+    .header-section {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+    
+    .btn-add-question {
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-add-question:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        color: white;
+    }
+    
+    /* Stats Bar */
+    .stats-bar {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .stat-card {
+        flex: 1;
+        min-width: 180px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .stat-total .stat-icon { background: rgba(67, 97, 238, 0.2); color: var(--primary); }
+    .stat-mcq .stat-icon { background: rgba(76, 201, 240, 0.2); color: var(--mcq-color); }
+    .stat-descriptive .stat-icon { background: rgba(114, 9, 183, 0.2); color: var(--descriptive-color); }
+    .stat-match .stat-icon { background: rgba(247, 37, 133, 0.2); color: var(--match-color); }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    /* Image Column Styling */
+    .question-image-container {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    
+    /* Image Thumbnail */
+    .image-thumbnail {
+        position: relative;
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #e9ecef;
+        background: #f8f9fa;
+    }
+    
+    .image-thumbnail:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-color: #4361ee;
+    }
+    
+    .image-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: white;
+    }
+    
+    /* Image Hover Overlay */
+    .image-hover {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(67, 97, 238, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        color: white;
+        font-size: 0.7rem;
+    }
+    
+    .image-thumbnail:hover .image-hover {
+        opacity: 1;
+    }
+    
+    .image-hover i {
+        font-size: 1.2rem;
+        margin-bottom: 4px;
+    }
+    
+    /* No Image Placeholder */
+    .no-image-placeholder {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+    }
+    
+    .no-image-placeholder i {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+    
+    .no-image-placeholder small {
+        font-size: 0.7rem;
+    }
+    
+    /* Image Modal Styling */
+    .image-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .image-modal-content {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+        text-align: center;
+    }
+    
+    .image-modal-img {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 10px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    
+    .image-modal-caption {
+        color: white;
+        margin-top: 20px;
+        font-size: 1.2rem;
+        padding: 10px 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 5px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .image-modal-close {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        transition: transform 0.3s ease;
+    }
+    
+    .image-modal-close:hover {
+        transform: scale(1.2);
+    }
+    
+    /* Filter Section */
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .filter-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem 2rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .filter-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+    }
+    
+    .filter-body {
+        padding: 2rem;
+    }
+    
+    .filter-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .filter-select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        background: white;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+    }
+    
+    .difficulty-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .difficulty-dot.easy { background: var(--easy-color); }
+    .difficulty-dot.medium { background: var(--medium-color); }
+    .difficulty-dot.hard { background: var(--hard-color); }
+    
+    .btn-filter-apply {
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .btn-filter-reset {
+        background: transparent;
+        color: #6c757d;
+        border: 2px solid #dee2e6;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .btn-filter-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-filter-reset:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+    }
+    
+    .total-counter {
+        background: #f8f9fa;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        color: var(--dark);
+    }
+    
+    .total-counter .count {
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+    
+    /* Questions Table */
+    .questions-table-container {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    
+    .questions-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .questions-table thead {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+    
+    .questions-table th {
+        color: white;
+        padding: 1.2rem 1rem;
+        font-weight: 600;
+        text-align: left;
+        border: none;
+        position: sticky;
+        top: 0;
+    }
+    
+    .questions-table th:first-child {
+        border-top-left-radius: 15px;
+    }
+    
+    .questions-table th:last-child {
+        border-top-right-radius: 15px;
+    }
+    
+    .questions-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f3f4;
+    }
+    
+    .questions-table tbody tr:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .questions-table td {
+        padding: 1.2rem 1rem;
+        vertical-align: middle;
+    }
+    
+    /* Question ID */
+    .question-id {
+        text-align: center;
+    }
+    
+    .id-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        color: white;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    /* Subject Info */
+    .subject-name {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 4px;
+    }
+    
+    .subject-meta {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    /* Chapter & Topic Tags */
+    .chapter-tag, .topic-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        background: #f8f9fa;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        color: #495057;
+    }
+    
+    /* Type Badges */
+    .type-badge {
+        display: inline-block;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+    
+    .type-mcq { background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%); }
+    .type-descriptive { background: linear-gradient(135deg, #4cc9f0 0%, #2ec4b6 100%); }
+    .type-match { background: linear-gradient(135deg, #f72585 0%, #b5179e 100%); }
+    .type-fill { background: linear-gradient(135deg, #3a0ca3 0%, #4361ee 100%); }
+    .type-num { background: linear-gradient(135deg, #2ec4b6 0%, #06d6a0 100%); }
+    .type-tf { background: linear-gradient(135deg, #ff9e00 0%, #ff9100 100%); }
+    .type-short { background: linear-gradient(135deg, #7209b7 0%, #560bad 100%); }
+    .type-long { background: linear-gradient(135deg, #560bad 0%, #480ca8 100%); }
+    .type-diag { background: linear-gradient(135deg, #06d6a0 0%, #4cc9f0 100%); }
+    .type-graph { background: linear-gradient(135deg, #3a0ca3 0%, #4361ee 100%); }
+    .type-theorem { background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%); }
+    .type-chem { background: linear-gradient(135deg, #e63946 0%, #d00000 100%); }
+    .type-default { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); }
+    
+    /* Question Preview */
+    .question-preview {
+        max-width: 300px;
+    }
+    
+    .question-text {
+        color: var(--dark);
+        line-height: 1.5;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    .mcq-options-preview {
+        background: #f8f9fa;
+        padding: 8px;
+        border-radius: 5px;
+        border-left: 3px solid #4361ee;
+    }
+    
+    .option-preview {
+        background: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        border: 1px solid #dee2e6;
+    }
+    
+    .option-correct {
+        background: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+        font-weight: bold;
+    }
+    
+    .question-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    /* Answer Preview */
+    .answer-preview {
+        max-width: 200px;
+    }
+    
+    .correct-answer-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .answer-text {
+        color: var(--dark);
+        line-height: 1.5;
+        font-size: 0.9rem;
+    }
+    
+    .answer-true {
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .answer-false {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    /* Difficulty Badges */
+    .difficulty-badge {
+        display: inline-block;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .difficulty-easy { background: linear-gradient(135deg, #2ec4b6 0%, #06d6a0 100%); }
+    .difficulty-medium { background: linear-gradient(135deg, #ff9e00 0%, #ff9100 100%); }
+    .difficulty-hard { background: linear-gradient(135deg, #e63946 0%, #d00000 100%); }
+    
+    /* Marks Badge */
+    .marks-badge {
+        display: inline-block;
+        padding: 6px 15px;
+        background: linear-gradient(135deg, #7209b7 0%, #560bad 100%);
+        color: white;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+    
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: white;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-view { background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%); }
+    .btn-edit { background: linear-gradient(135deg, #ff9e00 0%, #ff9100 100%); }
+    .btn-delete { background: linear-gradient(135deg, #e63946 0%, #d00000 100%); }
+    
+    .btn-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        padding: 3rem 1rem;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+    
+    /* Pagination */
+    .pagination-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    
+    .pagination {
+        justify-content: center;
+    }
+    
+    .page-link {
+        border: 2px solid #e9ecef;
+        color: #495057;
+        margin: 0 5px;
+        border-radius: 10px !important;
+        padding: 10px 18px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .page-link:hover {
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        color: white;
+        border-color: #4361ee;
+    }
+    
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        border-color: #4361ee;
+        color: white;
+    }
+    
+    /* Confirmation Modal */
+    .confirmation-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    
+    .confirmation-content {
+        background: white;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 15px;
+        overflow: hidden;
+        animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .confirmation-header {
+        background: linear-gradient(135deg, #e63946 0%, #d00000 100%);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .confirmation-icon {
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+    
+    .confirmation-body {
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .confirmation-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+    
+    .btn-confirm-delete {
+        background: linear-gradient(135deg, #e63946 0%, #d00000 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .close-modal {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+    }
+    
+    /* Question Detail Modal Styles */
+    .question-detail-content {
+        padding: 20px;
+    }
+    
+    .question-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .question-detail-info {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    
+    .info-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 12px;
+        background: #f8f9fa;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+    
+    .question-detail-body {
+        margin-bottom: 20px;
+    }
+    
+    .question-text-full {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .answer-text-full {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        background: #d4edda;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .mcq-options-full {
+        margin: 20px 0;
+    }
+    
+    .mcq-option-full {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        margin-bottom: 8px;
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .mcq-option-full.correct {
+        background: #d4edda;
+        border-color: #28a745;
+    }
+    
+    .mcq-option-full .option-letter {
+        width: 30px;
+        font-weight: bold;
+        margin-right: 15px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .stats-bar {
+            flex-direction: column;
+        }
+        
+        .questions-table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .filter-section .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .btn-filter-apply,
+        .btn-filter-reset {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .questions-table th:nth-child(6),
+        .questions-table td:nth-child(6) {
+            min-width: 200px;
+        }
+        
+        .questions-table th:nth-child(7),
+        .questions-table td:nth-child(7) {
+            min-width: 150px;
+        }
+        
+        .question-image-container {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .image-thumbnail {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .no-image-placeholder {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .image-hover i {
+            font-size: 0.9rem;
+        }
+        
+        .image-hover span {
+            font-size: 0.6rem;
+        }
+    }
+</style>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    let currentQuestionId = null;
+    let currentImageModal = null;
+    
+    function viewQuestionDetail(questionId) {
+        currentQuestionId = questionId;
+        
+        // Show loading
+        document.getElementById('questionDetailContent').innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p class="mt-3">Loading question details...</p>
+            </div>
+        `;
+        
+        // Show modal
+        document.getElementById('questionDetailModal').style.display = 'flex';
+        
+        // Fetch question details via AJAX
+        fetch(`/api/question/${questionId}/detail/`)
+            .then(response => response.json())
+            .then(data => {
+                let content = `
+                    <div class="question-detail-content">
+                        <div class="question-detail-header">
+                            <div>
+                                <h4 class="mb-0">Question Details</h4>
+                                <small class="text-muted">ID: #${data.id}</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                ${data.type_badge}
+                                ${data.difficulty_badge}
+                                <span class="info-badge">
+                                    <i class="fas fa-star"></i> ${data.marks} Marks
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="question-detail-info">
+                            <span class="info-badge">
+                                <i class="fas fa-book"></i> ${data.subject}
+                            </span>
+                            <span class="info-badge">
+                                <i class="fas fa-graduation-cap"></i> ${data.class}
+                            </span>
+                            <span class="info-badge">
+                                <i class="fas fa-bookmark"></i> ${data.chapter}
+                            </span>
+                            <span class="info-badge">
+                                <i class="fas fa-hashtag"></i> ${data.topic}
+                            </span>
+                            <span class="info-badge">
+                                <i class="far fa-clock"></i> ${data.created_at}
+                            </span>
+                        </div>
+                        
+                        <div class="question-detail-body">
+                            <h5>Question:</h5>
+                            <div class="question-text-full">
+                                ${data.question}
+                            </div>
+                            
+                            ${data.mcq_options || ''}
+                            
+                            <h5>Answer:</h5>
+                            <div class="answer-text-full">
+                                ${data.answer}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('questionDetailContent').innerHTML = content;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('questionDetailContent').innerHTML = `
+                    <div class="text-center py-4 text-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        <p class="mt-3">Failed to load question details.</p>
+                    </div>
+                `;
+            });
+    }
+    
+    function closeQuestionModal() {
+        document.getElementById('questionDetailModal').style.display = 'none';
+        currentQuestionId = null;
+    }
+    
+    // Image Modal Functionality
+    function viewQuestionImage(imageUrl, caption) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalCaption = document.getElementById('modalCaption');
+        
+        modalImg.src = imageUrl;
+        modalCaption.textContent = caption;
+        modal.style.display = 'flex';
+        currentImageModal = modal;
+        
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeImageModal() {
+        const modal = document.getElementById('imageModal');
+        modal.style.display = 'none';
+        currentImageModal = null;
+        
+        // Restore body scroll
+        document.body.style.overflow = 'auto';
+    }
+    
+    function showDeleteConfirmation(questionId) {
+        currentQuestionId = questionId;
+        
+        // Set the form action
+        const form = document.getElementById('deleteForm');
+        form.action = `/question/delete/${questionId}/`;
+        
+        document.getElementById('deleteConfirmationModal').style.display = 'flex';
+    }
+    
+    function closeDeleteModal() {
+        document.getElementById('deleteConfirmationModal').style.display = 'none';
+        currentQuestionId = null;
+    }
+    
+    function confirmDelete() {
+        if (currentQuestionId) {
+            const form = document.getElementById('deleteForm');
+            form.submit();
+        }
+        closeDeleteModal();
+    }
+    
+    // Search functionality
+    function searchTable() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const rows = document.querySelectorAll('#questionsTable tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const questionModal = document.getElementById('questionDetailModal');
+        const deleteModal = document.getElementById('deleteConfirmationModal');
+        const imageModal = document.getElementById('imageModal');
+        
+        if (event.target === questionModal) {
+            closeQuestionModal();
+        }
+        if (event.target === deleteModal) {
+            closeDeleteModal();
+        }
+        if (event.target === imageModal) {
+            closeImageModal();
+        }
+    }
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            if (currentImageModal) {
+                closeImageModal();
+            }
+            if (document.getElementById('questionDetailModal').style.display === 'flex') {
+                closeQuestionModal();
+            }
+            if (document.getElementById('deleteConfirmationModal').style.display === 'flex') {
+                closeDeleteModal();
+            }
+        }
+    });
+    
+    // Initialize animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to table rows
+        const rows = document.querySelectorAll('#questionsTable tbody tr');
+        rows.forEach((row, index) => {
+            row.style.animationDelay = `${index * 0.05}s`;
+        });
+        
+        // Add loading state to filter button
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function() {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalHTML = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Filtering...';
+                    submitBtn.disabled = true;
+                    
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalHTML;
+                        submitBtn.disabled = false;
+                    }, 1500);
+                }
+            });
+        }
+        
+        // Dynamic subject filtering based on class selection
+        const classFilter = document.getElementById('classFilter');
+        const subjectFilter = document.getElementById('subjectFilter');
+        
+        if (classFilter) {
+            classFilter.addEventListener('change', function() {
+                const classId = this.value;
+                const form = document.getElementById('filterForm');
+                if (classId) {
+                    // Submit form to reload with filtered subjects
+                    form.submit();
+                }
+            });
+        }
+        
+        // Show loading indicator when filters change
+        const filterSelects = document.querySelectorAll('.filter-select');
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                const submitBtn = document.querySelector('.btn-filter-apply');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Applying...';
+                    submitBtn.disabled = true;
+                    document.getElementById('filterForm').submit();
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

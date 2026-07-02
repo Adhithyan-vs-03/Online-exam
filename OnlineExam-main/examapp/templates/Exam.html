@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/file/exam.css">
+</head>
+<body>
+    <div class="header-top8">
+        <img src="/static/images/nassonline.jpg" alt="Logo" class="logo8">
+        <div class="header-info8">
+            <h3 class="welcome8">Welcome , {{ data.username }}</h3>
+            <a href="{% url 'Login' %}">
+                <button class="reg8">
+                    LogOut <i class="fa fa-sign-out" style="font-size:16px;"></i>
+                </button>
+            </a>
+        </div>
+    </div>
+    <hr>
+        <div class="container8">
+            <aside>
+                <ul>
+                    <li class="dropdown8"><img src="/static/dashboard/dashboard.png" alt="">Genaral Exam
+                        <ul class="dropdown-menu8">
+                                    <li onclick="location.href='/test/'">Take Exam</li>
+                        </ul>
+                    </li>  
+                </ul>
+                <ul>
+                    <li class="dropdown8"><img src="/static/dashboard/dashboard.png" alt="">Topic wise exam
+                        <ul class="dropdown-menu8">
+                            <li onclick="location.href='/test/?subject=Physics'">Physics</li>
+                            <li onclick="location.href='/test/?subject=Chemistry'">Chemistry</li>
+                            <li onclick="location.href='/test/?subject=Biology'">Biology</li>
+                            <li onclick="location.href='/test/?subject=Mathematics'">Mathematics</li>
+
+                        </ul>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+
+        <footer>
+                <hr>
+        </footer> 
+        <script src="/static/file/exam.js"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Start Exam</title>
+    <link rel="stylesheet" href="/static/file/exam.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f4f4;
+            padding: 40px;
+        }
+
+        .exam-container {
+            max-width: 800px;
+            background: white;
+            padding: 30px;
+            margin: auto;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        .question-block {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="exam-container">
+        <h2>Online Exam</h2>
+        <p><strong>Exam Time:</strong> {{ question_paper.exam_time }} minutes</p>
+        <p><strong>Total Marks:</strong> {{ question_paper.total_marks }}</p>
+
+        <form method="post" action="{% url 'submit_exam' %}">
+            {% csrf_token %}
+            <input type="hidden" name="question_paper_id" value="{{ question_paper.id }}">
+
+            {% for question in question_paper.mathematics_questions.all %}
+                <div class="question-block">
+                    <label>Mathematics: {{ question.question }} ({{ question.marks }} marks)</label>
+                    <textarea name="answer_{{ question.id }}"></textarea>
+                </div>
+            {% endfor %}
+
+            {% for question in question_paper.physics_questions.all %}
+                <div class="question-block">
+                    <label>Physics: {{ question.question }} ({{ question.marks }} marks)</label>
+                    <textarea name="answer_{{ question.id }}"></textarea>
+                </div>
+            {% endfor %}
+
+            {% for question in question_paper.biology_questions.all %}
+                <div class="question-block">
+                    <label>Biology: {{ question.question }} ({{ question.marks }} marks)</label>
+                    <textarea name="answer_{{ question.id }}"></textarea>
+                </div>
+            {% endfor %}
+
+            {% for question in question_paper.chemistry_questions.all %}
+                <div class="question-block">
+                    <label>Chemistry: {{ question.question }} ({{ question.marks }} marks)</label>
+                    <textarea name="answer_{{ question.id }}"></textarea>
+                </div>
+            {% endfor %}
+
+            <button type="submit">Submit Exam</button>
+        </form>
+    </div>
+</body>
+</html>

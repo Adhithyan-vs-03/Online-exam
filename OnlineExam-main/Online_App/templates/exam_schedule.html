@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Schedule</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/file/examschedule.css">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <div class="header-top8">
+        <img src="/static/images/nassonline.jpg" alt="Logo" class="logo8">
+        <div class="header-info8">
+            <h3 class="welcome8">Welcome, {{ data.username }}</h3>
+            <a href="{% url 'login' %}">
+                <button class="reg8">
+                    LogOut <i class="fa fa-sign-out" style="font-size:16px;"></i>
+                </button>
+            </a>
+        </div>
+        <div>
+            <button type="button" id="backButton" onclick="goBack()">BACK</button>
+        </div>
+    </div>
+
+    <!-- Exam Schedule Table -->
+    <h2 style="text-align: center;">Exam Schedule</h2>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Subject</th>
+            </tr>
+            {% for exam in exams %}
+            <tr>
+                <td>{{ exam.exam_date }}</td>
+                <td>{{ exam.exam_time }}</td>
+                <td>{{ exam.exam_subject }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center;">No exams scheduled</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- JavaScript for Back Button -->
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+
+</body>
+</html>

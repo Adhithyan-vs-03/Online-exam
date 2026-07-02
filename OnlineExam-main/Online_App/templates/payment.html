@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Package Payment</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+<div class="bg-white shadow-xl rounded-2xl p-8 w-[500px]">
+
+    <h2 class="text-3xl font-bold mb-4 text-center">
+        {{ package.name }}
+    </h2>
+
+    <p class="text-gray-600 text-center mb-6">
+        {{ package.description }}
+    </p>
+
+    <div class="space-y-3 mb-6">
+
+        <div class="flex justify-between">
+            <span class="font-semibold">Type</span>
+            <span>{{ package.type|upper }}</span>
+        </div>
+
+        <div class="flex justify-between">
+            <span class="font-semibold">Validity</span>
+            <span>{{ package.validity }} Days</span>
+        </div>
+
+        <div class="flex justify-between">
+            <span class="font-semibold">Price</span>
+            <span class="text-green-600 font-bold">₹{{ package.price }}</span>
+        </div>
+
+        {% if package.original_price %}
+        <div class="flex justify-between">
+            <span class="font-semibold">Original Price</span>
+            <span class="line-through text-gray-400">₹{{ package.original_price }}</span>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <hr class="mb-6">
+
+    <h3 class="text-xl font-semibold mb-3">Package Features</h3>
+
+    <ul class="list-disc pl-6 mb-6 text-gray-700">
+        {% for feature in package.features.splitlines %}
+        <li>{{ feature }}</li>
+        {% endfor %}
+    </ul>
+
+    <button id="pay-btn"
+        class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-lg">
+        Pay ₹{{ package.price }}
+    </button>
+
+</div>
+
+<script>
+var options = {
+    "key": "{{ razorpay_key }}",
+    "amount": "{{ amount }}",   // in paise
+    "currency": "{{ currency }}",
+    "name": "Online Exam Platform",
+    "description": "{{ package.name }}",
+    "order_id": "{{ razorpay_order_id }}",
+
+    "handler": function (response) {
+
+        // Send payment details to backend
+        fetch("/payment-success/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                package_id: "{{ package.id }}",
+                payment_id: response.razorpay_payment_id,
+                order_id: response.razorpay_order_id
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert("✅ Payment Successful!");
+                window.location.href = "/transactions/";
+            } else {
+                alert("❌ Payment saved failed");
+            }
+        });
+    },
+
+    "theme": {
+        "color": "#16a34a"
+    }
+};
+
+var rzp = new Razorpay(options);
+
+document.getElementById("pay-btn").onclick = function(e){
+    rzp.open();
+    e.preventDefault();
+};
+</script>
+
+</body>
+</html>

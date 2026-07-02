@@ -1,0 +1,33 @@
+.logo8 {
+    height: 60px;
+}
+.header-top8 {
+    width: 100%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 30px;
+    border-bottom: 2px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.header-info8 {
+    display: flex;
+    align-items: center;
+}
+
+.welcome8 {
+    margin-right: 30px;
+    font-size: 18px;
+}
+button {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    margin-right: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.3s;
+}

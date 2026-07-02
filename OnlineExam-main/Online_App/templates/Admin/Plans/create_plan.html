@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create New Plan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5; 
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+            position: relative; 
+        }
+        h1 { 
+            color: #333; 
+            text-align: center; 
+        }
+        .form-group { margin-bottom: 15px; }
+        label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+        }
+        input[type="text"], 
+        input[type="number"], 
+        select { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+        }
+        .checkbox-group { 
+            display: flex; 
+            align-items: center; 
+        }
+        .checkbox-group input { 
+            width: auto; 
+            margin-right: 10px; 
+        }
+        .btn { 
+            padding: 10px 15px; 
+            background: #4a6cf7; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
+        .btn-cancel { 
+            background: #f74a4a; 
+            text-decoration: none;
+            display: inline-block;
+            padding: 10px 15px;
+        }
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #4a6cf7;
+        }
+        .back-btn:hover {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back button -->
+        <button class="back-btn" onclick="history.back()" title="Go Back">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+
+        <h1>Create New Exam Plan</h1>
+        <form method="post" id="planForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Plan Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="plan_type">Exam Type:</label>
+                <select id="plan_type" name="plan_type" required>
+                    <option value="neet">NEET</option>
+                    <option value="jee">JEE</option>
+                    <option value="combined">NEET + JEE Combined</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="price">Price (₹):</label>
+                <input type="number" id="price" name="price" step="0.01" min="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="duration">Duration:</label>
+                <select id="duration" name="duration" required>
+                    <option value="monthly">Per Month</option>
+                    <option value="yearly">Per Year</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="users">Number of Users:</label>
+                <input type="number" id="users" name="users" min="1" value="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="practice_tests">Practice Tests:</label>
+                <input type="number" id="practice_tests" name="practice_tests" min="0" value="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="full_length_mocks">Full Mock Tests:</label>
+                <input type="number" id="full_length_mocks" name="full_length_mocks" min="0" value="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="doubt_sessions">Doubt Sessions:</label>
+                <input type="number" id="doubt_sessions" name="doubt_sessions" min="0" value="0" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="storage">Storage:</label>
+                <input type="text" id="storage" name="storage" value="1024 MB" required>
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="study_materials" name="study_materials">
+                <label for="study_materials">Study Materials</label>
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="video_lectures" name="video_lectures">
+                <label for="video_lectures">Video Lectures</label>
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="performance_analytics" name="performance_analytics">
+                <label for="performance_analytics">Performance Analytics</label>
+            </div>
+            
+            <div style="text-align: center;">
+                <button type="submit" class="btn">Create Plan</button>
+                <a href="/" class="btn btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,127 @@
+/* General Page Styling */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f8f9fa;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header Styling */
+.header-top8 {
+    width: 100%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 30px;
+    border-bottom: 2px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.logo8 {
+    height: 60px;
+}
+
+.header-info8 {
+    display: flex;
+    align-items: center;
+}
+
+.welcome8 {
+    margin-right: 20px;
+    font-size: 18px;
+}
+
+.reg8 {
+    background: #ff6b6b;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.reg8:hover {
+    background: #e84118;
+}
+
+/* Feedback Form Container */
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 40%;
+    margin-top: 40px;
+    text-align: center;
+}
+
+/* Heading */
+h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #444;
+}
+
+/* Form Styling */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    background: #f9f9f9;
+    color: #333;
+}
+
+textarea {
+    resize: none;
+    height: 120px;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        width: 80%;
+    }
+    
+    .header-top8 {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header-info8 {
+        flex-direction: column;
+    }
+
+    .welcome8 {
+        margin-bottom: 10px;
+    }
+}

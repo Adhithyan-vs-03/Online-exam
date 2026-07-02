@@ -1,0 +1,329 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Result - {{ result.question_paper.exam_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .progress-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(#10b981 0% {{ result.percentage }}%, #e5e7eb {{ result.percentage }}% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .progress-circle::before {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .progress-text {
+            position: relative;
+            z-index: 1;
+            font-weight: bold;
+            font-size: 24px;
+            color: #1f2937;
+        }
+        
+        .question-review {
+            border-left: 4px solid;
+            transition: all 0.3s;
+        }
+        
+        .question-review.correct {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .question-review.incorrect {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .question-review.unattempted {
+            border-left-color: #9ca3af;
+            background: #f9fafb;
+        }
+        
+        .answer-box {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .correct-answer {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+        }
+        
+        .student-answer {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+        }
+        
+        .tab-button {
+            padding: 12px 24px;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            background: white;
+            color: #3b82f6;
+            border-bottom: 3px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Exam Result</h2>
+                    <p class="text-gray-600">{{ paper_name|default:"Exam" }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'student_exam_results' %}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        <i class="fas fa-list mr-2"></i>All Results
+                    </a>
+                    <a href="{% url 'student_available_exams' %}" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 ml-2">
+                        <i class="fas fa-clipboard-list mr-2"></i>Available Exams
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+        <!-- Result Summary -->
+        <div class="result-card mb-8">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="text-center md:text-left mb-6 md:mb-0">
+                    <h2 class="text-3xl font-bold mb-2">Congratulations!</h2>
+                    <p class="text-blue-100 mb-4">You have completed the exam</p>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-center">
+                            <div class="text-4xl font-bold">{{ result.grade }}</div>
+                            <div class="text-sm opacity-90">Grade</div>
+                        </div>
+                        <div class="h-12 w-px bg-white opacity-50"></div>
+                        <div class="text-center">
+                            <div class="text-4xl font-bold">{{ result.percentage|floatformat:1 }}%</div>
+                            <div class="text-sm opacity-90">Percentage</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-circle">
+                    <div class="progress-text">{{ result.percentage|floatformat:1 }}%</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-xl p-6 shadow text-center">
+                <div class="text-3xl font-bold text-green-600 mb-2">{{ result.correct_answers }}</div>
+                <div class="text-gray-700 font-medium">Correct Answers</div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow text-center">
+                <div class="text-3xl font-bold text-red-600 mb-2">{{ result.wrong_answers }}</div>
+                <div class="text-gray-700 font-medium">Wrong Answers</div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow text-center">
+                <div class="text-3xl font-bold text-gray-600 mb-2">{{ result.unattempted }}</div>
+                <div class="text-gray-700 font-medium">Unattempted</div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-6 shadow text-center">
+                <div class="text-3xl font-bold text-blue-600 mb-2">{{ result.time_taken|time:"H:i:s" }}</div>
+                <div class="text-gray-700 font-medium">Time Taken</div>
+            </div>
+        </div>
+        
+        <!-- Marks Breakdown -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-chart-bar mr-2 text-blue-600"></i>Marks Breakdown
+            </h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="font-medium">Obtained Marks</span>
+                        <span class="font-bold text-green-600">{{ result.obtained_marks }}/{{ result.total_marks }}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div class="bg-green-600 h-3 rounded-full" 
+                             style="width: {% widthratio result.obtained_marks result.total_marks 100 %}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Question Review Tabs -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Tab Headers -->
+            <div class="flex border-b border-gray-200">
+                <div class="tab-button active" onclick="showTab('all')" id="tabAll">
+                    All Questions ({{ question_results|length }})
+                </div>
+                <div class="tab-button" onclick="showTab('correct')" id="tabCorrect">
+                    Correct ({{ result.correct_answers }})
+                </div>
+                <div class="tab-button" onclick="showTab('incorrect')" id="tabIncorrect">
+                    Incorrect ({{ result.wrong_answers }})
+                </div>
+                <div class="tab-button" onclick="showTab('unattempted')" id="tabUnattempted">
+                    Unattempted ({{ result.unattempted }})
+                </div>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="p-6">
+                <div id="tabContentAll">
+                    {% for q_result in question_results %}
+                    <div class="question-review {% if q_result.is_correct %}correct{% elif q_result.student_answer %}incorrect{% else %}unattempted{% endif %} mb-6 p-4 rounded-lg">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <span class="font-bold text-gray-800">Question {{ forloop.counter }}</span>
+                                <span class="ml-2 px-2 py-1 text-xs rounded 
+                                    {% if q_result.is_correct %}bg-green-100 text-green-800{% elif q_result.student_answer %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {% if q_result.is_correct %}
+                                    <i class="fas fa-check mr-1"></i>Correct
+                                    {% elif q_result.student_answer %}
+                                    <i class="fas fa-times mr-1"></i>Incorrect
+                                    {% else %}
+                                    <i class="fas fa-minus mr-1"></i>Unattempted
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="font-bold {% if q_result.is_correct %}text-green-600{% else %}text-red-600{% endif %}">
+                                {{ q_result.marks_obtained }}/{{ q_result.question.marks|default:"1" }} marks
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="font-medium text-gray-700 mb-2">Question:</div>
+                            <div class="text-gray-800">{{ q_result.question.question|safe }}</div>
+                        </div>
+                        
+                        {% if q_result.student_answer %}
+                        <div class="mb-3">
+                            <div class="font-medium text-gray-700 mb-2">Your Answer:</div>
+                            <div class="answer-box student-answer">{{ q_result.student_answer }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if not q_result.is_correct and q_result.question.correct_options %}
+                        <div class="mb-3">
+                            <div class="font-medium text-gray-700 mb-2">Correct Answer:</div>
+                            <div class="answer-box correct-answer">{{ q_result.question.correct_options }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if q_result.question.answer and q_result.question.question_type != 'objective' %}
+                        <div class="mb-3">
+                            <div class="font-medium text-gray-700 mb-2">Model Answer:</div>
+                            <div class="answer-box correct-answer">{{ q_result.question.answer }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="mt-8 text-center space-x-4">
+            <button onclick="window.print()" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                <i class="fas fa-print mr-2"></i>Print Result
+            </button>
+            <a href="{% url 'student_available_exams' %}" class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                <i class="fas fa-clipboard-list mr-2"></i>Take Another Exam
+            </a>
+        </div>
+    </main>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('[id^="tabContent"]').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-button').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`tabContent${capitalizeFirst(tabName)}`).style.display = 'block';
+            
+            // Add active class to selected tab
+            document.getElementById(`tab${capitalizeFirst(tabName)}`).classList.add('active');
+            
+            // Filter questions based on tab
+            filterQuestions(tabName);
+        }
+        
+        function capitalizeFirst(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+        
+        function filterQuestions(filter) {
+            const questions = document.querySelectorAll('.question-review');
+            
+            questions.forEach(question => {
+                const isCorrect = question.classList.contains('correct');
+                const isUnattempted = question.classList.contains('unattempted');
+                
+                switch(filter) {
+                    case 'all':
+                        question.style.display = 'block';
+                        break;
+                    case 'correct':
+                        question.style.display = isCorrect ? 'block' : 'none';
+                        break;
+                    case 'incorrect':
+                        question.style.display = (!isCorrect && !isUnattempted) ? 'block' : 'none';
+                        break;
+                    case 'unattempted':
+                        question.style.display = isUnattempted ? 'block' : 'none';
+                        break;
+                }
+            });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            showTab('all');
+        });
+    </script>
+</body>
+</html>

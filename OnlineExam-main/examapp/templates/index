@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" class="html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index</title>
+    <link rel="icon" href="/static/images/nasso.jpg">
+    <link rel="stylesheet" href="/static/file/index.css">
+    
+</head>
+<body id="body">
+    <div class="overlay">
+        <div class="popup">
+            <h1>ABOUT</h1>
+            <h2>🎓 Unlock Your Future with Our Online Exams! 🌟</h2>
+            <h4>Welcome to Nass Online Exams, your trusted destination for
+                seamless and efficient online examinations. Our mission is to empower learners,
+                job seekers, and professionals by providing them with a secure, flexible, 
+                and user-friendly platform to assess and enhance their knowledge and skills.</h4>
+            <img src="static/images/onilne.webp" alt="No image">
+            <button class="close-popup">Close ❌</button>
+            <h3>Who We Are?</h3>
+            <h4>We are a dedicated team of education and technology experts passionate about creating 
+                innovative solutions for modern learning and assessment needs. Our platform is designed 
+                to cater to a diverse audience, ranging from students preparing for government exams to 
+                professionals aiming for certifications.</h4>
+        </div>
+    </div>
+    <div class="den" id="menu">
+        <div class="hai"></div>
+        <div class="hai"></div>
+        <div class="hai"></div>
+    </div>
+    <div class="hidden" id="hidden">
+        <button class="popup-btn">About</button> 
+        <button class="contact-btn"><a href="#contact">Contact </a></button>
+        <button class="contact-btn"><a href="#gallery">Gallery </a></button>
+    </div>
+    <div class="buttons-container" >
+        <a href="{% url 'Register' %}" ><button>Register</button></a>
+        <a href="{% url 'Login' %}" ><button class="reg">SignIn</button></a>
+    </div>
+    <header>
+        <div class="title">
+            <h1 style="font-family: arial;font-weight: 900;font-size: 300%;color: rgb(0, 0, 0,0.8);">ONLINE EXAM</h1>
+        </div>
+        <div class="imge">
+            <img src="/static/images/nassonline.jpg" alt="file not exist" width="200px"><br><br><br>
+        </div>
+        
+    </header>
+    <hr>
+    <div class="content">
+        <span class="down-arrow">⬇️</span>
+        <pre><h1>Instructions:</h1><h2><i>Before the Exam</i>
+            <li>Understand the Format:</li>
+            
+            Check whether the exam is MCQs, essay-based, or a mix.
+            Confirm if the exam is timed or has a flexible duration.
+            <li>Know the Rules:</li>
+            Read the exam guidelines (e.g., open-book, closed-book, plagiarism policy).
+            Ensure you know how to submit answers or navigate the platform.</h2>
+            <h2><i>Technical Setup:</i>
+            <li>Device:</li> 
+            Use a laptop or PC with a stable internet connection.
+            <li>Browser:</li> 
+            Check if a specific browser is required.
+            <li>Software:</li> 
+            Install necessary software (e.g., lockdown browser or proctoring tools).
+            <li>Test the system:</li> 
+            Run a trial session if the platform allows it.
+            <li>Create a Conducive Environment:</li>
+            Sit in a quiet, well-lit room free from distractions.
+            Keep your study materials, stationery, and water bottle handy.
+            <li>Prepare Academically:</li>
+            Revise the syllabus and practice previous papers.
+            Use mock exams to get familiar with the interface and time management.
+            During the Exam
+            <li>Time Management:</li>
+            Divide time based on the number of questions or marks.
+            Prioritize questions you know first, and leave tougher ones for later.
+            <li>Stay Focused:</li>
+            Avoid multitasking; concentrate solely on the exam.
+            Don’t rush; read each question carefully before answering.
+           <li> Follow Instructions:</li> 
+            Answer all compulsory questions.
+            Double-check your work before submitting.
+            <li>Technical Issues:</li>
+            If something goes wrong (e.g., internet disconnects), take a screenshot.
+            Inform the invigilator or tech support immediately.</h2>
+
+            <h2><i>After the Exam</i>
+            <li>Review Your Performance:</li>
+            If possible, check your answers or feedback from the platform.
+            Note areas for improvement.
+            <li>Reflect:</li>
+            Analyze what went well and what didn’t to prepare better next time.
+            Resources for Practice
+            Platforms: Websites like NassOnline, Testbook, or PrepInsta offer mock tests and guides.
+            YouTube: Tutorials and live problem-solving videos.
+            Aptitude Practice: Use apps like Quizizz or Kahoot for quizzes.
+        </h2></pre>
+    </div>
+    <h1 id="gallery">Gallery</h1>
+    <div class="img-det">
+        <div class="gallery">
+            <img src="/static/gallery/entrance.jpg" alt="image1" id="image1">
+        </div>
+        <div class="img-detail">
+            <h1 id="img-detail">Entrance Exams: To evaluate students' eligibility for various courses.</h1>
+        </div>
+    </div>
+    <div class="next-pre">
+        <button onclick="previewImage()"><h1><<<</h1></button>
+        <button onclick="nextImage()"><h1>>>></h1></button>
+    </div>
+    <hr>
+    <center><h3 id="contact">Contact Us:</h3></center>
+    
+    <div class="contact">
+        <img src="/static/images/phone.png" alt="no icon"><h3>727 0000 222</h3>
+        <img src="/static/images/mail.png" alt="no icon"><a href="mailto:care@nassonline.in"><h3>care@nassonline.in</h3></a>
+        <img src="/static/images/globe.png" alt="no icon"><a href="https://nassonline.in/"><h3>nassonline.in/</h3></a>
+    </div><br>
+    <div class="media">
+        <a href="https://www.facebook.com/NassOnlinetvm"><img src="/static/images/facebook.png" alt="no icon"></a>
+        <a href="https://www.linkedin.com/in/nass-online-trivandrum/"><img src="/static/images/linkedin.png" alt="no icon"></a>
+        <a href="https://www.instagram.com/nassonlineadme/"><img src="/static/images/social.png" alt="no icon"></a>
+        <a href="https://x.com/NassOnline"><img src="/static/images/twitter.png" alt="no icon"></a>
+        <a href=""><img src="/static/images/pinterest.png" alt="no icon"></a>
+        <a href="https://www.youtube.com/@nassonline1857"><img src="/static/images/youtube.png" alt="no icon"></a>
+    </div>
+    <center><h5 class="cr">© copyrighted by Nass Online</h5></center>
+    <script src="static/file/index.js"></script>
+</body>
+</html>

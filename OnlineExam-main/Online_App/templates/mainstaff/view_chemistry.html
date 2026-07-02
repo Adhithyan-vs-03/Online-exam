@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chemistry Questions - Admin Panel</title>
+<style>
+/* --- Global Styles --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* --- Header Section --- */
+.header {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.header h1 i {
+    font-size: 2.2rem;
+}
+
+.stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px 25px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    min-width: 150px;
+}
+
+.stat-card .number {
+    font-size: 2rem;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-card .label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* --- Main Content --- */
+.content {
+    padding: 30px;
+}
+
+/* --- Search and Filter Section --- */
+.search-section {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    border: 1px solid #e1e7ef;
+}
+
+.filter-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1d3557;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #e1e7ef;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #6a11cb;
+}
+
+.search-btn {
+    background: #6a11cb;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.search-btn:hover {
+    background: #4d0a9e;
+    transform: translateY(-2px);
+}
+
+/* --- Table Section --- */
+.table-container {
+    overflow-x: auto;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.questions-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+.questions-table th {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    padding: 18px 15px;
+    text-align: left;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.questions-table th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.questions-table th:last-child {
+    border-top-right-radius: 10px;
+}
+
+.questions-table td {
+    padding: 16px 15px;
+    border-bottom: 1px solid #e1e7ef;
+    vertical-align: top;
+}
+
+.questions-table tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.questions-table tr:hover {
+    background: #e8f4fc;
+    transform: scale(1.002);
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Question Type Badges --- */
+.type-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-objective {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.badge-descriptive {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.badge-numerical {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-equation_balancing {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.badge-match_following {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+/* --- Question Content --- */
+.question-preview {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    line-height: 1.4;
+}
+
+.question-content {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+/* --- Options Display --- */
+.options-display {
+    max-width: 250px;
+}
+
+.option-item {
+    margin-bottom: 5px;
+    padding: 5px 8px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border-left: 3px solid #ddd;
+    font-size: 0.9rem;
+}
+
+.option-item.correct {
+    background: #d4edda;
+    border-left-color: #28a745;
+    font-weight: 600;
+}
+
+/* --- Equation Display --- */
+.equation-display {
+    font-family: 'Courier New', monospace;
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    color: #d63384;
+}
+
+/* --- Answer Display --- */
+.answer-preview {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+/* --- Image Preview --- */
+.image-cell {
+    width: 120px;
+}
+
+.image-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #e1e7ef;
+    transition: transform 0.3s;
+    cursor: pointer;
+}
+
+.image-preview:hover {
+    transform: scale(1.8);
+    z-index: 10;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.no-image {
+    color: #95a5a6;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* --- Action Buttons --- */
+.actions {
+    display: flex;
+    gap: 8px;
+    min-width: 180px;
+}
+
+.action-btn {
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.view-btn {
+    background: #3498db;
+    color: white;
+    border: 2px solid #3498db;
+}
+
+.view-btn:hover {
+    background: #2980b9;
+    border-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.edit-btn {
+    background: #f39c12;
+    color: white;
+    border: 2px solid #f39c12;
+    text-decoration: none;
+}
+
+.edit-btn:hover {
+    background: #d68910;
+    border-color: #d68910;
+    transform: translateY(-2px);
+}
+
+.delete-btn {
+    background: #e74c3c;
+    color: white;
+    border: 2px solid #e74c3c;
+}
+
+.delete-btn:hover {
+    background: #c0392b;
+    border-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* --- Delete Confirmation Modal --- */
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirmation-content {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 15px;
+    padding: 0;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.confirmation-header {
+    background: linear-gradient(135deg, #e74c3c 0%, #f1948a 100%);
+    color: white;
+    padding: 25px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.confirmation-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.confirmation-body {
+    padding: 30px;
+    text-align: center;
+}
+
+.confirmation-icon {
+    font-size: 4rem;
+    color: #e74c3c;
+    margin-bottom: 20px;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.confirm-btn {
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s;
+    min-width: 120px;
+}
+
+.confirm-delete {
+    background: #e74c3c;
+    color: white;
+}
+
+.confirm-delete:hover {
+    background: #c0392b;
+}
+
+.confirm-cancel {
+    background: #95a5a6;
+    color: white;
+}
+
+.confirm-cancel:hover {
+    background: #7f8c8d;
+}
+
+/* --- Pagination --- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+    padding: 20px;
+}
+
+.page-btn {
+    padding: 10px 18px;
+    background: #ecf0f1;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.page-btn:hover {
+    background: #bdc3c7;
+}
+
+.page-btn.active {
+    background: #6a11cb;
+    color: white;
+}
+
+/* --- Empty State --- */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #7f8c8d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    color: #bdc3c7;
+}
+
+.empty-state h3 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+/* --- Footer --- */
+.footer {
+    background: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #3498db;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+    margin-top: 20px;
+}
+
+.back-link:hover {
+    background: #2980b9;
+    transform: translateX(-5px);
+}
+
+/* --- Modal for Question Details --- */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 800px;
+    margin: 50px auto;
+    border-radius: 15px;
+    padding: 0;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    padding: 25px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.modal-body {
+    padding: 30px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.question-detail {
+    margin-bottom: 25px;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.detail-value {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e1e7ef;
+    margin-bottom: 15px;
+}
+
+.detail-value.answer {
+    background: #d4edda;
+    border-color: #c3e6cb;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .stat-card {
+        min-width: 120px;
+        padding: 10px 15px;
+    }
+    
+    .stat-card .number {
+        font-size: 1.5rem;
+    }
+    
+    .questions-table th,
+    .questions-table td {
+        padding: 12px 8px;
+        font-size: 0.9rem;
+    }
+    
+    .actions {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 20px auto;
+    }
+    
+    .confirmation-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        padding: 20px;
+    }
+    
+    .stats-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .stat-card {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Header Section -->
+    <div class="header">
+        <h1><i class="fas fa-flask"></i> Chemistry Questions Management</h1>
+        <p>View and manage all chemistry questions in the system</p>
+        
+        <div class="stats-bar">
+            <div class="stat-card">
+                <span class="number">{{ chemistry_questions|length }}</span>
+                <span class="label">Total Questions</span>
+            </div>
+            <div class="stat-card">
+                <span class="number">{{ objective_count }}</span>
+                <span class="label">Objective Questions</span>
+            </div>
+            <div class="stat-card">
+                <span class="number">{{ descriptive_count }}</span>
+                <span class="label">Descriptive Questions</span>
+            </div>
+            <div class="stat-card">
+                <span class="number">{{ equation_count }}</span>
+                <span class="label">Equation Balancing</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="content">
+        <div class="search-section">
+            <h3><i class="fas fa-search"></i> Search & Filter Questions</h3>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by chapter, topic, or question..." onkeyup="searchTable()">
+                <button class="search-btn" onclick="searchTable()"><i class="fas fa-search"></i> Search</button>
+            </div>
+            
+            <div class="filter-container">
+                <div class="filter-group">
+                    <label><i class="fas fa-filter"></i> Filter by Question Type:</label>
+                    <select id="typeFilter" onchange="filterTable()">
+                        <option value="">All Types</option>
+                        <option value="objective">Objective (MCQ)</option>
+                        <option value="descriptive">Descriptive</option>
+                        <option value="numerical">Numerical</option>
+                        <option value="equation_balancing">Equation Balancing</option>
+                        <option value="match_following">Match Following</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-book"></i> Filter by Chapter:</label>
+                    <select id="chapterFilter" onchange="filterTable()">
+                        <option value="">All Chapters</option>
+                        {% for chapter in chapters %}
+                        <option value="{{ chapter }}">{{ chapter }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-tag"></i> Filter by Topic:</label>
+                    <select id="topicFilter" onchange="filterTable()">
+                        <option value="">All Topics</option>
+                        {% for topic in topics %}
+                        <option value="{{ topic }}">{{ topic }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label><i class="fas fa-sort-amount-down"></i> Sort by:</label>
+                    <select id="sortFilter" onchange="sortTable()">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="chapter">Chapter (A-Z)</option>
+                        <option value="topic">Topic (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions Table -->
+        <div class="table-container">
+            <table class="questions-table" id="questionsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Chapter</th>
+                        <th>Topic</th>
+                        <th>Type</th>
+                        <th>Question</th>
+                        <th>Options/Details</th>
+                        <th>Answer</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for q in chemistry_questions %}
+                    <tr>
+                        <td>{{ q.id }}</td>
+                        <td>{{ q.chapter }}</td>
+                        <td>{{ q.topic }}</td>
+
+                        <td>
+                            <span class="type-badge badge-{{ q.question_type }}">
+                                {{ q.get_question_type_display|default:q.question_type|title }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="question-preview">
+                                {{ q.question|striptags|truncatechars:100 }}
+                            </div>
+                        </td>
+
+                        <!-- OPTIONS/DETAILS COLUMN -->
+                        <td>
+                            <div class="options-display">
+                                {% if q.question_type == "objective" %}
+                                    {% if q.option1 %}
+                                    <div class="option-item {% if q.correct_options and '1' in q.correct_options %}correct{% endif %}">
+                                        <strong>A:</strong> {{ q.option1|truncatechars:30 }}
+                                    </div>
+                                    {% endif %}
+                                    {% if q.option2 %}
+                                    <div class="option-item {% if q.correct_options and '2' in q.correct_options %}correct{% endif %}">
+                                        <strong>B:</strong> {{ q.option2|truncatechars:30 }}
+                                    </div>
+                                    {% endif %}
+                                    {% if q.option3 %}
+                                    <div class="option-item {% if q.correct_options and '3' in q.correct_options %}correct{% endif %}">
+                                        <strong>C:</strong> {{ q.option3|truncatechars:30 }}
+                                    </div>
+                                    {% endif %}
+                                    {% if q.option4 %}
+                                    <div class="option-item {% if q.correct_options and '4' in q.correct_options %}correct{% endif %}">
+                                        <strong>D:</strong> {{ q.option4|truncatechars:30 }}
+                                    </div>
+                                    {% endif %}
+                                
+                                {% elif q.question_type == "equation_balancing" %}
+                                    <div class="equation-display">
+                                        {{ q.chemical_equation|default:"Unbalanced Equation" }}
+                                    </div>
+                                
+                                {% elif q.question_type == "numerical" %}
+                                    <span class="numerical-details">
+                                        Formula: {{ q.formula|truncatechars:30|default:"N/A" }}
+                                    </span>
+                                
+                                {% elif q.question_type == "match_following" %}
+                                    <span class="match-count">
+                                        Match items: {{ q.match_count|default:"4" }}
+                                    </span>
+                                
+                                {% else %}
+                                    <span class="no-options">N/A</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- ANSWER COLUMN -->
+                         <td>
+                            <div class="answer-preview">
+                                {% if q.question_type == "objective" %}
+                                    {% if q.correct_options %}
+                                        <div style="margin-bottom: 5px;">
+                                            {% if '1' in q.correct_options %}
+                                                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 5px; font-weight: bold;">A</span>
+                                            {% endif %}
+                                            {% if '2' in q.correct_options %}
+                                                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 5px; font-weight: bold;">B</span>
+                                            {% endif %}
+                                            {% if '3' in q.correct_options %}
+                                                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 5px; font-weight: bold;">C</span>
+                                            {% endif %}
+                                            {% if '4' in q.correct_options %}
+                                                <span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 3px; margin-right: 5px; font-weight: bold;">D</span>
+                                            {% endif %}
+                                        </div>
+                                        <div style="font-size: 0.85rem; color: #666; font-style: italic;">
+                                            {% if q.correct_options|length > 1 %}
+                                                (Multiple correct)
+                                            {% else %}
+                                                (Single correct)
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span style="color: #e74c3c; font-style: italic;">No answer set</span>
+                                    {% endif %}
+                                {% elif q.question_type == "numerical" %}
+                                    {{ q.final_answer|truncatechars:40|default:"Numerical Solution" }}
+                                {% elif q.question_type == "graph_based" %}
+                                    {{ q.graph_interpretation|truncatechars:40|default:"Graph Analysis" }}
+                                {% else %}
+                                    {{ q.answer|striptags|truncatechars:50 }}
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- ACTIONS -->
+                        <td>
+                            <div class="actions">
+                                <a href="{% url 'view_chemistry_question_detail' q.id %}"
+                                   class="action-btn view-btn">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+
+                                <a href="{% url 'edit_chemistry_question' q.id %}"
+                                   class="action-btn edit-btn">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+
+                                
+
+                                
+                            </div>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <i class="fas fa-flask"></i>
+                                <h3>No Chemistry Questions Found</h3>
+                                <p>Start adding questions using the data entry module.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if chemistry_questions.has_other_pages %}
+        <div class="pagination">
+            {% if chemistry_questions.has_previous %}
+            <button class="page-btn" onclick="changePage({{ chemistry_questions.previous_page_number }})">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            {% endif %}
+            
+            {% for num in chemistry_questions.paginator.page_range %}
+                {% if chemistry_questions.number == num %}
+                <button class="page-btn active">{{ num }}</button>
+                {% else %}
+                <button class="page-btn" onclick="changePage({{ num }})">{{ num }}</button>
+                {% endif %}
+            {% endfor %}
+            
+            {% if chemistry_questions.has_next %}
+            <button class="page-btn" onclick="changePage({{ chemistry_questions.next_page_number }})">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Back Link -->
+        <a href="{% url 'admin_dashboard' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Chemistry Questions Management System &copy; {% now "Y" %}</p>
+        <p>Total Questions: {{ chemistry_questions|length }} | Last Updated: {% now "F j, Y, g:i a" %}</p>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmationModal" class="confirmation-modal">
+    <div class="confirmation-content">
+        <div class="confirmation-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Confirm Delete</h3>
+            <button class="close-modal" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="confirmation-body">
+            <div class="confirmation-icon">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            <h3>Are you sure?</h3>
+            <p id="deleteMessage">This action cannot be undone. This will permanently delete the question:</p>
+            <p id="questionPreview" style="font-style: italic; color: #e74c3c; margin: 10px 0;"></p>
+            
+            <form id="deleteForm" method="post" action="">
+                {% csrf_token %}
+                <div class="confirmation-buttons">
+                    <button type="submit" class="confirm-btn confirm-delete">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button type="button" class="confirm-btn confirm-cancel" onclick="closeDeleteModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Image View Modal -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Image Preview</h3>
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <img id="modalImage" src="" alt="Full size image" style="width: 100%; border-radius: 8px;">
+        </div>
+    </div>
+</div>
+
+<!-- Question Details Modal -->
+<div id="detailModal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3>Question Details</h3>
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="detailContent">
+            <!-- Content loaded dynamically -->
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variable to store current question ID for deletion
+let currentQuestionId = null;
+
+// Delete confirmation
+function showDeleteConfirmation(questionId, questionText) {
+    currentQuestionId = questionId;
+    
+    document.getElementById('deleteMessage').textContent = 
+        'This action cannot be undone. This will permanently delete the question:';
+    document.getElementById('questionPreview').textContent = 
+        '"' + (questionText || 'Question ID: ' + questionId) + '"';
+    
+    const deleteForm = document.getElementById('deleteForm');
+    deleteForm.action = "".replace('0', questionId);
+    
+    document.getElementById('deleteConfirmationModal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteConfirmationModal').style.display = 'none';
+    currentQuestionId = null;
+}
+
+// Search functionality
+function searchTable() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#questionsTable tbody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(input) ? '' : 'none';
+    });
+}
+
+// Filter functionality
+function filterTable() {
+    const type = document.getElementById('typeFilter').value;
+    const chapter = document.getElementById('chapterFilter').value;
+    const topic = document.getElementById('topicFilter').value;
+    const rows = document.querySelectorAll('#questionsTable tbody tr');
+    
+    rows.forEach(row => {
+        const rowType = row.querySelector('.type-badge').textContent.toLowerCase();
+        const rowChapter = row.cells[1].textContent.trim();
+        const rowTopic = row.cells[2].textContent.trim();
+        
+        const typeMatch = !type || rowType.includes(type);
+        const chapterMatch = !chapter || rowChapter === chapter;
+        const topicMatch = !topic || rowTopic === topic;
+        
+        row.style.display = (typeMatch && chapterMatch && topicMatch) ? '' : 'none';
+    });
+}
+
+// Sort functionality
+function sortTable() {
+    const sortBy = document.getElementById('sortFilter').value;
+    const tbody = document.querySelector('#questionsTable tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    rows.sort((a, b) => {
+        if (sortBy === 'newest') {
+            return parseInt(b.cells[0].textContent) - parseInt(a.cells[0].textContent);
+        } else if (sortBy === 'oldest') {
+            return parseInt(a.cells[0].textContent) - parseInt(b.cells[0].textContent);
+        } else if (sortBy === 'chapter') {
+            return a.cells[1].textContent.localeCompare(b.cells[1].textContent);
+        } else if (sortBy === 'topic') {
+            return a.cells[2].textContent.localeCompare(b.cells[2].textContent);
+        }
+        return 0;
+    });
+    
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// Modal closing
+function closeModal() {
+    document.getElementById('imageModal').style.display = 'none';
+    document.getElementById('detailModal').style.display = 'none';
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+        closeDeleteModal();
+    }
+});
+
+// Pagination
+function changePage(page) {
+    window.location.href = `?page=${page}`;
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Get unique chapters and topics for filters
+    const chapters = new Set();
+    const topics = new Set();
+    
+    document.querySelectorAll('#questionsTable tbody tr').forEach(row => {
+        chapters.add(row.cells[1].textContent.trim());
+        topics.add(row.cells[2].textContent.trim());
+    });
+    
+    // Add click handlers for view details
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (this.getAttribute('href').includes('#')) {
+                e.preventDefault();
+                const questionId = this.getAttribute('data-id');
+                // Implement view details functionality
+            }
+        });
+    });
+});
+
+// Close confirmation modal when clicking outside
+document.getElementById('deleteConfirmationModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+
+// Image viewing function
+function viewImage(imageUrl) {
+    document.getElementById('modalImage').src = imageUrl;
+    document.getElementById('imageModal').style.display = 'block';
+}
+</script>
+
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for message in messages %}
+    alert("{{ message }}");
+    {% endfor %}
+});
+</script>
+{% endif %}
+
+</body>
+</html>
